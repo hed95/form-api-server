@@ -25,7 +25,11 @@
   },
   "homepage": "https://github.com/DigitalPatterns/form-api-server#readme",
   "devDependencies": {
+    "@types/chai": "^4.1.7",
+    "@types/mocha": "^5.2.6",
     "@types/node": "^12.0.2",
+    "chai": "^4.2.0",
+    "mocha": "^6.1.4",
     "ts-node": "^8.2.0",
     "tslint": "^5.16.0",
     "typescript": "^3.4.5"
@@ -41,6 +45,8 @@
     "inversify-express-utils": "^6.3.2",
     "keycloak-connect": "^6.0.1",
     "reflect-metadata": "^0.1.13",
+    "sequelize": "^5.8.6",
+    "sequelize-typescript": "^0.6.11",
     "winston": "^3.2.1"
   }
 }
