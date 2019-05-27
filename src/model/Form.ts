@@ -13,6 +13,5 @@ export class Form extends Model<Form>{
     createdOn: Date;
 
     @Column
-    createdBy: string
-
+    createdBy: string;
 }

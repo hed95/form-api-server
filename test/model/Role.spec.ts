@@ -20,13 +20,13 @@ describe("Role", () => {
 
     afterEach(async () => {
         await Role.destroy({
-            truncate: true
+            where: {}
         })
     });
 
     it('can save role', async () => {
         const role = new Role({
-            name: "Test Role",
+            name: "Test Role A",
             description: "Test description",
             active: true
         });

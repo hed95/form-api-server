@@ -21,12 +21,13 @@ describe("FormVersion", () => {
 
     afterEach(async () => {
         await FormVersion.destroy({
+            where: {},
             truncate: true
         });
         await Form.destroy({
+            where: {},
             truncate: true
         });
-
     });
 
     it('can create a version', async () => {
@@ -80,7 +81,7 @@ describe("FormVersion", () => {
         const form = await new Form().save();
 
         await new FormVersion({
-            name: "Test Form",
+            name: "Test Form AVC",
             description: "Test form description",
             schema: schema,
             formId: form.id,
