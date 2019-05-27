@@ -1,0 +1,46 @@
+{
+  "name": "form-api-server",
+  "version": "0.0.1",
+  "description": "Form API Server",
+  "main": "index.js",
+  "scripts": {
+    "build-ts": "tsc",
+    "start": "npm run serve",
+    "serve": "node dist/bootstrap.js",
+    "watch-node": "nodemon dist/bootstrap.js",
+    "watch-ts": "tsc -w",
+    "test": "mocha -r ts-node/register test/**/*.spec.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DigitalPatterns/form-api-server.git"
+  },
+  "keywords": [
+    "form"
+  ],
+  "author": "Amin Mohammed-Coleman",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DigitalPatterns/form-api-server/issues"
+  },
+  "homepage": "https://github.com/DigitalPatterns/form-api-server#readme",
+  "devDependencies": {
+    "@types/node": "^12.0.2",
+    "ts-node": "^8.2.0",
+    "tslint": "^5.16.0",
+    "typescript": "^3.4.5"
+  },
+  "dependencies": {
+    "@types/express": "^4.16.1",
+    "@types/keycloak-connect": "^4.5.1",
+    "class-transformer": "^0.2.3",
+    "class-validator": "^0.9.1",
+    "express": "^4.17.1",
+    "inversify": "^5.0.1",
+    "inversify-binding-decorators": "^4.0.0",
+    "inversify-express-utils": "^6.3.2",
+    "keycloak-connect": "^6.0.1",
+    "reflect-metadata": "^0.1.13",
+    "winston": "^3.2.1"
+  }
+}
