@@ -44,6 +44,7 @@ export class FormVersion extends Model<FormVersion> {
     @Column
     formId: string;
 
-
-
+    @Column
+    current: boolean;
+    
 }

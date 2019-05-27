@@ -83,7 +83,8 @@ describe("FormVersion", () => {
             name: "Test Form",
             description: "Test form description",
             schema: schema,
-            formId: form.id
+            formId: form.id,
+            current: false
         }).save({
             include: Form
         });
@@ -91,7 +92,8 @@ describe("FormVersion", () => {
             name: "Test Form Updated",
             description: "Test form description",
             schema: schema,
-            formId: form.id
+            formId: form.id,
+            current: true
         }).save();
 
         const versions = await FormVersion.findAll({
