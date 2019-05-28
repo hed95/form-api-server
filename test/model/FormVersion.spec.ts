@@ -2,34 +2,10 @@ import {Sequelize} from "sequelize-typescript";
 import {expect} from 'chai';
 import {FormVersion} from "../../src/model/FormVersion";
 import {Form} from "../../src/model/Form";
+import {FormRoles} from "../../src/model/FormRoles";
+import {Role} from "../../src/model/Role";
 
 describe("FormVersion", () => {
-    const db = '__';
-    const sequelize = new Sequelize({
-        name: db,
-        dialect: 'sqlite',
-        username: 'root',
-        password: '',
-        storage: ':memory:'
-    });
-    sequelize.addModels([Form, FormVersion]);
-
-    before(async () => {
-        await Form.sync({force: true});
-        await FormVersion.sync({force: true});
-    });
-
-    afterEach(async () => {
-        await FormVersion.destroy({
-            where: {},
-            truncate: true
-        });
-        await Form.destroy({
-            where: {},
-            truncate: true
-        });
-    });
-
     it('can create a version', async () => {
         const schema: object = {
             "name": "test",
@@ -45,7 +21,7 @@ describe("FormVersion", () => {
             createdBy: "test@tes.com"
         }).save();
         const version = new FormVersion({
-            name: "Test Form",
+            name: "Test Form A",
             description: "Test form description",
             schema: schema,
             formId: form.id

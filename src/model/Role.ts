@@ -22,4 +22,5 @@ export class Role extends Model<Role> {
 
     @Column
     active: boolean;
+
 }

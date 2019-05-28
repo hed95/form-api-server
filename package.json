@@ -9,7 +9,7 @@
     "serve": "node dist/bootstrap.js",
     "watch-node": "nodemon dist/bootstrap.js",
     "watch-ts": "tsc -w",
-    "test": "mocha -r ts-node/register test/**/*.spec.ts"
+    "test": "mocha --file ./test/setup-test.ts -r ts-node/register test/**/*.spec.ts"
   },
   "repository": {
     "type": "git",

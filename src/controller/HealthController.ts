@@ -2,7 +2,7 @@ import {BaseHttpController, controller, httpGet, response} from 'inversify-expre
 import * as express from 'express';
 
 @controller("")
-export class HealthController extends BaseHttpController{
+export class HealthController extends BaseHttpController {
 
     @httpGet('/healthz')
     public health(@response() res: express.Response) : void {

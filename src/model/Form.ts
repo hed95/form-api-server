@@ -1,7 +1,9 @@
-import {Column, CreatedAt, DataType, Model, Table} from "sequelize-typescript";
+import {BelongsToMany, Column, CreatedAt, DataType, Model, Table} from "sequelize-typescript";
+import {Role} from "./Role";
+import {FormRoles} from "./FormRoles";
 
 @Table
-export class Form extends Model<Form>{
+export class Form extends Model<Form> {
     @Column({
         type: DataType.UUID,
         defaultValue: DataType.UUIDV4,
@@ -14,4 +16,7 @@ export class Form extends Model<Form>{
 
     @Column
     createdBy: string;
+
+    @BelongsToMany(() => Role, () => FormRoles, 'formId', "roleId")
+    roles: Role[];
 }

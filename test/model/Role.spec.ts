@@ -3,27 +3,6 @@ import {Role} from "../../src/model/Role";
 import {expect} from 'chai';
 
 describe("Role", () => {
-
-    const db = '__';
-    const sequelize = new Sequelize({
-        name: db,
-        dialect: 'sqlite',
-        username: 'root',
-        password: '',
-        storage: ':memory:'
-    });
-    sequelize.addModels([Role]);
-
-    before(async () => {
-        await Role.sync({force: true});
-    });
-
-    afterEach(async () => {
-        await Role.destroy({
-            where: {}
-        })
-    });
-
     it('can save role', async () => {
         const role = new Role({
             name: "Test Role A",
@@ -36,18 +15,18 @@ describe("Role", () => {
 
     it('can list all roles', async () => {
         await new Role({
-            name: "Test Role",
+            name: "Test Role X",
             description: "Test description",
             active: true
         }).save();
 
         const roles = await Role.findAll();
-        expect(roles.length).to.eq(1)
+        expect(roles.length).to.greaterThan(1);
     });
 
     it('can update role', async() => {
         const role = new Role({
-            name: "Test Role",
+            name: "Test Role Y",
             description: "Test description",
             active: true
         });
