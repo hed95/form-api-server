@@ -7,6 +7,7 @@ import {Form} from "../src/model/Form";
 import {FormVersion} from "../src/model/FormVersion";
 const db = '__';
 
+
 const sequelize = new Sequelize({
     name: db,
     dialect: 'sqlite',
