@@ -8,7 +8,8 @@ describe("FormService", () => {
     beforeEach(() => {
         applicationContext = new ApplicationContext();
     });
-    it('can create a form', async () => {
+
+    it('appcontext loads service and repository', async () => {
         const formService: FormService = applicationContext.iocContainer().get(TYPE.FormService);
         expect(formService).to.be.not.null;
         expect(formService.getFormRepository()).to.be.not.null;
