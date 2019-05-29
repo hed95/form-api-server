@@ -5,6 +5,7 @@ import {applicationContext} from "../setup-test";
 import {FormRepository} from "../../../src/types/repository";
 import {Role} from "../../../src/model/Role";
 import {FormVersion} from "../../../src/model/FormVersion";
+import {Op} from "sequelize";
 
 describe("FormService", () => {
 
@@ -150,5 +151,14 @@ describe("FormService", () => {
 
         const loaded : FormVersion = await formService.findForm(form.id);
         expect(loaded.id).to.be.eq(latest.id);
+
+        const result = await FormVersion.findOne({
+            where: {
+               id: {[Op.eq]: lastVersion.id}
+            }
+        });
+        expect(result.outDate).to.be.not.null;
+        expect(result.latest).to.be.eq(false);
+
     });
 });
