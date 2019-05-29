@@ -1,8 +1,7 @@
 module.exports = {
     test: {
         dialect: 'sqlite',
-        storage: ':memory:',
-        logging: true
+        storage: ':memory:'
     },
     prod: {
         username: process.env.DB_USERNAME,

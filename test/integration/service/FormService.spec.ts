@@ -95,5 +95,10 @@ describe("FormService", () => {
         expect(result.id).to.be.eq(lastVersion.id);
         expect(result.latest).to.be.eq(true);
         expect(result.outDate).to.be.null;
+        expect(result.form).to.be.not.null;
+        expect(result.form.roles.length).to.be.eq(1);;
+        expect(result.form.roles[0].name).to.be.eq("Test Role XXX")
+
+
     })
 });

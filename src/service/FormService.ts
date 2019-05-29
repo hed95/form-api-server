@@ -5,6 +5,8 @@ import {FormRepository, FormVersionRepository} from "../types/repository";
 import logger from "../util/logger";
 import {provide} from "inversify-binding-decorators";
 import {Op} from "sequelize";
+import {Form} from "../model/Form";
+import {Role} from "../model/Role";
 
 @provide(TYPE.FormService)
 export class FormService {
@@ -44,7 +46,8 @@ export class FormService {
                     outDate: {
                         [Op.eq]: null
                     }
-                }
+                },
+                include: [{model: Form, include:[{model: Role}]}]
             });
         } finally {
             profiler.done({"message": `completed getting form for ${formId}`})
