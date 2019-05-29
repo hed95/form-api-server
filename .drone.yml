@@ -5,8 +5,14 @@ name: default
 steps:
 - name: test
   image: digitalpatterns/node
-  command:
-   - npm test
+  commands:
+    - npm install
+    - npm run test
+  when:
+    branch:
+      - master
+    event:
+      - push
 
 - name: image_to_docker_hub
   image: plugins/docker
