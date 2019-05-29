@@ -6,9 +6,6 @@ steps:
 - name: test
   image: digitalpatterns/node:4
   commands:
-    - pwd
-    - whoami
-    - ls -ld /drone/src
     - npm install
     - npm run test
   when:
@@ -17,20 +14,20 @@ steps:
     event:
       - push
 
-- name: image_to_docker_hub
-  image: plugins/docker
-  settings:
-    username:
-      from_secret: docker_username
-    password:
-      from_secret: docker_password
-    repo: digitalpatterns/form-api-server
-    tags:
-      - ${DRONE_BUILD_NUMBER}
-      - ${DRONE_COMMIT_SHA}
-      - latest
-  when:
-    branch:
-      - master
-    event:
-      - push
+#- name: image_to_docker_hub
+#  image: plugins/docker
+#  settings:
+#    username:
+#      from_secret: docker_username
+#    password:
+#      from_secret: docker_password
+#    repo: digitalpatterns/form-api-server
+#    tags:
+#      - ${DRONE_BUILD_NUMBER}
+#      - ${DRONE_COMMIT_SHA}
+#      - latest
+#  when:
+#    branch:
+#      - master
+#    event:
+#      - push
