@@ -9,7 +9,7 @@ const db = '__';
 
 
 const sequelize = new Sequelize({
-    name: db,
+    database: db,
     dialect: 'sqlite',
     username: 'root',
     password: '',

@@ -1,4 +1,4 @@
-import {AllowNull, Column, DataType, Length, Model, Table, Unique} from "sequelize-typescript";
+import {AllowNull, Column, DataType, Length, Model, Table} from "sequelize-typescript";
 
 @Table
 export class Role extends Model<Role> {

@@ -62,9 +62,7 @@ describe("FormVersion", () => {
             schema: schema,
             formId: form.id,
             current: false
-        }).save({
-            include: Form
-        });
+        }).save();
         await new FormVersion({
             name: "Test Form Updated",
             description: "Test form description",

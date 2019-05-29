@@ -14,7 +14,7 @@ describe("Form", () => {
         }).save();
 
         const form = await new Form({
-            createdBy: "test@test",
+            createdBy: "test@test"
         }).save();
 
         await form.$add("roles", [role], {

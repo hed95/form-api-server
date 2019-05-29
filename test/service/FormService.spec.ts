@@ -10,9 +10,19 @@ describe("FormService", () => {
     });
 
     it('appcontext loads service and repository', async () => {
-        const formService: FormService = applicationContext.iocContainer().get(TYPE.FormService);
+        const formService: FormService = applicationContext.get(TYPE.FormService);
         expect(formService).to.be.not.null;
         expect(formService.getFormRepository()).to.be.not.null;
         expect(formService.getFormRepository().name).to.be.eq('Form');
     });
+
+    it ('can create a form, role and version', async () => {
+        const formService: FormService = applicationContext.get(TYPE.FormService);
+        await formService.create({});
+    });
+
+    it ('can create multiple versions', () => {
+
+    });
+
 });
