@@ -3,6 +3,11 @@ name: default
 
 ## Build Public Image
 steps:
+- name: test
+  image: digitalpatterns/node
+  command:
+   - npm test
+
 - name: image_to_docker_hub
   image: plugins/docker
   settings:
