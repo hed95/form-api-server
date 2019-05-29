@@ -11,9 +11,7 @@ export class FormVersion extends Model<FormVersion> {
     id: string;
 
     @AllowNull(false)
-    @Column({
-        unique: true
-    })
+    @Column
     name: string;
 
     @Column
@@ -45,6 +43,6 @@ export class FormVersion extends Model<FormVersion> {
     formId: string;
 
     @Column
-    current: boolean;
-    
+    latest: boolean;
+
 }
