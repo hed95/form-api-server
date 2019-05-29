@@ -7,8 +7,8 @@ steps:
   image: digitalpatterns/node
   commands:
     - pwd
-    - ls -l
-    - ls -l /drone/src
+    - whoami
+    - ls -ld /drone/src
     - npm install
     - npm run test
   when:
