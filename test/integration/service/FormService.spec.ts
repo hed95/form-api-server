@@ -13,8 +13,8 @@ describe("FormService", () => {
     it('appcontext loads service and repository', async () => {
         const formService: FormService = applicationContext.get(TYPE.FormService);
         expect(formService).to.be.not.null;
-        expect(formService.getFormRepository()).to.be.not.null;
-        expect(formService.getFormRepository().name).to.be.eq('Form');
+        expect(formService.formRepository).to.be.not.null;
+        expect(formService.formRepository.name).to.be.eq('Form');
     });
 
 

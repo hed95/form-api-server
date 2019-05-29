@@ -11,8 +11,8 @@ import {User} from "../model/User";
 
 @provide(TYPE.FormService)
 export class FormService {
-    private readonly formRepository: FormRepository;
-    private readonly formVersionRepository: FormVersionRepository;
+    readonly formRepository: FormRepository;
+    readonly formVersionRepository: FormVersionRepository;
 
     constructor(@inject(TYPE.FormRepository) formRepository: FormRepository,
                 @inject(TYPE.FormVersionRepository) formVersionRepository: FormVersionRepository) {
@@ -84,7 +84,7 @@ export class FormService {
                     model: Form, include: [{
                         model: Role, where: {
                             name: {
-                                [Op.in]: user.getRoles().map((role: Role) => {
+                                [Op.in]: user.roles.map((role: Role) => {
                                     return role.name;
                                 })
                             }
@@ -128,7 +128,4 @@ export class FormService {
 
     }
 
-    public getFormRepository(): FormRepository {
-        return this.formRepository;
-    }
 }
