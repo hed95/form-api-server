@@ -2,9 +2,6 @@ import {FormRoles} from "../../../src/model/FormRoles";
 import {Role} from "../../../src/model/Role";
 import {Form} from "../../../src/model/Form";
 import {expect} from 'chai';
-import {serialize} from "class-transformer";
-import {sequelizeProvider} from "../setup-test";
-import {FormVersion} from "../../../src/model/FormVersion";
 
 describe("Form", () => {
 

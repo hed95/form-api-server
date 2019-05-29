@@ -20,17 +20,6 @@ export class FormService {
         this.formVersionRepository = formVersionRepository;
     }
 
-    public async create(jsonSchema: object): Promise<String> {
-        const profiler = logger.startTimer();
-        return new Promise((resolve: any) => {
-            setTimeout(() => {
-                resolve("hello");
-                profiler.done({"message": "Form created"})
-            }, 400)
-        });
-    }
-
-
     public async restore(formId: string, formVersionId: string): Promise<FormVersion> {
         const profiler = logger.startTimer();
         return await this.formVersionRepository.sequelize.transaction(async (transaction) => {
