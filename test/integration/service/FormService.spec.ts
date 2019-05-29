@@ -6,6 +6,7 @@ import {FormRepository} from "../../../src/types/repository";
 import {Role} from "../../../src/model/Role";
 import {FormVersion} from "../../../src/model/FormVersion";
 import {Op} from "sequelize";
+import {User} from "../../../src/model/User";
 
 describe("FormService", () => {
 
@@ -90,8 +91,8 @@ describe("FormService", () => {
             inDate: new Date(),
             outDate: null
         }).save();
-
-        const result: FormVersion = await formService.findForm(form.id);
+        const user = new User("id", "test", [role]);
+        const result: FormVersion = await formService.findForm(form.id, user);
         expect(result).to.be.not.null;
         expect(result.id).to.be.eq(lastVersion.id);
         expect(result.latest).to.be.eq(true);
@@ -149,7 +150,8 @@ describe("FormService", () => {
         expect(latest.outDate).to.be.null;
         expect(latest.latest).to.be.eq(true);
 
-        const loaded : FormVersion = await formService.findForm(form.id);
+        const user = new User("id", "test", [role]);
+        const loaded : FormVersion = await formService.findForm(form.id, user);
         expect(loaded.id).to.be.eq(latest.id);
 
         const result = await FormVersion.findOne({
@@ -159,6 +161,44 @@ describe("FormService", () => {
         });
         expect(result.outDate).to.be.not.null;
         expect(result.latest).to.be.eq(false);
+
+    });
+
+    it('form not returned if user does not have role', async () => {
+        const formRepository: FormRepository = applicationContext.get(TYPE.FormRepository);
+        const formService: FormService = applicationContext.get(TYPE.FormService);
+
+        const role = await new Role({
+            name: "Test Role XX13",
+            description: "Test description",
+            active: true
+        }).save();
+        const form = await formRepository.create({
+            createdBy: "test@test.com"
+        });
+        await form.$add("roles", [role]);
+
+        await new FormVersion({
+            name: "Test Form ABC 123",
+            description: "Test form description",
+            schema: {
+                components: [],
+                display: "wizard"
+            },
+            formId: form.id,
+            latest: true,
+            inDate: new Date(),
+            outDate: null
+        }).save();
+
+        const anotherRole = await new Role({
+            name: "Test Role For User",
+            description: "Test description",
+            active: true
+        }).save();
+        const user = new User("id", "test", [anotherRole]);
+        const loaded : FormVersion = await formService.findForm(form.id, user);
+        expect(loaded).to.be.null;
 
     });
 });

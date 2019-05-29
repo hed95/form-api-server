@@ -4,9 +4,10 @@ import {FormVersion} from "../model/FormVersion";
 import {FormRepository, FormVersionRepository} from "../types/repository";
 import logger from "../util/logger";
 import {provide} from "inversify-binding-decorators";
-import Transaction, {Op} from "sequelize";
+import {Op} from "sequelize";
 import {Form} from "../model/Form";
 import {Role} from "../model/Role";
+import {User} from "../model/User";
 
 @provide(TYPE.FormService)
 export class FormService {
@@ -30,50 +31,50 @@ export class FormService {
     }
 
 
-    public async restore(formId: string, formVersionId: string) : Promise<FormVersion> {
+    public async restore(formId: string, formVersionId: string): Promise<FormVersion> {
         const profiler = logger.startTimer();
-        return await this.formVersionRepository.sequelize.transaction(async(transaction) => {
-             const date = new Date();
-             const latestVersion = await this.formVersionRepository.findOne({
-                 where: {
-                     formId: {
-                         [Op.eq]: formId
-                     },
-                     latest: {
-                         [Op.eq]: true
-                     },
-                     outDate: {
-                         [Op.eq]: null
-                     }
-                 }
-             });
-             const versionToRestore = await this.formVersionRepository.findOne({
-                 where: {
-                     id: {
-                         [Op.eq]: formVersionId
-                     }
-                 }
-             });
-             if (!versionToRestore) {
-                 throw new Error("Could not find form version");
-             }
+        return await this.formVersionRepository.sequelize.transaction(async (transaction) => {
+            const date = new Date();
+            const latestVersion = await this.formVersionRepository.findOne({
+                where: {
+                    formId: {
+                        [Op.eq]: formId
+                    },
+                    latest: {
+                        [Op.eq]: true
+                    },
+                    outDate: {
+                        [Op.eq]: null
+                    }
+                }
+            });
+            const versionToRestore = await this.formVersionRepository.findOne({
+                where: {
+                    id: {
+                        [Op.eq]: formVersionId
+                    }
+                }
+            });
+            if (!versionToRestore) {
+                throw new Error("Could not find form version");
+            }
 
-             await latestVersion.update({
-                 outDate: date,
-                 latest: false
-             });
+            await latestVersion.update({
+                outDate: date,
+                latest: false
+            });
 
-             await versionToRestore.update({
-                 latest: true,
-                 inDate: date,
-                 outDate: null,
-             });
-             profiler.done({"message": `restored form id ${formId} to version ${versionToRestore.id}`});
-             return versionToRestore;
+            await versionToRestore.update({
+                latest: true,
+                inDate: date,
+                outDate: null,
+            });
+            profiler.done({"message": `restored form id ${formId} to version ${versionToRestore.id}`});
+            return versionToRestore;
         });
     }
 
-    public async findForm(formId: string): Promise<FormVersion> {
+    public async findForm(formId: string, user: User): Promise<FormVersion> {
         const profiler = logger.startTimer();
         try {
             return await this.formVersionRepository.findOne({
@@ -90,7 +91,17 @@ export class FormService {
                         [Op.eq]: null
                     }
                 },
-                include: [{model: Form, include:[{model: Role}]}]
+                include: [{
+                    model: Form, include: [{
+                        model: Role, where: {
+                            name: {
+                                [Op.in]: user.getRoles().map((role: Role) => {
+                                    return role.name;
+                                })
+                            }
+                        }
+                    }]
+                }]
             });
         } finally {
             profiler.done({"message": `completed getting form for ${formId}`})
@@ -101,7 +112,8 @@ export class FormService {
         offset: number,
         limit: number,
         data: FormVersion[],
-        total: number}> {
+        total: number
+    }> {
         const profiler = logger.startTimer();
         const result: { rows: FormVersion[], count: number } = await FormVersion.findAndCountAll({
             where: {
