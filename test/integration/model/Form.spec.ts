@@ -1,6 +1,6 @@
-import {FormRoles} from "../../src/model/FormRoles";
-import {Role} from "../../src/model/Role";
-import {Form} from "../../src/model/Form";
+import {FormRoles} from "../../../src/model/FormRoles";
+import {Role} from "../../../src/model/Role";
+import {Form} from "../../../src/model/Form";
 import {expect} from 'chai';
 
 describe("Form", () => {

@@ -1,5 +1,5 @@
 import {Sequelize} from "sequelize-typescript";
-import {Role} from "../../src/model/Role";
+import {Role} from "../../../src/model/Role";
 import {expect} from 'chai';
 
 describe("Role", () => {

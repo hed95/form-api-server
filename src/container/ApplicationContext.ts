@@ -6,6 +6,7 @@ import {FormRepository, FormVersionRepository, RoleRepository} from "../types/re
 import logger from "../util/logger";
 import {FormVersion} from "../model/FormVersion";
 import {Role} from "../model/Role";
+import {SequelizeProvider} from "../model/SequelizeProvider";
 
 export class ApplicationContext {
     private readonly container: Container;
@@ -14,16 +15,20 @@ export class ApplicationContext {
         this.container = new Container({
             defaultScope: 'Singleton'
         });
+        this.container.bind<SequelizeProvider>(TYPE.SequelizeProvider).to(SequelizeProvider);
         this.container.bind<FormRepository>(TYPE.FormRepository).toConstantValue(Form);
         this.container.bind<FormVersionRepository>(TYPE.FormVersionRepository).toConstantValue(FormVersion);
         this.container.bind<RoleRepository>(TYPE.RoleRepository).toConstantValue(Role);
         this.container.bind<FormService>(TYPE.FormService).to(FormService);
+
+
         logger.info("Application context initialised");
     }
 
-    public get(serviceIdentifier: string | symbol) : any {
+    public get(serviceIdentifier: string | symbol): any {
         return this.container.get(serviceIdentifier);
     }
+
     public iocContainer(): Container {
         return this.container;
     }

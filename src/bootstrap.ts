@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import * as bodyParser from 'body-parser';
 import {InversifyExpressServer} from 'inversify-express-utils';
-import {ApplicationContext} from './ioc/ApplicationContext';
+import {ApplicationContext} from './container/ApplicationContext';
 import './controller';
 
 const applicationContext: ApplicationContext = new ApplicationContext();

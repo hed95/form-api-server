@@ -1,8 +1,8 @@
 import 'reflect-metadata';
 import {expect} from "chai";
-import {HealthController} from "../../src/controller";
+import {HealthController} from "../../../src/controller";
 import 'mocha';
-import {MockResponse} from "../MockResponse";
+import {MockResponse} from "../../MockResponse";
 
 describe("Health Controller", () => {
 

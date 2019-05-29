@@ -1,12 +1,12 @@
-import {inject, injectable} from "inversify";
+import {inject} from "inversify";
 import TYPE from "../constant/TYPE";
 import {FormVersion} from "../model/FormVersion";
 import {FormRepository} from "../types/repository";
 import logger from "../util/logger";
+import {provide} from "inversify-binding-decorators";
 
-@injectable()
+@provide(TYPE.FormService)
 export class FormService {
-
     private readonly formRepository: FormRepository;
 
     constructor(@inject(TYPE.FormRepository) formRepository: FormRepository) {
@@ -15,18 +15,12 @@ export class FormService {
 
     public async create(jsonSchema: object): Promise<String> {
         const profiler = logger.startTimer();
-
-
-
-
         return new Promise((resolve: any) => {
             setTimeout(() => {
-                    resolve("hello");
-                    profiler.done({"message": "Form created"})
-                }, 400)
+                resolve("hello");
+                profiler.done({"message": "Form created"})
+            }, 400)
         });
-
-
     }
 
     public async findAllVersions(formId: String, page: number, limit: number): Promise<FormVersion[]> {

@@ -1,9 +1,9 @@
 import {Sequelize} from "sequelize-typescript";
 import {expect} from 'chai';
-import {FormVersion} from "../../src/model/FormVersion";
-import {Form} from "../../src/model/Form";
-import {FormRoles} from "../../src/model/FormRoles";
-import {Role} from "../../src/model/Role";
+import {FormVersion} from "../../../src/model/FormVersion";
+import {Form} from "../../../src/model/Form";
+import {FormRoles} from "../../../src/model/FormRoles";
+import {Role} from "../../../src/model/Role";
 
 describe("FormVersion", () => {
     it('can create a version', async () => {
