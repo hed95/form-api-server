@@ -9,10 +9,10 @@
     "serve": "node dist/bootstrap.js",
     "watch-node": "nodemon dist/bootstrap.js",
     "watch-ts": "tsc -w",
-    "test" : "npm run test:all",
+    "test": "npm run test:all",
     "test:int": "mocha --file ./test/integration/setup-test.ts -r ts-node/register test/integration/**/*.spec.ts",
     "test:unit": "mocha -r ts-node/register test/unit/**/*.spec.ts",
-    "test:all" : "mocha --file ./test/integration/setup-test.ts -r ts-node/register test/**/*.spec.ts"
+    "test:all": "mocha --file ./test/integration/setup-test.ts -r ts-node/register test/**/*.spec.ts"
   },
   "repository": {
     "type": "git",
@@ -29,6 +29,7 @@
   "homepage": "https://github.com/DigitalPatterns/form-api-server#readme",
   "devDependencies": {
     "@types/chai": "^4.1.7",
+    "@types/continuation-local-storage": "^3.2.1",
     "@types/mocha": "^5.2.6",
     "@types/node": "^12.0.2",
     "chai": "^4.2.0",
@@ -45,6 +46,7 @@
     "@types/winston": "^2.4.4",
     "class-transformer": "^0.2.3",
     "class-validator": "^0.9.1",
+    "continuation-local-storage": "^3.2.1",
     "dotenv": "^8.0.0",
     "express": "^4.17.1",
     "inversify": "^5.0.1",

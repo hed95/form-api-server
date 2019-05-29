@@ -6,6 +6,9 @@ import {FormVersion} from "./FormVersion";
 import {provide} from "inversify-binding-decorators";
 import TYPE from "../constant/TYPE";
 import logger from "../util/logger";
+import * as cls from 'continuation-local-storage';
+const namespace = cls.createNamespace('sequelize-transaction');
+Sequelize.useCLS(namespace);
 
 @provide(TYPE.SequelizeProvider)
 export class SequelizeProvider {

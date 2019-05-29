@@ -8,7 +8,7 @@ import {Role} from "../../src/model/Role";
 import {FormVersion} from "../../src/model/FormVersion";
 import {Form} from "../../src/model/Form";
 
-let sequelizeProvider: SequelizeProvider;
+export let sequelizeProvider: SequelizeProvider;
 export const applicationContext: ApplicationContext = new ApplicationContext();
 
 before(async () => {

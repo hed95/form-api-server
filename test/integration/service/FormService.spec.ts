@@ -21,7 +21,7 @@ describe("FormService", () => {
         const formService: FormService = applicationContext.get(TYPE.FormService);
 
         const role = await new Role({
-            name: "Test Role X",
+            name: "Test Role",
             description: "Test description",
             active: true
         }).save();
@@ -31,7 +31,7 @@ describe("FormService", () => {
         await form.$add("roles", [role]);
 
         await new FormVersion({
-            name: "Test Form Updated",
+            name: "Test Form 123",
             description: "Test form description",
             schema: {
                 components: [],
@@ -96,9 +96,59 @@ describe("FormService", () => {
         expect(result.latest).to.be.eq(true);
         expect(result.outDate).to.be.null;
         expect(result.form).to.be.not.null;
-        expect(result.form.roles.length).to.be.eq(1);;
+        expect(result.form.roles.length).to.be.eq(1);
         expect(result.form.roles[0].name).to.be.eq("Test Role XXX")
+    });
+
+    it('can restore a version', async () => {
+
+        const formRepository: FormRepository = applicationContext.get(TYPE.FormRepository);
+        const formService: FormService = applicationContext.get(TYPE.FormService);
+
+        const role = await new Role({
+            name: "Test Role XX12",
+            description: "Test description",
+            active: true
+        }).save();
+        const form = await formRepository.create({
+            createdBy: "test@test.com"
+        });
+        await form.$add("roles", [role]);
+
+        const oldVersion = await new FormVersion({
+            name: "Test Form ABC 123",
+            description: "Test form description",
+            schema: {
+                components: [],
+                display: "wizard"
+            },
+            formId: form.id,
+            latest: true,
+            inDate: new Date(),
+            outDate: new Date()
+        }).save();
+
+        const lastVersion: FormVersion = await new FormVersion({
+            name: "Test Form ABC 123",
+            description: "Test form description",
+            schema: {
+                components: [],
+                display: "wizard"
+            },
+            formId: form.id,
+            latest: true,
+            inDate: new Date(),
+            outDate: null
+        }).save();
 
 
-    })
+        const latest: FormVersion = await formService.restore(form.id, oldVersion.id);
+
+        expect(latest.id).to.eq(oldVersion.id);
+        expect(latest.outDate).to.be.null;
+        expect(latest.latest).to.be.eq(true);
+
+        const loaded : FormVersion = await formService.findForm(form.id);
+        expect(loaded.id).to.be.eq(latest.id);
+    });
 });
