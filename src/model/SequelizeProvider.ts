@@ -16,6 +16,7 @@ export class SequelizeProvider {
     private readonly sequelize: Sequelize;
 
     constructor() {
+
         const config = require('../config/config')[process.env.NODE_ENV || 'test'];
         logger.info(`use config.use_env_variable ${config.use_env_variable}`);
         if (config.use_env_variable) {

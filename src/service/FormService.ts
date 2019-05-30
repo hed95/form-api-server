@@ -4,7 +4,7 @@ import {FormVersion} from "../model/FormVersion";
 import {FormRepository, FormVersionRepository} from "../types/repository";
 import logger from "../util/logger";
 import {provide} from "inversify-binding-decorators";
-import {Op} from "sequelize";
+import Sequelize, {Op} from "sequelize";
 import {Form} from "../model/Form";
 import {Role} from "../model/Role";
 import {User} from "../model/User";
@@ -19,6 +19,45 @@ export class FormService {
                 @inject(TYPE.FormVersionRepository) formVersionRepository: FormVersionRepository) {
         this.formRepository = formRepository;
         this.formVersionRepository = formVersionRepository;
+    }
+
+    public async getAllForms(user: User, limit: number = 20, offset: number = 0): Promise<{ total: number, forms: FormVersion[] }> {
+
+        const result: { rows: FormVersion[], count: number } = await this.formVersionRepository
+            .findAndCountAll({
+                limit: limit,
+                offset: offset,
+                where: {
+                    latest: {
+                        [Op.eq]: true
+                    },
+                    outDate: {
+                        [Op.eq]: null
+                    }
+                },
+                include: [{
+                    model: Form,
+                    required: true,
+                    include: [{
+                        model: Role,
+                        required: true,
+                        where: {
+                            name: {
+                                [Op.or]: {
+                                    [Op.in] : user.roles.map((role: Role) => {
+                                        return role.name;
+                                    }),
+                                    [Op.eq] : 'all'
+                                }
+                            }
+                        }
+                    }]
+                }]
+            });
+        return {
+            total: result.count,
+            forms: result.rows
+        };
     }
 
     public async restore(formId: string, formVersionId: string): Promise<FormVersion> {
@@ -89,9 +128,12 @@ export class FormService {
                     model: Form, include: [{
                         model: Role, where: {
                             name: {
-                                [Op.in]: user.roles.map((role: Role) => {
-                                    return role.name;
-                                })
+                                [Op.or]: {
+                                    [Op.in]:  user.roles.map((role: Role) => {
+                                        return role.name;
+                                    }),
+                                    [Op.eq] : "all"
+                                }
                             }
                         }
                     }]
@@ -109,7 +151,7 @@ export class FormService {
         total: number
     }> {
         const profiler = logger.startTimer();
-        const result: { rows: FormVersion[], count: number } = await FormVersion.findAndCountAll({
+        const result: { rows: FormVersion[], count: number } = await this.formVersionRepository.findAndCountAll({
             where: {
                 formId: {
                     [Op.eq]: formId

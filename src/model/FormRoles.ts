@@ -7,7 +7,7 @@ export class FormRoles extends Model<FormRoles>{
 
     @ForeignKey(() => Form)
     @Column
-    formVersionId: string;
+    formId: string;
 
     @ForeignKey(() => Role)
     @Column
