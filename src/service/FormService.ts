@@ -8,6 +8,7 @@ import {Op} from "sequelize";
 import {Form} from "../model/Form";
 import {Role} from "../model/Role";
 import {User} from "../model/User";
+import ResourceNotFoundError from "../error/ResourceNotFoundError";
 
 @provide(TYPE.FormService)
 export class FormService {
@@ -37,6 +38,10 @@ export class FormService {
                     }
                 }
             });
+
+            if (!latestVersion) {
+                throw new ResourceNotFoundError(`Form ${formId} does not exist`);
+            }
             const versionToRestore = await this.formVersionRepository.findOne({
                 where: {
                     id: {
@@ -45,7 +50,7 @@ export class FormService {
                 }
             });
             if (!versionToRestore) {
-                throw new Error("Could not find form version");
+                throw new ResourceNotFoundError(`Version ${formVersionId} does not exist`);
             }
 
             await latestVersion.update({

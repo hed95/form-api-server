@@ -8,6 +8,9 @@ import {FormVersion} from "../../../src/model/FormVersion";
 import {Op} from "sequelize";
 import {User} from "../../../src/model/User";
 
+
+import ResourceNotFoundError from "../../../src/error/ResourceNotFoundError";
+
 describe("FormService", () => {
 
     it('appcontext loads service and repository', async () => {
@@ -151,18 +154,19 @@ describe("FormService", () => {
         expect(latest.latest).to.be.eq(true);
 
         const user = new User("id", "test", [role]);
-        const loaded : FormVersion = await formService.findForm(form.id, user);
+        const loaded: FormVersion = await formService.findForm(form.id, user);
         expect(loaded.id).to.be.eq(latest.id);
 
         const result = await FormVersion.findOne({
             where: {
-               id: {[Op.eq]: lastVersion.id}
+                id: {[Op.eq]: lastVersion.id}
             }
         });
         expect(result.outDate).to.be.not.null;
         expect(result.latest).to.be.eq(false);
 
     });
+
 
     it('form not returned if user does not have role', async () => {
         const formRepository: FormRepository = applicationContext.get(TYPE.FormRepository);
@@ -197,8 +201,51 @@ describe("FormService", () => {
             active: true
         }).save();
         const user = new User("id", "test", [anotherRole]);
-        const loaded : FormVersion = await formService.findForm(form.id, user);
+        const loaded: FormVersion = await formService.findForm(form.id, user);
         expect(loaded).to.be.null;
+    });
+
+    it('expected to throw resource not found exception', async () => {
+        const formService: FormService = applicationContext.get(TYPE.FormService);
+
+        try {
+            await formService.restore("randomId", "randomID")
+        } catch (e) {
+            expect(e instanceof ResourceNotFoundError).to.eq(true);
+        }
+
+    });
+    it('expected to throw resource not version does not exist', async () => {
+        const formRepository: FormRepository = applicationContext.get(TYPE.FormRepository);
+        const formService: FormService = applicationContext.get(TYPE.FormService);
+
+        try {
+            const role = await new Role({
+                name: "Test Role New One two three",
+                description: "Test description",
+                active: true
+            }).save();
+            const form = await formRepository.create({
+                createdBy: "test@test.com"
+            });
+            await form.$add("roles", [role]);
+
+            await new FormVersion({
+                name: "Test Form ABC 123",
+                description: "Test form description",
+                schema: {
+                    components: [],
+                    display: "wizard"
+                },
+                formId: form.id,
+                latest: true,
+                inDate: new Date(),
+                outDate: null
+            }).save();
+            await formService.restore(form.id, "randomID")
+        } catch (e) {
+            expect(e instanceof ResourceNotFoundError).to.eq(true);
+        }
 
     });
 });
