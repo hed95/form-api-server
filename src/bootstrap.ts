@@ -4,11 +4,19 @@ import {InversifyExpressServer} from 'inversify-express-utils';
 import {ApplicationContext} from './container/ApplicationContext';
 import './controller';
 import logger from "./util/logger";
+import TYPE from "./constant/TYPE";
+import {SequelizeProvider} from "./model/SequelizeProvider";
 
 const port = process.env.PORT || 4000;
 const applicationContext: ApplicationContext = new ApplicationContext();
 
 const container = applicationContext.iocContainer();
+
+const sequelizeProvider: SequelizeProvider = applicationContext.get(TYPE.SequelizeProvider);
+
+sequelizeProvider.getSequelize().sync({}).then(() => {
+   logger.info("DB initialised");
+});
 
 const server = new InversifyExpressServer(container);
 

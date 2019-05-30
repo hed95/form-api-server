@@ -16,7 +16,6 @@ export class SequelizeProvider {
     private readonly sequelize: Sequelize;
 
     constructor() {
-
         const config = require('../config/config')[process.env.NODE_ENV || 'test'];
         logger.info(`use config.use_env_variable ${config.use_env_variable}`);
         if (config.use_env_variable) {
@@ -25,6 +24,9 @@ export class SequelizeProvider {
             this.sequelize = new Sequelize(config.database, config.username, config.password, config);
         }
         this.sequelize.addModels([FormRoles, Role, Form, FormVersion]);
+        // this.sequelize.sync({}).then(() => {
+        //    logger.info("DB initialised")
+        // });
     }
 
     public getSequelize(): Sequelize {

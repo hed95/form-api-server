@@ -1,5 +1,5 @@
 import {BaseHttpController, controller} from "inversify-express-utils";
 
 @controller("/api/form")
-class FormController extends BaseHttpController {
+export class FormController extends BaseHttpController {
 }
