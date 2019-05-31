@@ -6,6 +6,7 @@ import './controller';
 import logger from "./util/logger";
 import TYPE from "./constant/TYPE";
 import {SequelizeProvider} from "./model/SequelizeProvider";
+import {KeycloakAuthProvider} from "./auth/KeycloakAuthProvider";
 
 const port = process.env.PORT || 4000;
 const applicationContext: ApplicationContext = new ApplicationContext();
@@ -16,12 +17,12 @@ const sequelizeProvider: SequelizeProvider = applicationContext.get(TYPE.Sequeli
 
 sequelizeProvider.getSequelize().sync({
     force: true
-}).then(async() => {
+}).then(async () => {
     await sequelizeProvider.initDefaultRole(process.env.DEFAULT_ROLE);
     logger.info("DB initialised");
 });
 
-const server = new InversifyExpressServer(container);
+const server = new InversifyExpressServer(container, null, null, null, KeycloakAuthProvider);
 
 server.setConfig((app) => {
     app.use(bodyParser.urlencoded({

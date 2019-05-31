@@ -7,7 +7,7 @@ import {provide} from "inversify-binding-decorators";
 import {Op} from "sequelize";
 import {Form} from "../model/Form";
 import {Role} from "../model/Role";
-import {User} from "../model/User";
+import {User} from "../auth/User";
 import ResourceNotFoundError from "../error/ResourceNotFoundError";
 import {FormSchemaValidator} from "../model/FormSchemaValidator";
 import {ValidationResult} from "@hapi/joi";
@@ -41,7 +41,7 @@ export class FormService {
         const title: string = payload.title;
         const path: string = payload.path;
         const name: string = payload.name;
-        const accessRoles: string[] =  payload.access;
+        const accessRoles: string[] = payload.access;
 
         return await this.formRepository.sequelize.transaction(async () => {
             const defaultRole = await Role.defaultRole();
@@ -54,10 +54,11 @@ export class FormService {
                 }
             }) : [];
             const form = await this.formRepository.create({
-                createdBy: user.email,
+                createdBy: user.details.email,
             });
             const rolesToApply: Role[] = roles.length === 0 ? [defaultRole] : roles;
             await form.$add("roles", rolesToApply);
+            payload["_id"] = form.id;
 
             const formVersion = await this.formVersionRepository.create({
                 title: title,
@@ -96,15 +97,17 @@ export class FormService {
                     }
                 },
                 include: [{
-                    model: Form,
-                    required: true,
-                    include: [{
+                    model: Form, include: [{
                         model: Role,
-                        required: true,
+                        as: "roles",
+                        attributes: ["id", "name"],
+                        through: {
+                            attributes: []
+                        },
                         where: {
                             name: {
                                 [Op.or]: {
-                                    [Op.in]: user.roles.map((role: Role) => {
+                                    [Op.in]: user.details.roles.map((role: Role) => {
                                         return role.name;
                                     }),
                                     [Op.eq]: defaultRole.name
@@ -188,10 +191,16 @@ export class FormService {
                 },
                 include: [{
                     model: Form, include: [{
-                        model: Role, where: {
+                        model: Role,
+                        as: "roles",
+                        attributes: ["id", "name"],
+                        through: {
+                            attributes: []
+                        },
+                        where: {
                             name: {
                                 [Op.or]: {
-                                    [Op.in]: user.roles.map((role: Role) => {
+                                    [Op.in]: user.details.roles.map((role: Role) => {
                                         return role.name;
                                     }),
                                     [Op.eq]: defaultRole.name

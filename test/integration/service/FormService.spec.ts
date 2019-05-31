@@ -6,7 +6,7 @@ import {FormRepository} from "../../../src/types/repository";
 import {Role} from "../../../src/model/Role";
 import {FormVersion} from "../../../src/model/FormVersion";
 import {Op} from "sequelize";
-import {User} from "../../../src/model/User";
+import {User} from "../../../src/auth/User";
 
 import ResourceNotFoundError from "../../../src/error/ResourceNotFoundError";
 import ValidationError from "../../../src/error/ValidationError";
@@ -96,6 +96,7 @@ describe("FormService", () => {
             validTo: null
         }).save();
         const user = new User("id", "test", [role]);
+
         const result: FormVersion = await formService.findForm(form.id, user);
         expect(result).to.be.not.null;
         expect(result.id).to.be.eq(lastVersion.id);
@@ -103,7 +104,7 @@ describe("FormService", () => {
         expect(result.validTo).to.be.null;
         expect(result.form).to.be.not.null;
         expect(result.form.roles.length).to.be.eq(1);
-        expect(result.form.roles[0].name).to.be.eq("Test Role XXX")
+        expect(result.form.roles[0].name).to.be.eq("Test Role XXX");
     });
 
     it('can restore a version', async () => {
@@ -197,7 +198,7 @@ describe("FormService", () => {
         }).save();
 
         const anotherRole = await new Role({
-            name: "Test Role For User",
+            name: "Test Role For Currentuser",
             title: "Test title",
             active: true
         }).save();
@@ -231,7 +232,7 @@ describe("FormService", () => {
         }).save();
 
         const anotherRole = await new Role({
-            name: "User role",
+            name: "Currentuser role",
             title: "Test title",
             active: true
         }).save();
@@ -369,7 +370,7 @@ describe("FormService", () => {
             const index = 2;
 
             const anotherRole = await new Role({
-                name: "Test Role For User Xyz + 1 + 2",
+                name: "Test Role For Currentuser Xyz + 1 + 2",
                 title: "Test title",
                 active: true
             }).save();
