@@ -8,6 +8,8 @@ import {FormVersion} from "../model/FormVersion";
 import {Role} from "../model/Role";
 import {SequelizeProvider} from "../model/SequelizeProvider";
 import {FormSchemaValidator} from "../model/FormSchemaValidator";
+import {KeycloakService} from "../auth/KeycloakService";
+import {ProtectMiddleware} from "../middleware/ProtectMiddleware";
 
 export class ApplicationContext {
     private readonly container: Container;
@@ -15,13 +17,17 @@ export class ApplicationContext {
     constructor() {
         this.container = new Container({
             defaultScope: 'Singleton'
+
         });
+        this.container.bind<KeycloakService>(TYPE.KeycloakService).to(KeycloakService);
+        this.container.bind<ProtectMiddleware>(TYPE.ProtectMiddleware).to(ProtectMiddleware);
         this.container.bind<FormSchemaValidator>(TYPE.FormSchemaValidator).to(FormSchemaValidator);
         this.container.bind<SequelizeProvider>(TYPE.SequelizeProvider).to(SequelizeProvider);
         this.container.bind<FormRepository>(TYPE.FormRepository).toConstantValue(Form);
         this.container.bind<FormVersionRepository>(TYPE.FormVersionRepository).toConstantValue(FormVersion);
         this.container.bind<RoleRepository>(TYPE.RoleRepository).toConstantValue(Role);
         this.container.bind<FormService>(TYPE.FormService).to(FormService);
+
 
 
         logger.info("Application context initialised");

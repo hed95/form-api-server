@@ -5,7 +5,9 @@ export default {
     FormVersionRepository: Symbol.for('FormVersionRepository'),
     RoleRepository: Symbol.for('RoleRepository'),
     SequelizeProvider: Symbol.for('SequelizeProvider'),
-    FormSchemaValidator: Symbol.for('FormSchemaValidator')
+    FormSchemaValidator: Symbol.for('FormSchemaValidator'),
+    KeycloakService: Symbol.for('KeycloakService'),
+    ProtectMiddleware: Symbol.for('ProtectMiddleware'),
 };
 
 

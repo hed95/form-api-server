@@ -7,6 +7,7 @@ import logger from "./util/logger";
 import TYPE from "./constant/TYPE";
 import {SequelizeProvider} from "./model/SequelizeProvider";
 import {KeycloakAuthProvider} from "./auth/KeycloakAuthProvider";
+import {KeycloakService} from "./auth/KeycloakService";
 
 const port = process.env.PORT || 4000;
 const applicationContext: ApplicationContext = new ApplicationContext();
@@ -25,6 +26,8 @@ sequelizeProvider.getSequelize().sync({
 const server = new InversifyExpressServer(container, null, null, null, KeycloakAuthProvider);
 
 server.setConfig((app) => {
+    const keycloakService: KeycloakService = container.get(TYPE.KeycloakService);
+    app.use(keycloakService.middleware());
     app.use(bodyParser.urlencoded({
         extended: true,
     }));
