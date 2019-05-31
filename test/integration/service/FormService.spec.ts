@@ -78,8 +78,8 @@ describe("FormService", () => {
             },
             formId: form.id,
             latest: true,
-            inDate: new Date(),
-            outDate: new Date()
+            validFrom: new Date(),
+            validTo: new Date()
         }).save();
 
         const lastVersion: FormVersion = await new FormVersion({
@@ -91,15 +91,15 @@ describe("FormService", () => {
             },
             formId: form.id,
             latest: true,
-            inDate: new Date(),
-            outDate: null
+            validFrom: new Date(),
+            validTo: null
         }).save();
         const user = new User("id", "test", [role]);
         const result: FormVersion = await formService.findForm(form.id, user);
         expect(result).to.be.not.null;
         expect(result.id).to.be.eq(lastVersion.id);
         expect(result.latest).to.be.eq(true);
-        expect(result.outDate).to.be.null;
+        expect(result.validTo).to.be.null;
         expect(result.form).to.be.not.null;
         expect(result.form.roles.length).to.be.eq(1);
         expect(result.form.roles[0].name).to.be.eq("Test Role XXX")
@@ -129,8 +129,8 @@ describe("FormService", () => {
             },
             formId: form.id,
             latest: true,
-            inDate: new Date(),
-            outDate: new Date()
+            validFrom: new Date(),
+            validTo: new Date()
         }).save();
 
         const lastVersion: FormVersion = await new FormVersion({
@@ -142,15 +142,15 @@ describe("FormService", () => {
             },
             formId: form.id,
             latest: true,
-            inDate: new Date(),
-            outDate: null
+            validFrom: new Date(),
+            validTo: null
         }).save();
 
 
         const latest: FormVersion = await formService.restore(form.id, oldVersion.id);
 
         expect(latest.id).to.eq(oldVersion.id);
-        expect(latest.outDate).to.be.null;
+        expect(latest.validTo).to.be.null;
         expect(latest.latest).to.be.eq(true);
 
         const user = new User("id", "test", [role]);
@@ -162,7 +162,7 @@ describe("FormService", () => {
                 id: {[Op.eq]: lastVersion.id}
             }
         });
-        expect(result.outDate).to.be.not.null;
+        expect(result.validTo).to.be.not.null;
         expect(result.latest).to.be.eq(false);
 
     });
@@ -191,8 +191,8 @@ describe("FormService", () => {
             },
             formId: form.id,
             latest: true,
-            inDate: new Date(),
-            outDate: null
+            validFrom: new Date(),
+            validTo: null
         }).save();
 
         const anotherRole = await new Role({
@@ -227,8 +227,8 @@ describe("FormService", () => {
             },
             formId: form.id,
             latest: true,
-            inDate: new Date(),
-            outDate: null
+            validFrom: new Date(),
+            validTo: null
         }).save();
 
         const anotherRole = await new Role({
@@ -275,8 +275,8 @@ describe("FormService", () => {
                 },
                 formId: form.id,
                 latest: true,
-                inDate: new Date(),
-                outDate: null
+                validFrom: new Date(),
+                validTo: null
             }).save();
             await formService.restore(form.id, "randomID")
         } catch (e) {
@@ -312,8 +312,8 @@ describe("FormService", () => {
                 },
                 formId: form.id,
                 latest: false,
-                inDate: new Date(),
-                outDate: new Date()
+                validFrom: new Date(),
+                validTo: new Date()
             }).save();
 
             await new FormVersion({
@@ -325,8 +325,8 @@ describe("FormService", () => {
                 },
                 formId: form.id,
                 latest: true,
-                inDate: new Date(),
-                outDate: null
+                validFrom: new Date(),
+                validTo: null
             }).save();
         });
         await formRepository.sequelize.transaction(async (transaction: any) => {
@@ -347,8 +347,8 @@ describe("FormService", () => {
                 },
                 formId: form.id,
                 latest: false,
-                inDate: new Date(),
-                outDate: new Date()
+                validFrom: new Date(),
+                validTo: new Date()
             }).save();
 
             await new FormVersion({
@@ -360,8 +360,8 @@ describe("FormService", () => {
                 },
                 formId: form.id,
                 latest: true,
-                inDate: new Date(),
-                outDate: null
+                validFrom: new Date(),
+                validTo: null
             }).save();
         });
 
@@ -391,8 +391,8 @@ describe("FormService", () => {
                 },
                 formId: form.id,
                 latest: false,
-                inDate: new Date(),
-                outDate: new Date()
+                validFrom: new Date(),
+                validTo: new Date()
             }).save();
 
             await new FormVersion({
@@ -404,8 +404,8 @@ describe("FormService", () => {
                 },
                 formId: form.id,
                 latest: true,
-                inDate: new Date(),
-                outDate: null
+                validFrom: new Date(),
+                validTo: null
             }).save();
         });
         const results: { total: number, forms: FormVersion[] } = await formService.getAllForms(new User("id", "test", [role]));

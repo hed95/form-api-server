@@ -34,10 +34,10 @@ export class FormVersion extends Model<FormVersion> {
     schema: object;
 
     @Column({comment: ""})
-    inDate: Date;
+    validFrom: Date;
 
-    @Column({comment: "if outDate is null then this is the latest version of the form"})
-    outDate: Date;
+    @Column({comment: "if validTo is null then this is the latest version of the form"})
+    validTo: Date;
 
     @BelongsTo(() => Form)
     form?: Form;

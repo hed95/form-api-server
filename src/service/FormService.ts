@@ -31,6 +31,7 @@ export class FormService {
     public async create(user: User, payload: object): Promise<FormVersion> {
         const validationResult: ValidationResult<object> = this.formSchemaValidator.validate(payload);
         if (validationResult.error) {
+            logger.error("Failed validation on create", validationResult.error.details);
             return Promise.reject(new ValidationError("Failed to validate form", validationResult.error.details));
         }
         return null;
@@ -46,7 +47,7 @@ export class FormService {
                     latest: {
                         [Op.eq]: true
                     },
-                    outDate: {
+                    validTo: {
                         [Op.eq]: null
                     }
                 },
@@ -87,7 +88,7 @@ export class FormService {
                     latest: {
                         [Op.eq]: true
                     },
-                    outDate: {
+                    validTo: {
                         [Op.eq]: null
                     }
                 }
@@ -108,14 +109,14 @@ export class FormService {
             }
 
             await latestVersion.update({
-                outDate: date,
+                validTo: date,
                 latest: false
             });
 
             await versionToRestore.update({
                 latest: true,
-                inDate: date,
-                outDate: null,
+                validFrom: date,
+                validTo: null,
             });
             profiler.done({"message": `restored form id ${formId} to version ${versionToRestore.id}`});
             return versionToRestore;
@@ -135,7 +136,7 @@ export class FormService {
                     latest: {
                         [Op.eq]: true
                     },
-                    outDate: {
+                    validTo: {
                         [Op.eq]: null
                     }
                 },
