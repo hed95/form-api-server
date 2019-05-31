@@ -4,7 +4,8 @@ export default {
     FormService: Symbol.for('FormService'),
     FormVersionRepository: Symbol.for('FormVersionRepository'),
     RoleRepository: Symbol.for('RoleRepository'),
-    SequelizeProvider: Symbol.for('SequelizeProvider')
+    SequelizeProvider: Symbol.for('SequelizeProvider'),
+    FormSchemaValidator: Symbol.for('FormSchemaValidator')
 };
 
 

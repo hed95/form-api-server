@@ -14,8 +14,12 @@ export class FormVersion extends Model<FormVersion> {
     @Column
     name: string;
 
+    @AllowNull(false)
     @Column
-    description: string;
+    title: string;
+
+    @Column
+    path: string;
 
     @UpdatedAt
     updatedOn: Date;

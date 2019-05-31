@@ -9,6 +9,7 @@ import {Op} from "sequelize";
 import {User} from "../../../src/model/User";
 
 import ResourceNotFoundError from "../../../src/error/ResourceNotFoundError";
+import ValidationError from "../../../src/error/ValidationError";
 
 describe("FormService", () => {
 
@@ -26,7 +27,7 @@ describe("FormService", () => {
 
         const role = await new Role({
             name: "Test Role",
-            description: "Test description",
+            title: "Test title",
             active: true
         }).save();
         const form = await formRepository.create({
@@ -36,7 +37,7 @@ describe("FormService", () => {
 
         await new FormVersion({
             name: "Test Form 123",
-            description: "Test form description",
+            title: "Test form title",
             schema: {
                 components: [],
                 display: "wizard"
@@ -60,7 +61,7 @@ describe("FormService", () => {
 
         const role = await new Role({
             name: "Test Role XXX",
-            description: "Test description",
+            title: "Test title",
             active: true
         }).save();
         const form = await formRepository.create({
@@ -70,7 +71,7 @@ describe("FormService", () => {
 
         await new FormVersion({
             name: "Test Form ABC 123",
-            description: "Test form description",
+            title: "Test form title",
             schema: {
                 components: [],
                 display: "wizard"
@@ -83,7 +84,7 @@ describe("FormService", () => {
 
         const lastVersion: FormVersion = await new FormVersion({
             name: "Test Form ABC 123",
-            description: "Test form description",
+            title: "Test form title",
             schema: {
                 components: [],
                 display: "wizard"
@@ -111,7 +112,7 @@ describe("FormService", () => {
 
         const role = await new Role({
             name: "Test Role XX12",
-            description: "Test description",
+            title: "Test title",
             active: true
         }).save();
         const form = await formRepository.create({
@@ -121,7 +122,7 @@ describe("FormService", () => {
 
         const oldVersion = await new FormVersion({
             name: "Test Form ABC 123",
-            description: "Test form description",
+            title: "Test form title",
             schema: {
                 components: [],
                 display: "wizard"
@@ -134,7 +135,7 @@ describe("FormService", () => {
 
         const lastVersion: FormVersion = await new FormVersion({
             name: "Test Form ABC 123",
-            description: "Test form description",
+            title: "Test form title",
             schema: {
                 components: [],
                 display: "wizard"
@@ -173,7 +174,7 @@ describe("FormService", () => {
 
         const role = await new Role({
             name: "Test Role XX13",
-            description: "Test description",
+            title: "Test title",
             active: true
         }).save();
         const form = await formRepository.create({
@@ -183,7 +184,7 @@ describe("FormService", () => {
 
         await new FormVersion({
             name: "Test Form ABC 123",
-            description: "Test form description",
+            title: "Test form title",
             schema: {
                 components: [],
                 display: "wizard"
@@ -196,14 +197,14 @@ describe("FormService", () => {
 
         const anotherRole = await new Role({
             name: "Test Role For User",
-            description: "Test description",
+            title: "Test title",
             active: true
         }).save();
         const user = new User("id", "test", [anotherRole]);
         const loaded: FormVersion = await formService.findForm(form.id, user);
         expect(loaded).to.be.null;
     });
-    it ('can get form if all role attached to form', async() => {
+    it('can get form if all role attached to form', async () => {
         const formRepository: FormRepository = applicationContext.get(TYPE.FormRepository);
         const formService: FormService = applicationContext.get(TYPE.FormService);
 
@@ -212,14 +213,14 @@ describe("FormService", () => {
         });
         const defaultRole = await new Role({
             name: "all",
-            description: "Test description",
+            title: "Test title",
             active: true
         }).save();
         await form.$add("roles", [defaultRole]);
 
         await new FormVersion({
             name: "Test Form ABC 123",
-            description: "Test form description",
+            title: "Test form title",
             schema: {
                 components: [],
                 display: "wizard"
@@ -232,7 +233,7 @@ describe("FormService", () => {
 
         const anotherRole = await new Role({
             name: "User role",
-            description: "Test description",
+            title: "Test title",
             active: true
         }).save();
 
@@ -257,7 +258,7 @@ describe("FormService", () => {
         try {
             const role = await new Role({
                 name: "Test Role New One two three",
-                description: "Test description",
+                title: "Test title",
                 active: true
             }).save();
             const form = await formRepository.create({
@@ -267,7 +268,7 @@ describe("FormService", () => {
 
             await new FormVersion({
                 name: "Test Form ABC 123",
-                description: "Test form description",
+                title: "Test form title",
                 schema: {
                     components: [],
                     display: "wizard"
@@ -289,7 +290,7 @@ describe("FormService", () => {
 
         const role = await new Role({
             name: "ABC",
-            description: "Test description",
+            title: "Test title",
             active: true
         }).save();
 
@@ -304,7 +305,7 @@ describe("FormService", () => {
             const formName = `Test Form ABC${index}${value}`;
             await new FormVersion({
                 name: formName,
-                description: "Test form description",
+                title: "Test form title",
                 schema: {
                     components: [],
                     display: "wizard"
@@ -317,7 +318,7 @@ describe("FormService", () => {
 
             await new FormVersion({
                 name: formName,
-                description: "Test form description",
+                title: "Test form title",
                 schema: {
                     components: [],
                     display: "wizard"
@@ -339,7 +340,7 @@ describe("FormService", () => {
             const formName = `Test Form ABC${index}${value}Y`;
             await new FormVersion({
                 name: formName,
-                description: "Test form description",
+                title: "Test form title",
                 schema: {
                     components: [],
                     display: "wizard"
@@ -352,7 +353,7 @@ describe("FormService", () => {
 
             await new FormVersion({
                 name: formName,
-                description: "Test form description",
+                title: "Test form title",
                 schema: {
                     components: [],
                     display: "wizard"
@@ -370,7 +371,7 @@ describe("FormService", () => {
 
             const anotherRole = await new Role({
                 name: "Test Role For User Xyz + 1 + 2",
-                description: "Test description",
+                title: "Test title",
                 active: true
             }).save();
 
@@ -383,7 +384,7 @@ describe("FormService", () => {
             const formName = `Test Form ABC${index}${value}X`;
             await new FormVersion({
                 name: formName,
-                description: "Test form description",
+                title: "Test form title",
                 schema: {
                     components: [],
                     display: "wizard"
@@ -396,7 +397,7 @@ describe("FormService", () => {
 
             await new FormVersion({
                 name: formName,
-                description: "Test form description",
+                title: "Test form title",
                 schema: {
                     components: [],
                     display: "wizard"
@@ -412,11 +413,11 @@ describe("FormService", () => {
         expect(results.forms.length).to.be.gte(2);
     });
 
-    it('can create custom role on creating form', async() => {
+    it('can create custom role on creating form', async () => {
         const formRepository: FormRepository = applicationContext.get(TYPE.FormRepository);
         const role = new Role({
             name: "ontheflyrole",
-            description: "Test description",
+            title: "Test title",
             active: true
         });
         const form = await formRepository.create({
@@ -424,7 +425,7 @@ describe("FormService", () => {
             roles: [role]
         }, {
             include: [{
-                model : Role
+                model: Role
             }]
         });
         expect(form.roles.length).to.eq(1);
@@ -436,6 +437,23 @@ describe("FormService", () => {
             }
         });
         expect(loadedRole.name).to.eq(role.name);
+    });
+
+    it('fails validation on create', async () => {
+        const formService: FormService = applicationContext.get(TYPE.FormService);
+        const role = new Role({
+            name: "Test Role New One two three",
+            title: "Test title",
+            active: true
+        });
+        const user = new User("id", "test", [role]);
+        try {
+            await formService.create(user, {});
+        } catch (err) {
+            expect(err instanceof ValidationError).to.eq(true);
+            const validationError = err as ValidationError;
+            expect(validationError.get().length).to.be.eq(3);
+        }
     });
 });
 

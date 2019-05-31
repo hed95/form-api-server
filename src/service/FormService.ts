@@ -9,19 +9,30 @@ import {Form} from "../model/Form";
 import {Role} from "../model/Role";
 import {User} from "../model/User";
 import ResourceNotFoundError from "../error/ResourceNotFoundError";
+import {FormSchemaValidator} from "../model/FormSchemaValidator";
+import {ValidationResult} from "@hapi/joi";
+import ValidationError from "../error/ValidationError";
+
 
 @provide(TYPE.FormService)
 export class FormService {
     readonly formRepository: FormRepository;
     readonly formVersionRepository: FormVersionRepository;
+    private readonly formSchemaValidator: FormSchemaValidator;
 
     constructor(@inject(TYPE.FormRepository) formRepository: FormRepository,
-                @inject(TYPE.FormVersionRepository) formVersionRepository: FormVersionRepository) {
+                @inject(TYPE.FormVersionRepository) formVersionRepository: FormVersionRepository,
+                @inject(TYPE.FormSchemaValidator) formSchemaValidator: FormSchemaValidator) {
         this.formRepository = formRepository;
         this.formVersionRepository = formVersionRepository;
+        this.formSchemaValidator = formSchemaValidator;
     }
 
     public async create(user: User, payload: object): Promise<FormVersion> {
+        const validationResult: ValidationResult<object> = this.formSchemaValidator.validate(payload);
+        if (validationResult.error) {
+            return Promise.reject(new ValidationError("Failed to validate form", validationResult.error.details));
+        }
         return null;
     }
 

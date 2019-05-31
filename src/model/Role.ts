@@ -1,4 +1,5 @@
 import {AllowNull, Column, DataType, Length, Model, Table} from "sequelize-typescript";
+import {Op} from "sequelize";
 
 @Table
 export class Role extends Model<Role> {
@@ -22,5 +23,17 @@ export class Role extends Model<Role> {
 
     @Column
     active: boolean;
+
+
+    public static async defaultRole(): Promise<Role> {
+        const defaultRoleName = process.env.DEFAULT_ROLE || "anonymous";
+        return await Role.findOne({
+            where: {
+                name: {
+                    [Op.eq]: defaultRoleName
+                }
+            }
+        });
+    }
 
 }

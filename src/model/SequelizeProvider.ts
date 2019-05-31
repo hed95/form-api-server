@@ -7,6 +7,8 @@ import {provide} from "inversify-binding-decorators";
 import TYPE from "../constant/TYPE";
 import logger from "../util/logger";
 import * as cls from 'continuation-local-storage';
+import {Op} from "sequelize";
+
 const namespace = cls.createNamespace('sequelize-transaction');
 Sequelize.useCLS(namespace);
 
@@ -24,12 +26,30 @@ export class SequelizeProvider {
             this.sequelize = new Sequelize(config.database, config.username, config.password, config);
         }
         this.sequelize.addModels([FormRoles, Role, Form, FormVersion]);
-        // this.sequelize.sync({}).then(() => {
-        //    logger.info("DB initialised")
-        // });
     }
 
     public getSequelize(): Sequelize {
         return this.sequelize;
+    }
+
+    public async initDefaultRole(roleName: string = "anonymous"): Promise<void> {
+        const role = await Role.findOne({
+            where: {
+                name: {
+                    [Op.eq] : roleName
+                }
+            }
+        });
+        if (!role) {
+            await new Role({
+                name: roleName,
+                description: "Default role that allows anyone to see a form",
+                active: true
+            }).save();
+            logger.info(`Created default role ${roleName}`);
+        } else {
+            logger.info(`${roleName} already exists so not creating`);
+        }
+
     }
 }

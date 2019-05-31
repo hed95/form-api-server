@@ -19,7 +19,7 @@ describe("FormVersion", () => {
         }).save();
         const version = new FormVersion({
             name: "Test Form A",
-            description: "Test form description",
+            title: "Test form description",
             schema: schema,
             formId: form.id
         });
@@ -55,14 +55,14 @@ describe("FormVersion", () => {
 
         await new FormVersion({
             name: "Test Form AVC",
-            description: "Test form description",
+            title: "Test form description",
             schema: schema,
             formId: form.id,
             current: false
         }).save();
         await new FormVersion({
             name: "Test Form Updated",
-            description: "Test form description",
+            title: "Test form description",
             schema: schema,
             formId: form.id,
             current: true

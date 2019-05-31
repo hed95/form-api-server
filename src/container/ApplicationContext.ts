@@ -7,6 +7,7 @@ import logger from "../util/logger";
 import {FormVersion} from "../model/FormVersion";
 import {Role} from "../model/Role";
 import {SequelizeProvider} from "../model/SequelizeProvider";
+import {FormSchemaValidator} from "../model/FormSchemaValidator";
 
 export class ApplicationContext {
     private readonly container: Container;
@@ -15,6 +16,7 @@ export class ApplicationContext {
         this.container = new Container({
             defaultScope: 'Singleton'
         });
+        this.container.bind<FormSchemaValidator>(TYPE.FormSchemaValidator).to(FormSchemaValidator);
         this.container.bind<SequelizeProvider>(TYPE.SequelizeProvider).to(SequelizeProvider);
         this.container.bind<FormRepository>(TYPE.FormRepository).toConstantValue(Form);
         this.container.bind<FormVersionRepository>(TYPE.FormVersionRepository).toConstantValue(FormVersion);

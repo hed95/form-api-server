@@ -10,4 +10,5 @@ export const applicationContext: ApplicationContext = new ApplicationContext();
 before(async () => {
     sequelizeProvider = applicationContext.get(TYPE.SequelizeProvider);
     await sequelizeProvider.getSequelize().sync({force: true});
+    await sequelizeProvider.initDefaultRole();
 });
