@@ -10,6 +10,7 @@ import {User} from "../../../src/model/User";
 
 import ResourceNotFoundError from "../../../src/error/ResourceNotFoundError";
 import ValidationError from "../../../src/error/ValidationError";
+import {basicForm} from "../../form";
 
 describe("FormService", () => {
 
@@ -211,11 +212,9 @@ describe("FormService", () => {
         const form = await formRepository.create({
             createdBy: "test@test.com"
         });
-        const defaultRole = await new Role({
-            name: "all",
-            title: "Test title",
-            active: true
-        }).save();
+
+        const defaultRole = await Role.defaultRole();
+
         await form.$add("roles", [defaultRole]);
 
         await new FormVersion({
@@ -452,8 +451,26 @@ describe("FormService", () => {
         } catch (err) {
             expect(err instanceof ValidationError).to.eq(true);
             const validationError = err as ValidationError;
-            expect(validationError.get().length).to.be.eq(3);
+            expect(validationError.get().length).to.be.eq(4);
         }
+    });
+
+    it ('can create a form', async() => {
+        const formService: FormService = applicationContext.get(TYPE.FormService);
+        const role = new Role({
+            name: "Test Role New One two three",
+            title: "Test title",
+            active: true
+        });
+        const user = new User("id", "test", [role]);
+        const version = await formService.create(user, basicForm);
+        expect(version).to.be.not.null;
+        expect(version.schema).to.be.not.null;
+
+        const loaded = await formService.findForm(version.formId, user);
+        expect(loaded).to.be.not.null;
+        expect(loaded.form.roles.length).to.eq(1);
+        expect(loaded.form.roles[0].name).to.eq("anonymous");
     });
 });
 

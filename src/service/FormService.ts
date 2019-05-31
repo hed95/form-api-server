@@ -1,7 +1,7 @@
 import {inject} from "inversify";
 import TYPE from "../constant/TYPE";
 import {FormVersion} from "../model/FormVersion";
-import {FormRepository, FormVersionRepository} from "../types/repository";
+import {FormRepository, FormVersionRepository, RoleRepository} from "../types/repository";
 import logger from "../util/logger";
 import {provide} from "inversify-binding-decorators";
 import {Op} from "sequelize";
@@ -19,26 +19,70 @@ export class FormService {
     readonly formRepository: FormRepository;
     readonly formVersionRepository: FormVersionRepository;
     private readonly formSchemaValidator: FormSchemaValidator;
+    private readonly roleRepository: RoleRepository;
 
     constructor(@inject(TYPE.FormRepository) formRepository: FormRepository,
                 @inject(TYPE.FormVersionRepository) formVersionRepository: FormVersionRepository,
-                @inject(TYPE.FormSchemaValidator) formSchemaValidator: FormSchemaValidator) {
+                @inject(TYPE.FormSchemaValidator) formSchemaValidator: FormSchemaValidator,
+                @inject(TYPE.RoleRepository) roleRepository: RoleRepository) {
         this.formRepository = formRepository;
         this.formVersionRepository = formVersionRepository;
         this.formSchemaValidator = formSchemaValidator;
+        this.roleRepository = roleRepository;
     }
 
-    public async create(user: User, payload: object): Promise<FormVersion> {
+    public async create(user: User, payload: any): Promise<FormVersion> {
         const validationResult: ValidationResult<object> = this.formSchemaValidator.validate(payload);
         if (validationResult.error) {
             logger.error("Failed validation on create", validationResult.error.details);
             return Promise.reject(new ValidationError("Failed to validate form", validationResult.error.details));
         }
-        return null;
+
+        const title: string = payload.title;
+        const path: string = payload.path;
+        const name: string = payload.name;
+        const accessRoles: string[] =  payload.access;
+
+        return await this.formRepository.sequelize.transaction(async () => {
+            const defaultRole = await Role.defaultRole();
+
+            const roles = accessRoles.length >= 1 ? await this.roleRepository.findAll({
+                where: {
+                    id: {
+                        [Op.in]: accessRoles
+                    }
+                }
+            }) : [];
+            const form = await this.formRepository.create({
+                createdBy: user.email,
+            });
+            const rolesToApply: Role[] = roles.length === 0 ? [defaultRole] : roles;
+            await form.$add("roles", rolesToApply);
+
+            const formVersion = await this.formVersionRepository.create({
+                title: title,
+                path: path,
+                name: name,
+                schema: payload,
+                formId: form.id,
+                validFrom: new Date(),
+                validTo: null,
+                latest: true
+            });
+
+            return await this.formVersionRepository.findByPk(formVersion.id, {
+                include: [{
+                    model: Form, include: [{
+                        model: Role
+                    }]
+                }]
+            })
+
+        });
     }
 
     public async getAllForms(user: User, limit: number = 20, offset: number = 0): Promise<{ total: number, forms: FormVersion[] }> {
-
+        const defaultRole = await Role.defaultRole();
         const result: { rows: FormVersion[], count: number } = await this.formVersionRepository
             .findAndCountAll({
                 limit: limit,
@@ -63,7 +107,7 @@ export class FormService {
                                     [Op.in]: user.roles.map((role: Role) => {
                                         return role.name;
                                     }),
-                                    [Op.eq]: 'all'
+                                    [Op.eq]: defaultRole.name
                                 }
                             }
                         }
@@ -126,6 +170,8 @@ export class FormService {
     public async findForm(formId: string, user: User): Promise<FormVersion> {
         const profiler = logger.startTimer();
         try {
+            const defaultRole = await Role.defaultRole();
+
             return await this.formVersionRepository.findOne({
                 limit: 1,
                 offset: 0,
@@ -148,7 +194,7 @@ export class FormService {
                                     [Op.in]: user.roles.map((role: Role) => {
                                         return role.name;
                                     }),
-                                    [Op.eq]: "all"
+                                    [Op.eq]: defaultRole.name
                                 }
                             }
                         }
