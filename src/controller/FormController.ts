@@ -26,7 +26,9 @@ export class FormController extends BaseHttpController {
     }
 
     @httpGet('/:id', TYPE.ProtectMiddleware)
-    public async get(@requestParam("id") id: string, @request() req: express.Request, @response() res: express.Response, @principal() currentUser: User): Promise<void> {
+    public async get(@requestParam("id") id: string,
+                     @response() res: express.Response,
+                     @principal() currentUser: User): Promise<void> {
         const formVersion = await this.formService.findForm(id, currentUser);
         if (!formVersion) {
             res.status(404).send({});
@@ -37,7 +39,9 @@ export class FormController extends BaseHttpController {
     }
 
     @httpPost('/', TYPE.ProtectMiddleware)
-    public async create(@requestBody() form: any, @response() res: express.Response, @principal() currentUser: User): Promise<void> {
+    public async create(@requestBody() form: any,
+                        @response() res: express.Response,
+                        @principal() currentUser: User): Promise<void> {
         logger.info(`Creating new form`);
         try {
 
