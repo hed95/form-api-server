@@ -5,13 +5,15 @@ import {User} from "./User";
 import TYPE from "../constant/TYPE";
 import {KeycloakService} from "./KeycloakService";
 import {Role} from "../model/Role";
-import Keycloak = require("keycloak-connect");
 import logger from "../util/logger";
+import Keycloak = require("keycloak-connect");
 
 @injectable()
 export class KeycloakAuthProvider implements interfaces.AuthProvider {
+
     constructor(@inject(TYPE.KeycloakService) private readonly keycloakService: KeycloakService) {
     }
+
     public async getUser(
         req: express.Request,
         res: express.Response,

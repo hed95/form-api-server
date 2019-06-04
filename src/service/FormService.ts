@@ -215,19 +215,50 @@ export class FormService {
         }
     }
 
-    public async findAllVersions(formId: String, offset: number, limit: number): Promise<{
+    public async findAllVersions(formId: string, offset: number, limit: number, user: User): Promise<{
         offset: number,
         limit: number,
-        data: FormVersion[],
+        versions: FormVersion[],
         total: number
     }> {
         const profiler = logger.startTimer();
+        const defaultRole = await Role.defaultRole();
+        const form = await this.formRepository.findOne({
+            where: {
+                id: {
+                    [Op.eq] : formId
+                }
+            },
+            include: [{
+                model: Role,
+                as: "roles",
+                attributes: ["id", "name"],
+                through: {
+                    attributes: []
+                },
+                where: {
+                    name: {
+                        [Op.or]: {
+                            [Op.in]: user.details.roles.map((role: Role) => {
+                                return role.name;
+                            }),
+                            [Op.eq]: defaultRole.name
+                        }
+                    }
+                }
+            }]
+        });
+        if (!form) {
+            throw new ResourceNotFoundError(`Form with id ${formId} does not exist`);
+        }
+
         const result: { rows: FormVersion[], count: number } = await this.formVersionRepository.findAndCountAll({
             where: {
                 formId: {
                     [Op.eq]: formId
                 }
             },
+            order: [['validFrom', 'ASC']],
             offset: offset,
             limit: limit,
         });
@@ -236,7 +267,7 @@ export class FormService {
                 {
                     offset: offset,
                     limit: limit,
-                    data: result.rows,
+                    versions: result.rows,
                     total: result.count
                 },
             );
@@ -246,4 +277,48 @@ export class FormService {
 
     }
 
+    public async update(id: string, form: any, currentUser: User) {
+        const oldVersion = await this.formVersionRepository.findOne({
+            where: {
+                formId: {
+                    [Op.eq]: id
+                }
+            },
+            include: [{
+                model: Form
+            }]
+        });
+        if (!oldVersion) {
+            throw new ResourceNotFoundError(`Form with ${id} does not exist for update`);
+        }
+        const validationResult: ValidationResult<object> = this.formSchemaValidator.validate(form);
+        if (validationResult.error) {
+            logger.error("Failed to update from", validationResult.error.details);
+            return Promise.reject(new ValidationError("Failed to validate form", validationResult.error.details));
+        }
+
+        const currentDate = new Date();
+        return this.formVersionRepository.sequelize.transaction(async (t: any) => {
+            await oldVersion.update({
+                validTo: currentDate,
+                latest: false,
+                updateBy: currentUser.details.email
+            });
+            logger.info("Updated previous version to be invalid");
+            const newVersion = await new FormVersion({
+                title: form.title,
+                name: form.name,
+                path: form.path,
+                schema: form,
+                formId: oldVersion.form.id,
+                validFrom: currentDate,
+                updatedBy: currentUser.details.email,
+                validaTo: null,
+                latest: true
+            }).save({});
+            logger.info(`New version created. New version id ${newVersion.id} for form id ${oldVersion.form.id}`);
+            return newVersion;
+
+        });
+    }
 }

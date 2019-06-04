@@ -12,7 +12,7 @@ export class RolesController extends BaseHttpController {
         super();
     }
 
-    @httpGet('/')
+    @httpGet('/:id', TYPE.ProtectMiddleware)
     public async roles(@queryParam("limit") limit: number = 20, @queryParam("offset") offset: number = 0): Promise<{ total: number, roles: Role[] }> {
         const profiler = logger.startTimer();
         const result: { rows: Role[], count: number } = await this.roleRepository.findAndCountAll({

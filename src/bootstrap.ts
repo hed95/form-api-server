@@ -23,9 +23,13 @@ sequelizeProvider.getSequelize().sync({
     logger.info("DB initialised");
 });
 
-const server = new InversifyExpressServer(container, null, null, null, KeycloakAuthProvider);
+const server = new InversifyExpressServer(container,
+    null,
+    null,
+    null,
+    KeycloakAuthProvider as any);
 
-server.setConfig((app) => {
+server.setConfig((app: any) => {
     const keycloakService: KeycloakService = container.get(TYPE.KeycloakService);
     app.use(keycloakService.middleware());
     app.use(bodyParser.urlencoded({

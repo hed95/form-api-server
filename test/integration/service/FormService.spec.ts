@@ -21,6 +21,42 @@ describe("FormService", () => {
         expect(formService.formRepository.name).to.be.eq('Form');
     });
 
+    it ('cannot get versions if not allowed access', async() =>{
+        const formRepository: FormRepository = applicationContext.get(TYPE.FormRepository);
+        const formService: FormService = applicationContext.get(TYPE.FormService);
+
+        const role = await new Role({
+            name: "Test Role For Access",
+            title: "Test title",
+            active: true
+        }).save();
+        const form = await formRepository.create({
+            createdBy: "test@test.com"
+        });
+        await form.$add("roles", [role]);
+
+        await new FormVersion({
+            name: "Test Form 123",
+            title: "Test form title",
+            schema: {
+                components: [],
+                display: "wizard"
+            },
+            formId: form.id,
+            current: true
+        }).save();
+
+        const user = new User("id", "test", [new Role({
+            name: 'someRandomeRole',
+            description: "test"
+        })]);
+
+        try {
+           await formService.findAllVersions(form.id, 0, 10, user);
+        } catch (e) {
+            expect(e instanceof ResourceNotFoundError).to.be.eq(true);
+        }
+    });
 
     it('can create multiple versions', async () => {
         const formRepository: FormRepository = applicationContext.get(TYPE.FormRepository);
@@ -47,13 +83,15 @@ describe("FormService", () => {
             current: true
         }).save();
 
-        const result: { offset: number, limit: number, data: FormVersion[], total: number }
-            = await formService.findAllVersions(form.id, 0, 10);
+        const user = new User("id", "test", [role]);
+
+        const result: { offset: number, limit: number, versions: FormVersion[], total: number }
+            = await formService.findAllVersions(form.id, 0, 10, user);
 
         expect(result.total).to.eq(1);
         expect(result.offset).to.eq(0);
         expect(result.limit).to.eq(10);
-        expect(result.data.length).to.eq(1);
+        expect(result.versions.length).to.eq(1);
     });
 
     it('can get latest form version', async () => {
