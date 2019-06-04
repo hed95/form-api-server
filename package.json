@@ -10,18 +10,20 @@
     "watch-node": "nodemon dist/bootstrap.js",
     "watch-ts": "tsc -w",
     "test": "npm run test:all ",
-    "test:int": "mocha --file ./test/integration/setup-test.ts -r ts-node/register test/integration/**/*.spec.ts",
-    "test:unit": "mocha -r ts-node/register test/unit/**/*.spec.ts",
-    "test:all": "npm run test:unit && npm run test:int && nyc report --reporter=text"
+    "clean-coverage" : "rm -rf ./coverage",
+    "test:int": "nyc --report-dir=./coverage/int mocha --file ./test/integration/setup-test.ts -r ts-node/register test/integration/**/*.spec.ts ",
+    "test:unit": "nyc --report-dir=./coverage/unit mocha -r ts-node/register test/unit/**/*.spec.ts",
+    "test:all": "npm run clean-coverage && npm run test:unit && npm run test:int && nyc report --report-dir=./coverage"
   },
   "nyc": {
-    "extension": [
-      ".ts"
-    ],
-    "reporter": [
-      "text"
-    ],
-    "all": true
+    "reporter": ["text", "lcov"],
+    "temp-directory": "./coverage/.nyc_output",
+    "all": true,
+    "exclude": "typings",
+    "extension": [".ts"],
+    "sourceMap": true,
+    "instrument": true,
+    "include": ["src/**/*.ts"]
   },
   "repository": {
     "type": "git",
@@ -76,4 +78,5 @@
     "sequelize-typescript": "^1.0.0-beta.3",
     "winston": "^3.2.1"
   }
+
 }

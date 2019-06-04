@@ -2,6 +2,7 @@ export class MockResponse {
 
     private jsonData: object;
     private statusData: number;
+    private locationData: string;
 
     public json(data: object): MockResponse {
         this.jsonData = data;
@@ -24,5 +25,14 @@ export class MockResponse {
 
     public getStatus() {
         return this.statusData;
+    }
+
+    public location(location: string) {
+        this.locationData = location;
+        return this;
+    }
+
+    public getLocation() : string {
+        return this.locationData;
     }
 }

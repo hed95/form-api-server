@@ -9,6 +9,8 @@ import {FormVersion} from "../../../src/model/FormVersion";
 import {Arg, Substitute} from '@fluffy-spoon/substitute';
 import ResourceNotFoundError from "../../../src/error/ResourceNotFoundError";
 import InternalServerError from "../../../src/error/InternalServerError";
+import {Form} from "../../../src/model/Form";
+import ValidationError from "../../../src/error/ValidationError";
 
 describe("FormController", () => {
 
@@ -26,7 +28,7 @@ describe("FormController", () => {
     afterEach(() => {
     });
 
-    it ('can get a form', async () => {
+    it('can get a form', async () => {
         const user = new User("id", "email");
         Object.assign(FormVersion, {});
         const version: FormVersion = Object.assign(FormVersion.prototype, {});
@@ -37,7 +39,7 @@ describe("FormController", () => {
         // @ts-ignore
         formService.findForm(Arg.any(), Arg.any()).returns(Promise.resolve(version));
 
-        await formController.get("id",mockResponse, user);
+        await formController.get("id", mockResponse, user);
         expect(mockResponse.getJsonData()).to.be.eq(version.schema);
     });
 
@@ -47,7 +49,7 @@ describe("FormController", () => {
         // @ts-ignore
         formService.findForm(Arg.any(), Arg.any()).returns(Promise.resolve(null));
 
-        await formController.get("id",mockResponse, user);
+        await formController.get("id", mockResponse, user);
         expect(mockResponse.getStatus()).to.eq(404);
     });
 
@@ -64,7 +66,7 @@ describe("FormController", () => {
         const versions = [version];
 
         // @ts-ignore
-       formService.findAllVersions(Arg.any(), Arg.any(), Arg.any(),Arg.any()).returns(Promise.resolve({
+        formService.findAllVersions(Arg.any(), Arg.any(), Arg.any(), Arg.any()).returns(Promise.resolve({
             offset: 0,
             limit: 10,
             versions: versions,
@@ -77,24 +79,66 @@ describe("FormController", () => {
 
     });
 
-    it ('throws exception if form not accessible for versions', async () => {
+    it('throws exception if form not accessible for versions', async () => {
         const user = new User("id", "email");
 
         // @ts-ignore
-        formService.findAllVersions(Arg.any(), Arg.any(), Arg.any(),Arg.any()).returns(Promise.reject(new ResourceNotFoundError("Not found")));
+        formService.findAllVersions(Arg.any(), Arg.any(), Arg.any(), Arg.any()).returns(Promise.reject(new ResourceNotFoundError("Not found")));
 
         await formController.allVersions("id", 0, 20, mockResponse, user);
         expect(mockResponse.getStatus()).to.eq(404);
     });
 
-    it ('throws exception for internal exception', async () => {
+    it('throws exception for internal exception', async () => {
         const user = new User("id", "email");
 
         // @ts-ignore
-        formService.findAllVersions(Arg.any(), Arg.any(), Arg.any(),Arg.any()).returns(Promise.reject(new InternalServerError("Something went wrong")));
+        formService.findAllVersions(Arg.any(), Arg.any(), Arg.any(), Arg.any()).returns(Promise.reject(new InternalServerError("Something went wrong")));
 
         await formController.allVersions("id", 0, 20, mockResponse, user);
         expect(mockResponse.getStatus()).to.eq(500);
         expect(mockResponse.getJsonData().message).to.eq("InternalServerError: Something went wrong");
+    });
+
+    it('can create a form', async () => {
+        const user = new User("id", "email");
+        Object.assign(FormVersion, {});
+        Object.assign(Form, {})
+        const form: Form = Object.assign(Form.prototype, {});
+        const version: FormVersion = Object.assign(FormVersion.prototype, {});
+        form.id = 'formId';
+        version.schema = {
+            display: 'form',
+            components: []
+        };
+        version.form = form;
+        // @ts-ignore
+        formService.create(Arg.any(), Arg.any()).returns(Promise.resolve(version));
+
+        await formController.create({}, mockResponse, user);
+
+        expect(mockResponse.getStatus()).to.eq(201);
+        expect(mockResponse.getLocation()).to.eq("/form/formId");
+
+    });
+
+    it('cannot create a form if validation fails', async () => {
+        const user = new User("id", "email");
+
+        // @ts-ignore
+        formService.create(Arg.any(), Arg.any()).returns(Promise.reject(new ValidationError("Failed validation", [])));
+
+        await formController.create({}, mockResponse, user);
+        expect(mockResponse.getStatus()).to.eq(400);
+    });
+
+    it ('returns 500 if something went wrong', async() => {
+        const user = new User("id", "email");
+
+        // @ts-ignore
+        formService.create(Arg.any(), Arg.any()).returns(Promise.reject(new InternalServerError("Something went wrong")));
+
+        await formController.create({}, mockResponse, user);
+        expect(mockResponse.getStatus()).to.eq(500);
     });
 });
