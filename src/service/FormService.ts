@@ -404,18 +404,20 @@ export class FormService {
         return true;
     }
 
-    async createComment(id: string, user: User, comment: string): Promise<FormComment> {
+    async createComment(id: string, user: User, comment: FormComment): Promise<FormComment> {
         return await this.formRepository.sequelize.transaction(async (t: any) => {
             const form = await this.getForm(id, user);
             if (!form) {
                 throw new ResourceNotFoundError(`Form with id ${id} does not exist`);
             }
             const today = new Date();
-            const commentCreated = await this.formCommentRepository.create({
-                createdOn: today,
-                createdBy: user.details.email,
-                comment: comment
-            });
+            if (!comment.createdOn) {
+                comment.set("createdOn", today);
+            }
+            if (!comment.createdBy) {
+                comment.set("createdBy", user.details.email);
+            }
+            const commentCreated = await comment.save({});
             await form.$add("comments", [commentCreated]);
             return commentCreated;
         });
@@ -427,5 +429,9 @@ export class FormService {
             throw new ResourceNotFoundError(`Form with id ${id} does not exist`);
         }
         return form.comments;
+    }
+
+    async find(): Promise<{ total: number, forms: FormVersion[] }> {
+        return null;
     }
 }

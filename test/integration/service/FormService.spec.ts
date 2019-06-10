@@ -510,9 +510,11 @@ describe("FormService", () => {
         }).save();
 
         const user = new User("id", "test", [role]);
-
-        const comment: FormComment = await formService.createComment(form.id, user, "FormCommentary test");
-
+        const formComment = new FormComment({
+            comment: "FormCommentary test"
+        });
+        const comment: FormComment = await formService.createComment(form.id, user, formComment);
+        console.log(comment.createdOn);
         expect(comment).to.be.not.null;
 
     });
@@ -540,7 +542,10 @@ describe("FormService", () => {
         }).save();
 
         const user = new User("id", "test", [role]);
-        await formService.createComment(form.id, user, "FormCommentary test");
+        const formComment = new FormComment({
+           comment: "FormCommentary test"
+        });
+        await formService.createComment(form.id, user, formComment);
         const comments: FormComment[] = await formService.getComments(form.id, user);
         expect(comments.length).to.be.eq(1);
         expect(comments[0].createdBy).to.be.eq("test");

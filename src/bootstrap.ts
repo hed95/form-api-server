@@ -10,6 +10,7 @@ import {KeycloakAuthProvider} from "./auth/KeycloakAuthProvider";
 import {KeycloakService} from "./auth/KeycloakService";
 import cors from 'cors';
 import * as swagger from "swagger-express-ts";
+import {SwaggerDefinitionConstant} from "swagger-express-ts";
 import * as express from "express";
 
 
@@ -27,23 +28,35 @@ sequelizeProvider.getSequelize().sync({
     logger.info("DB initialised");
 });
 
+const version = "v1";
+const basePath = `/api/${version}`;
+
 const server = new InversifyExpressServer(container,
     null,
-    null,
+    {rootPath: basePath},
     null,
     KeycloakAuthProvider as any);
 
+
+
 server.setConfig((app: any) => {
     const keycloakService: KeycloakService = container.get(TYPE.KeycloakService);
-
     app.use('/api-docs/swagger', express.static('swagger'));
     app.use('/api-docs/swagger/assets', express.static('node_modules/swagger-ui-dist'));
     app.use(swagger.express(
         {
             definition: {
+                basePath: basePath,
                 info: {
                     title: "Form API Service",
-                    version: "1.0"
+                    version: version
+                },
+                securityDefinitions: {
+                    bearerAuth: {
+                        type: SwaggerDefinitionConstant.Security.Type.API_KEY,
+                        in: "header",
+                        name: "Authorization",
+                    }
                 }
             }
         }
@@ -57,6 +70,7 @@ server.setConfig((app: any) => {
     }));
     app.use(bodyParser.json());
 });
+
 
 const app = server.build();
 app.listen(port);

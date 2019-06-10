@@ -21,13 +21,19 @@ import ValidationError from "../error/ValidationError";
 import ResourceNotFoundError from "../error/ResourceNotFoundError";
 import {FormVersion} from "../model/FormVersion";
 import {FormComment} from "../model/FormComment";
-import {ApiOperationGet, ApiPath} from "swagger-express-ts";
+import {
+    ApiOperationDelete,
+    ApiOperationGet,
+    ApiOperationPost,
+    ApiPath,
+    SwaggerDefinitionConstant
+} from "swagger-express-ts";
 
 
 @ApiPath({
     path: "/forms",
     name: "Forms",
-    security: { bearerAuth: [] }
+    security: {bearerAuth: []}
 })
 @controller("/forms")
 export class FormController extends BaseHttpController {
@@ -42,7 +48,7 @@ export class FormController extends BaseHttpController {
         summary: "Get a form schema for a given id",
         parameters: {
             path: {
-                "id" : {
+                "id": {
                     name: "id",
                     description: "Form id",
                     format: "string",
@@ -51,8 +57,9 @@ export class FormController extends BaseHttpController {
             }
         },
         responses: {
-            200: { description: "Success" },
-            404: { description: "Form does not exist" }
+            403: {description: "Access denied"},
+            200: {description: "Success"},
+            404: {description: "Form does not exist"}
         }
     })
     @httpGet('/:id', TYPE.ProtectMiddleware)
@@ -63,13 +70,14 @@ export class FormController extends BaseHttpController {
         if (!formVersion) {
             res.status(404).send({
                 "id": id,
-                "exception" : "Resource not found",
+                "exception": "Resource not found",
                 "resource": "Form"
             });
         } else {
             res.json(formVersion.schema);
         }
     }
+
 
     @httpGet('/:id/versions', TYPE.ProtectMiddleware)
     public async allVersions(@requestParam("id") id: string,
@@ -90,7 +98,7 @@ export class FormController extends BaseHttpController {
             if (e instanceof ResourceNotFoundError) {
                 res.status(404).send({
                     "id": id,
-                    "exception" : "Resource not found",
+                    "exception": "Resource not found",
                     "resource": "Form"
                 });
             } else {
@@ -158,12 +166,53 @@ export class FormController extends BaseHttpController {
         }
     }
 
+    @ApiOperationDelete({
+        path: "/{id}",
+        description: "Delete a form",
+        summary: "Updates the validTo attribute of the latest version, effectively marking it as deleted. " +
+            "Subsequent calls using the GET method will not return the form. You can use the findAllVersions call and restore",
+        parameters: {
+            path: {
+                "id": {
+                    name: "id",
+                    description: "Form id",
+                    format: "string",
+                    required: true
+                }
+            }
+        },
+        responses: {
+            200: {description: "Success"},
+            404: {description: "Form does not exist"},
+            500: {description: "Internal execution error"}
+        }
+    })
     @httpDelete("/:id", TYPE.ProtectMiddleware)
     public async delete(@requestParam("id") id: string, @principal() currentUser: User): Promise<void> {
         logger.info(`Deleting form with id ${id}`);
         await this.formService.delete(id, currentUser);
     }
 
+    @ApiOperationGet({
+        path: "/{id}/comments",
+        description: "Get all comments for a given form",
+        summary: "Get all comments for a given form",
+        parameters: {
+            path: {
+                "id": {
+                    name: "id",
+                    description: "Form id",
+                    format: "string",
+                    required: true
+                }
+            }
+        },
+        responses: {
+            200: {description: "Success", type: SwaggerDefinitionConstant.Response.Type.ARRAY, model: "FormComment"},
+            404: {description: "Form does not exist"},
+            500: {description: "Internal execution error"}
+        }
+    })
     @httpGet('/:id/comments', TYPE.ProtectMiddleware)
     public async comments(@requestParam("id") id: string,
                           @response() res: express.Response,
@@ -175,7 +224,7 @@ export class FormController extends BaseHttpController {
             if (e instanceof ResourceNotFoundError) {
                 res.status(404).send({
                     "id": id,
-                    "exception" : "Resource not found",
+                    "exception": "Resource not found",
                     "resource": "Form"
                 });
             } else {
@@ -184,20 +233,43 @@ export class FormController extends BaseHttpController {
         }
     }
 
+    @ApiOperationPost({
+        path: "/{id}/comments",
+        description: "Create a comment for a form",
+        summary: "Create a comment for a form",
+        parameters: {
+            path: {
+                "id": {
+                    name: "id",
+                    description: "Form id",
+                    format: "string",
+                    required: true
+                }
+            },
+            body: {
+                type: SwaggerDefinitionConstant.Response.Type.OBJECT, model: "FormComment"
+            }
+        },
+        responses: {
+            201: {description: "Comment successfully created for form"},
+            404: {description: "Form does not exist"},
+            500: {description: "Internal execution error"}
+        }
+    })
     @httpPost("/:id/comments", TYPE.ProtectMiddleware)
     public async createComment(@requestParam("id") id: string,
-                               @requestBody() comment: any,
+                               @requestBody() comment: FormComment,
                                @response() res: express.Response,
                                @principal() currentUser: User): Promise<void> {
 
         try {
-            const created: FormComment = await this.formService.createComment(id, currentUser, comment.message);
-            res.json(created);
+            const created: FormComment = await this.formService.createComment(id, currentUser, comment);
+            res.status(201).json(created);
         } catch (e) {
             if (e instanceof ResourceNotFoundError) {
                 res.status(404).send({
                     "id": id,
-                    "exception" : "Resource not found",
+                    "exception": "Resource not found",
                     "resource": "Form"
                 });
             } else {
