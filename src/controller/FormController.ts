@@ -21,15 +21,40 @@ import ValidationError from "../error/ValidationError";
 import ResourceNotFoundError from "../error/ResourceNotFoundError";
 import {FormVersion} from "../model/FormVersion";
 import {FormComment} from "../model/FormComment";
+import {ApiOperationGet, ApiPath} from "swagger-express-ts";
 
 
-@controller("/form")
+@ApiPath({
+    path: "/forms",
+    name: "Forms",
+    security: { bearerAuth: [] }
+})
+@controller("/forms")
 export class FormController extends BaseHttpController {
 
     constructor(@inject(TYPE.FormService) private readonly formService: FormService) {
         super();
     }
 
+    @ApiOperationGet({
+        path: "/{id}",
+        description: "Get a form schema for a given id",
+        summary: "Get a form schema for a given id",
+        parameters: {
+            path: {
+                "id" : {
+                    name: "id",
+                    description: "Form id",
+                    format: "string",
+                    required: true
+                }
+            }
+        },
+        responses: {
+            200: { description: "Success" },
+            404: { description: "Form does not exist" }
+        }
+    })
     @httpGet('/:id', TYPE.ProtectMiddleware)
     public async get(@requestParam("id") id: string,
                      @response() res: express.Response,

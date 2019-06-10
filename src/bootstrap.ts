@@ -9,6 +9,9 @@ import {SequelizeProvider} from "./model/SequelizeProvider";
 import {KeycloakAuthProvider} from "./auth/KeycloakAuthProvider";
 import {KeycloakService} from "./auth/KeycloakService";
 import cors from 'cors';
+import * as swagger from "swagger-express-ts";
+import * as express from "express";
+
 
 const port = process.env.PORT || 4000;
 const applicationContext: ApplicationContext = new ApplicationContext();
@@ -32,6 +35,19 @@ const server = new InversifyExpressServer(container,
 
 server.setConfig((app: any) => {
     const keycloakService: KeycloakService = container.get(TYPE.KeycloakService);
+
+    app.use('/api-docs/swagger', express.static('swagger'));
+    app.use('/api-docs/swagger/assets', express.static('node_modules/swagger-ui-dist'));
+    app.use(swagger.express(
+        {
+            definition: {
+                info: {
+                    title: "Form API Service",
+                    version: "1.0"
+                }
+            }
+        }
+    ));
     app.use(keycloakService.middleware());
     app.use(bodyParser.urlencoded({
         extended: true,
@@ -44,6 +60,6 @@ server.setConfig((app: any) => {
 
 const app = server.build();
 app.listen(port);
-logger.info("Server up and running");
+logger.info("Server up and running on " + port);
 
 exports = module.exports = app;
