@@ -1,6 +1,7 @@
 import {
     BaseHttpController,
     controller,
+    httpDelete,
     httpGet,
     httpPost,
     httpPut,
@@ -19,6 +20,7 @@ import {User} from "../auth/User";
 import ValidationError from "../error/ValidationError";
 import ResourceNotFoundError from "../error/ResourceNotFoundError";
 import {FormVersion} from "../model/FormVersion";
+import {FormComment} from "../model/FormComment";
 
 
 @controller("/form")
@@ -34,7 +36,11 @@ export class FormController extends BaseHttpController {
                      @principal() currentUser: User): Promise<void> {
         const formVersion = await this.formService.findForm(id, currentUser);
         if (!formVersion) {
-            res.status(404).send({});
+            res.status(404).send({
+                "id": id,
+                "exception" : "Resource not found",
+                "resource": "Form"
+            });
         } else {
             res.json(formVersion.schema);
         }
@@ -57,15 +63,17 @@ export class FormController extends BaseHttpController {
             res.json(result);
         } catch (e) {
             if (e instanceof ResourceNotFoundError) {
-                res.status(404).send({})
+                res.status(404).send({
+                    "id": id,
+                    "exception" : "Resource not found",
+                    "resource": "Form"
+                });
             } else {
                 res.status(500).send({
-                    message: e.toString()
+                    exception: e.toString()
                 })
             }
-
         }
-
     }
 
     @httpPut('/:id', TYPE.ProtectMiddleware)
@@ -87,12 +95,12 @@ export class FormController extends BaseHttpController {
                 const validationError = e as ValidationError;
                 res.status(400);
                 res.json({
-                    errors: validationError.get()
+                    exception: validationError.get()
                 })
             } else {
                 res.status(500);
                 res.json({
-                    message: e.toString()
+                    exception: e.toString()
                 });
             }
         }
@@ -113,15 +121,64 @@ export class FormController extends BaseHttpController {
                 const validationError = err as ValidationError;
                 res.status(400);
                 res.json({
-                    errors: validationError.get()
+                    exception: validationError.get()
                 })
             } else {
                 res.status(500);
                 res.json({
-                    message: err.toString()
+                    exception: err.toString()
                 });
             }
 
         }
+    }
+
+    @httpDelete("/:id", TYPE.ProtectMiddleware)
+    public async delete(@requestParam("id") id: string, @principal() currentUser: User): Promise<void> {
+        logger.info(`Deleting form with id ${id}`);
+        await this.formService.delete(id, currentUser);
+    }
+
+    @httpGet('/:id/comments', TYPE.ProtectMiddleware)
+    public async comments(@requestParam("id") id: string,
+                          @response() res: express.Response,
+                          @principal() currentUser: User): Promise<void> {
+        try {
+            const comments: FormComment[] = await this.formService.getComments(id, currentUser);
+            res.json(comments);
+        } catch (e) {
+            if (e instanceof ResourceNotFoundError) {
+                res.status(404).send({
+                    "id": id,
+                    "exception" : "Resource not found",
+                    "resource": "Form"
+                });
+            } else {
+                res.status(500).json(e.toString());
+            }
+        }
+    }
+
+    @httpPost("/:id/comments", TYPE.ProtectMiddleware)
+    public async createComment(@requestParam("id") id: string,
+                               @requestBody() comment: any,
+                               @response() res: express.Response,
+                               @principal() currentUser: User): Promise<void> {
+
+        try {
+            const created: FormComment = await this.formService.createComment(id, currentUser, comment.message);
+            res.json(created);
+        } catch (e) {
+            if (e instanceof ResourceNotFoundError) {
+                res.status(404).send({
+                    "id": id,
+                    "exception" : "Resource not found",
+                    "resource": "Form"
+                });
+            } else {
+                res.status(500).json(e.toString());
+            }
+        }
+
     }
 }

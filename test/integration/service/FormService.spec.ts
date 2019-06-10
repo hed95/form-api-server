@@ -11,8 +11,21 @@ import {User} from "../../../src/auth/User";
 import ResourceNotFoundError from "../../../src/error/ResourceNotFoundError";
 import ValidationError from "../../../src/error/ValidationError";
 import {basicForm} from "../../form";
+import {FormComment} from "../../../src/model/FormComment";
 
 describe("FormService", () => {
+
+    const formRepository: FormRepository = applicationContext.get(TYPE.FormRepository);
+    const formService: FormService = applicationContext.get(TYPE.FormService);
+
+    let role: Role;
+    before(async () => {
+        role = await new Role({
+            name: "Role for access",
+            title: "Test title",
+            active: true
+        }).save();
+    });
 
     it('appcontext loads service and repository', async () => {
         const formService: FormService = applicationContext.get(TYPE.FormService);
@@ -21,15 +34,8 @@ describe("FormService", () => {
         expect(formService.formRepository.name).to.be.eq('Form');
     });
 
-    it ('cannot get versions if not allowed access', async() =>{
-        const formRepository: FormRepository = applicationContext.get(TYPE.FormRepository);
-        const formService: FormService = applicationContext.get(TYPE.FormService);
+    it('cannot get versions if not allowed access', async () => {
 
-        const role = await new Role({
-            name: "Test Role For Access",
-            title: "Test title",
-            active: true
-        }).save();
         const form = await formRepository.create({
             createdBy: "test@test.com"
         });
@@ -52,21 +58,13 @@ describe("FormService", () => {
         })]);
 
         try {
-           await formService.findAllVersions(form.id, 0, 10, user);
+            await formService.findAllVersions(form.id, 0, 10, user);
         } catch (e) {
             expect(e instanceof ResourceNotFoundError).to.be.eq(true);
         }
     });
 
     it('can create multiple versions', async () => {
-        const formRepository: FormRepository = applicationContext.get(TYPE.FormRepository);
-        const formService: FormService = applicationContext.get(TYPE.FormService);
-
-        const role = await new Role({
-            name: "Test Role",
-            title: "Test title",
-            active: true
-        }).save();
         const form = await formRepository.create({
             createdBy: "test@test.com"
         });
@@ -95,14 +93,6 @@ describe("FormService", () => {
     });
 
     it('can get latest form version', async () => {
-        const formRepository: FormRepository = applicationContext.get(TYPE.FormRepository);
-        const formService: FormService = applicationContext.get(TYPE.FormService);
-
-        const role = await new Role({
-            name: "Test Role XXX",
-            title: "Test title",
-            active: true
-        }).save();
         const form = await formRepository.create({
             createdBy: "test@test.com"
         });
@@ -142,19 +132,12 @@ describe("FormService", () => {
         expect(result.validTo).to.be.null;
         expect(result.form).to.be.not.null;
         expect(result.form.roles.length).to.be.eq(1);
-        expect(result.form.roles[0].name).to.be.eq("Test Role XXX");
+        expect(result.form.roles[0].name).to.be.eq("Role for access");
     });
 
     it('can restore a version', async () => {
 
-        const formRepository: FormRepository = applicationContext.get(TYPE.FormRepository);
-        const formService: FormService = applicationContext.get(TYPE.FormService);
 
-        const role = await new Role({
-            name: "Test Role XX12",
-            title: "Test title",
-            active: true
-        }).save();
         const form = await formRepository.create({
             createdBy: "test@test.com"
         });
@@ -209,14 +192,7 @@ describe("FormService", () => {
 
 
     it('form not returned if user does not have role', async () => {
-        const formRepository: FormRepository = applicationContext.get(TYPE.FormRepository);
-        const formService: FormService = applicationContext.get(TYPE.FormService);
 
-        const role = await new Role({
-            name: "Test Role XX13",
-            title: "Test title",
-            active: true
-        }).save();
         const form = await formRepository.create({
             createdBy: "test@test.com"
         });
@@ -245,8 +221,6 @@ describe("FormService", () => {
         expect(loaded).to.be.null;
     });
     it('can get form if all role attached to form', async () => {
-        const formRepository: FormRepository = applicationContext.get(TYPE.FormRepository);
-        const formService: FormService = applicationContext.get(TYPE.FormService);
 
         const form = await formRepository.create({
             createdBy: "test@test.com"
@@ -280,7 +254,6 @@ describe("FormService", () => {
         expect(loaded).to.be.not.null;
     });
     it('expected to throw resource not found exception', async () => {
-        const formService: FormService = applicationContext.get(TYPE.FormService);
 
         try {
             await formService.restore("randomId", "randomID")
@@ -290,15 +263,8 @@ describe("FormService", () => {
 
     });
     it('expected to throw resource not version does not exist', async () => {
-        const formRepository: FormRepository = applicationContext.get(TYPE.FormRepository);
-        const formService: FormService = applicationContext.get(TYPE.FormService);
 
         try {
-            const role = await new Role({
-                name: "Test Role New One two three",
-                title: "Test title",
-                active: true
-            }).save();
             const form = await formRepository.create({
                 createdBy: "test@test.com"
             });
@@ -323,14 +289,6 @@ describe("FormService", () => {
     });
 
     it('can get all forms', async () => {
-        const formRepository: FormRepository = applicationContext.get(TYPE.FormRepository);
-        const formService: FormService = applicationContext.get(TYPE.FormService);
-
-        const role = await new Role({
-            name: "ABC",
-            title: "Test title",
-            active: true
-        }).save();
 
         await formRepository.sequelize.transaction(async (transaction: any) => {
             const value = 1;
@@ -452,7 +410,6 @@ describe("FormService", () => {
     });
 
     it('can create custom role on creating form', async () => {
-        const formRepository: FormRepository = applicationContext.get(TYPE.FormRepository);
         const role = new Role({
             name: "ontheflyrole",
             title: "Test title",
@@ -478,7 +435,6 @@ describe("FormService", () => {
     });
 
     it('fails validation on create', async () => {
-        const formService: FormService = applicationContext.get(TYPE.FormService);
         const role = new Role({
             name: "Test Role New One two three",
             title: "Test title",
@@ -494,8 +450,7 @@ describe("FormService", () => {
         }
     });
 
-    it ('can create a form', async() => {
-        const formService: FormService = applicationContext.get(TYPE.FormService);
+    it('can create a form', async () => {
         const role = new Role({
             name: "Test Role New One two three",
             title: "Test title",
@@ -511,6 +466,94 @@ describe("FormService", () => {
         expect(loaded.form.roles.length).to.eq(1);
         expect(loaded.form.roles[0].name).to.eq("anonymous");
     });
+
+    it('can delete a form', async () => {
+        const role = new Role({
+            name: "TestX12XX",
+            title: "Test title",
+            active: true
+        });
+        const user = new User("id", "test", [role]);
+        const version = await formService.create(user, basicForm);
+        expect(version).to.be.not.null;
+        expect(version.schema).to.be.not.null;
+
+
+        const deleted = await formService.delete(version.formId, user);
+        expect(deleted).to.eq(true);
+
+        const loaded = await formService.findForm(version.formId, user);
+        expect(loaded).to.be.null;
+
+    });
+
+    it('can create comment', async () => {
+        const form = await formRepository.create({
+            createdBy: "test@test.com"
+        });
+
+        const defaultRole = await Role.defaultRole();
+
+        await form.$add("roles", [defaultRole]);
+
+        await new FormVersion({
+            name: "Test Form ABC 123",
+            title: "Test form title",
+            schema: {
+                components: [],
+                display: "wizard"
+            },
+            formId: form.id,
+            latest: true,
+            validFrom: new Date(),
+            validTo: null
+        }).save();
+
+        const user = new User("id", "test", [role]);
+
+        const comment: FormComment = await formService.createComment(form.id, user, "FormCommentary test");
+
+        expect(comment).to.be.not.null;
+
+    });
+
+    it('can get comments', async () => {
+        const form = await formRepository.create({
+            createdBy: "test@test.com"
+        });
+
+        const defaultRole = await Role.defaultRole();
+
+        await form.$add("roles", [defaultRole]);
+
+        await new FormVersion({
+            name: "Test Form ABC 123",
+            title: "Test form title",
+            schema: {
+                components: [],
+                display: "wizard"
+            },
+            formId: form.id,
+            latest: true,
+            validFrom: new Date(),
+            validTo: null
+        }).save();
+
+        const user = new User("id", "test", [role]);
+        await formService.createComment(form.id, user, "FormCommentary test");
+        const comments: FormComment[] = await formService.getComments(form.id, user);
+        expect(comments.length).to.be.eq(1);
+        expect(comments[0].createdBy).to.be.eq("test");
+    });
+
+    it('throws error if form does not exist for get comments call', async () => {
+        try {
+            const user = new User("id", "test", [role]);
+            await formService.getComments("xx", user);
+        } catch(e) {
+            expect(e instanceof ResourceNotFoundError).to.be.eq(true);
+        }
+    })
 });
 
 

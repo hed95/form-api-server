@@ -1,6 +1,8 @@
 import {BelongsToMany, Column, CreatedAt, DataType, Model, Table} from "sequelize-typescript";
 import {Role} from "./Role";
 import {FormRoles} from "./FormRoles";
+import {FormCommentary} from "./FormCommentary";
+import {FormComment} from "./FormComment";
 
 @Table
 export class Form extends Model<Form> {
@@ -19,4 +21,7 @@ export class Form extends Model<Form> {
 
     @BelongsToMany(() => Role, () => FormRoles, 'formId', "roleId")
     roles: Role[];
+
+    @BelongsToMany(() => FormComment, () => FormCommentary, 'formId', "commentId")
+    comments: FormComment[];
 }

@@ -97,7 +97,7 @@ describe("FormController", () => {
 
         await formController.allVersions("id", 0, 20, mockResponse, user);
         expect(mockResponse.getStatus()).to.eq(500);
-        expect(mockResponse.getJsonData().message).to.eq("InternalServerError: Something went wrong");
+        expect(mockResponse.getJsonData().exception).to.eq("InternalServerError: Something went wrong");
     });
 
     it('can create a form', async () => {

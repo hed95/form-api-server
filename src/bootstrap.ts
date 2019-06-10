@@ -8,6 +8,7 @@ import TYPE from "./constant/TYPE";
 import {SequelizeProvider} from "./model/SequelizeProvider";
 import {KeycloakAuthProvider} from "./auth/KeycloakAuthProvider";
 import {KeycloakService} from "./auth/KeycloakService";
+import cors from 'cors';
 
 const port = process.env.PORT || 4000;
 const applicationContext: ApplicationContext = new ApplicationContext();
@@ -35,8 +36,10 @@ server.setConfig((app: any) => {
     app.use(bodyParser.urlencoded({
         extended: true,
     }));
-    app.use(bodyParser.json
-    ());
+    app.use(cors({
+        optionsSuccessStatus: 200
+    }));
+    app.use(bodyParser.json());
 });
 
 const app = server.build();

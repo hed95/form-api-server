@@ -8,6 +8,8 @@ import TYPE from "../constant/TYPE";
 import logger from "../util/logger";
 import * as cls from 'continuation-local-storage';
 import {Op} from "sequelize";
+import {FormCommentary} from "./FormCommentary";
+import {FormComment} from "./FormComment";
 
 const namespace = cls.createNamespace('sequelize-transaction');
 Sequelize.useCLS(namespace);
@@ -25,7 +27,7 @@ export class SequelizeProvider {
         } else {
             this.sequelize = new Sequelize(config.database, config.username, config.password, config);
         }
-        this.sequelize.addModels([FormRoles, Role, Form, FormVersion]);
+        this.sequelize.addModels([FormRoles, Role, Form, FormVersion, FormCommentary, FormComment]);
     }
 
     public getSequelize(): Sequelize {

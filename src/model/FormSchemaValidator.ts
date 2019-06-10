@@ -8,6 +8,7 @@ export class FormSchemaValidator {
 
     private schema(): object {
         return Joi.object().keys({
+            _id: Joi.string(),
             name: Joi.string().required(),
             title: Joi.string().required(),
             path: Joi.string().required(),
