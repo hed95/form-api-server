@@ -1,7 +1,7 @@
 import {ValidationResult} from '@hapi/joi';
 import {inject} from 'inversify';
 import {provide} from 'inversify-binding-decorators';
-import Transaction, {Op} from 'sequelize';
+import {Op} from 'sequelize';
 import {User} from '../auth/User';
 import TYPE from '../constant/TYPE';
 import InternalServerError from '../error/InternalServerError';
@@ -12,7 +12,7 @@ import {FormComment} from '../model/FormComment';
 import {FormSchemaValidator} from '../model/FormSchemaValidator';
 import {FormVersion} from '../model/FormVersion';
 import {Role} from '../model/Role';
-import {FormCommentRepository, FormRepository, FormVersionRepository, RoleRepository} from '../types/repository';
+import {FormRepository, FormVersionRepository, RoleRepository} from '../types/repository';
 import logger from '../util/logger';
 
 @provide(TYPE.FormService)
@@ -21,18 +21,15 @@ export class FormService {
     public readonly formVersionRepository: FormVersionRepository;
     private readonly formSchemaValidator: FormSchemaValidator;
     private readonly roleRepository: RoleRepository;
-    private readonly formCommentRepository: FormCommentRepository;
 
     constructor(@inject(TYPE.FormRepository) formRepository: FormRepository,
                 @inject(TYPE.FormVersionRepository) formVersionRepository: FormVersionRepository,
                 @inject(TYPE.FormSchemaValidator) formSchemaValidator: FormSchemaValidator,
-                @inject(TYPE.RoleRepository) roleRepository: RoleRepository,
-                @inject(TYPE.FormCommentRepository) formCommentRepository: FormCommentRepository) {
+                @inject(TYPE.RoleRepository) roleRepository: RoleRepository) {
         this.formRepository = formRepository;
         this.formVersionRepository = formVersionRepository;
         this.formSchemaValidator = formSchemaValidator;
         this.roleRepository = roleRepository;
-        this.formCommentRepository = formCommentRepository;
     }
 
     public async create(user: User, payload: object): Promise<FormVersion> {
