@@ -27,7 +27,9 @@
     ],
     "no-unused-variable": [true, {"check-parameters" :  true}],
     "no-debugger": true,
-    "no-string-throw": true
+    "no-string-throw": true,
+    "no-var-keyword": true,
+    "cyclomatic-complexity": true
   },
   "rulesDirectory": []
 }
