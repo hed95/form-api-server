@@ -16,5 +16,5 @@ USER 1000
 
 EXPOSE 8080
 
-ENTRYPOINT exec node dist/bootstrap.js
+ENTRYPOINT exec npm run start
 

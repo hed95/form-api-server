@@ -21,7 +21,7 @@ const container = applicationContext.iocContainer();
 const sequelizeProvider: SequelizeProvider = applicationContext.get(TYPE.SequelizeProvider);
 
 sequelizeProvider.getSequelize().sync({
-    force: true,
+    force: false,
 }).then(async () => {
     await sequelizeProvider.initDefaultRole(process.env.DEFAULT_ROLE);
     logger.info('DB initialised');
