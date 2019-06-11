@@ -1,12 +1,12 @@
 import * as express from 'express';
 import {inject, injectable} from 'inversify';
 import {interfaces} from 'inversify-express-utils';
-import Keycloak = require('keycloak-connect');
 import TYPE from '../constant/TYPE';
 import {Role} from '../model/Role';
 import logger from '../util/logger';
 import {KeycloakService} from './KeycloakService';
 import {User} from './User';
+import Keycloak = require('keycloak-connect');
 
 const keycloakService = inject(TYPE.KeycloakService);
 
@@ -20,7 +20,7 @@ export class KeycloakAuthProvider implements interfaces.AuthProvider {
         res: express.Response,
         next: express.NextFunction,
     ): Promise<interfaces.Principal> {
-            const instance: Keycloak = this.keycloakService.keycloakInstance();
+        const instance: Keycloak = this.keycloakService.keycloakInstance();
         try {
             const grant: Keycloak.Grant = await instance.getGrant(req, res);
             // @ts-ignore
