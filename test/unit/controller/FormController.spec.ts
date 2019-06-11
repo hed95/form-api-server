@@ -11,6 +11,7 @@ import ResourceNotFoundError from "../../../src/error/ResourceNotFoundError";
 import InternalServerError from "../../../src/error/InternalServerError";
 import {Form} from "../../../src/model/Form";
 import ValidationError from "../../../src/error/ValidationError";
+import {FormComment} from "../../../src/model/FormComment";
 
 describe("FormController", () => {
 
@@ -141,4 +142,45 @@ describe("FormController", () => {
         await formController.create({}, mockResponse, user);
         expect(mockResponse.getStatus()).to.eq(500);
     });
+
+    it('can create a comment', async() => {
+        const user = new User("id", "email");
+        const formComment: FormComment = Object.assign(FormComment.prototype, {});
+        formComment.comment = "Hello";
+
+        // @ts-ignore
+        formService.createComment("formId", user, formComment).returns(Promise.resolve(formComment));
+
+        await formController.createComment("formId", formComment, mockResponse, user);
+
+        expect(mockResponse.getStatus()).to.eq(201);
+
+    });
+
+    it('fails to create comment if service throws ResourceNotFound', async() => {
+        const user = new User("id", "email");
+        const formComment: FormComment = Object.assign(FormComment.prototype, {});
+        formComment.comment = "Hello";
+
+        // @ts-ignore
+        formService.createComment("formId", user, formComment).returns(Promise.reject(new ResourceNotFoundError("Failed")));
+
+        await formController.createComment("formId", formComment, mockResponse, user);
+
+        expect(mockResponse.getStatus()).to.eq(404);
+    });
+
+    it('returns 500 for any internal server error', async() => {
+        const user = new User("id", "email");
+        const formComment: FormComment = Object.assign(FormComment.prototype, {});
+        formComment.comment = "Hello";
+
+        // @ts-ignore
+        formService.createComment("formId", user, formComment).returns(Promise.reject(new InternalServerError("Failed")));
+
+        await formController.createComment("formId", formComment, mockResponse, user);
+
+        expect(mockResponse.getStatus()).to.eq(500);
+    });
+
 });
