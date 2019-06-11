@@ -13,10 +13,14 @@ export class FormRoles extends Model<FormRoles> {
     public id: string;
 
     @ForeignKey(() => Form)
-    @Column
+    @Column({
+        type: DataType.UUID,
+    })
     public formId: string;
 
     @ForeignKey(() => Role)
-    @Column
+    @Column({
+        type: DataType.UUID,
+    })
     public roleId: string;
 }

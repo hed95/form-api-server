@@ -13,16 +13,14 @@ import './controller';
 import {SequelizeProvider} from './model/SequelizeProvider';
 import logger from './util/logger';
 
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 3000;
 const applicationContext: ApplicationContext = new ApplicationContext();
 
 const container = applicationContext.iocContainer();
 
 const sequelizeProvider: SequelizeProvider = applicationContext.get(TYPE.SequelizeProvider);
 
-sequelizeProvider.getSequelize().sync({
-    force: false,
-}).then(async () => {
+sequelizeProvider.getSequelize().sync({}).then(async () => {
     await sequelizeProvider.initDefaultRole(process.env.DEFAULT_ROLE);
     logger.info('DB initialised');
 });
