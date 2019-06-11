@@ -38,10 +38,12 @@ services:
       - AUTH_RESOURCE=form-api-server
       - AUTH_BEARER_ONLY=true
       - AUTH_REALM=dev
+    ports:
+      - 3000:3000
     depends_on:
       - postgres_formapi
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/heathz"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/heathz"]
       interval: 5s
       timeout: 2s
       retries: 15
