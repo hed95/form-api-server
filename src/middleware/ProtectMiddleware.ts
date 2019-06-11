@@ -1,4 +1,5 @@
 import * as express from 'express';
+import {RequestHandler} from 'express';
 import {inject} from 'inversify';
 import {provide} from 'inversify-binding-decorators';
 import {BaseMiddleware} from 'inversify-express-utils';
@@ -8,7 +9,7 @@ import TYPE from '../constant/TYPE';
 @provide(TYPE.ProtectMiddleware)
 export class ProtectMiddleware extends BaseMiddleware {
 
-    private readonly keycloakProtect: any;
+    private readonly keycloakProtect: RequestHandler;
 
     constructor(@inject(TYPE.KeycloakService) private readonly keycloakService: KeycloakService) {
         super();

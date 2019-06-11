@@ -22,7 +22,7 @@ export class User implements interfaces.Principal {
         return Promise.resolve(_.isNull(found));
     }
 
-    public isResourceOwner(resourceId: any): Promise<boolean> {
+    public isResourceOwner(resourceId: string): Promise<boolean> {
         return undefined;
     }
 

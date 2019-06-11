@@ -17,6 +17,13 @@
     "quotemark": [
       true,
       "single"
+    ],
+    "only-arrow-functions": true,
+    "no-any": [
+      true,
+      {
+        "ignore-rest-args": true
+      }
     ]
   },
   "rulesDirectory": []

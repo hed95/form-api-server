@@ -33,7 +33,7 @@ export class ApplicationContext {
         logger.info('Application context initialised');
     }
 
-    public get(serviceIdentifier: string | symbol): any {
+    public get<T>(serviceIdentifier: string | symbol): T {
         return this.container.get(serviceIdentifier);
     }
 

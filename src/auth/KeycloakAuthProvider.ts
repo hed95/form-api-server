@@ -8,18 +8,19 @@ import logger from '../util/logger';
 import {KeycloakService} from './KeycloakService';
 import {User} from './User';
 
+const keycloakService = inject(TYPE.KeycloakService);
+
 @injectable()
 export class KeycloakAuthProvider implements interfaces.AuthProvider {
 
-    constructor(@inject(TYPE.KeycloakService) private readonly keycloakService: KeycloakService) {
-    }
+    @keycloakService private readonly keycloakService: KeycloakService;
 
     public async getUser(
         req: express.Request,
         res: express.Response,
         next: express.NextFunction,
     ): Promise<interfaces.Principal> {
-        const instance: Keycloak = this.keycloakService.keycloakInstance();
+            const instance: Keycloak = this.keycloakService.keycloakInstance();
         try {
             const grant: Keycloak.Grant = await instance.getGrant(req, res);
             // @ts-ignore

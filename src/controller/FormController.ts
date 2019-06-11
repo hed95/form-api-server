@@ -109,7 +109,7 @@ export class FormController extends BaseHttpController {
 
     @httpPut('/:id', TYPE.ProtectMiddleware)
     public async update(@requestParam('id') id: string,
-                        @requestBody() form: any, @response() res: express.Response,
+                        @requestBody() form: object, @response() res: express.Response,
                         @principal() currentUser: User): Promise<void> {
 
         try {
@@ -138,7 +138,7 @@ export class FormController extends BaseHttpController {
     }
 
     @httpPost('/', TYPE.ProtectMiddleware)
-    public async create(@requestBody() form: any,
+    public async create(@requestBody() form: object,
                         @response() res: express.Response,
                         @principal() currentUser: User): Promise<void> {
         logger.info(`Creating new form`);

@@ -34,7 +34,7 @@ const server = new InversifyExpressServer(container,
     null,
     {rootPath: basePath},
     null,
-    KeycloakAuthProvider as any);
+    KeycloakAuthProvider);
 
 server.setConfig((app: express.Application) => {
     const keycloakService: KeycloakService = container.get(TYPE.KeycloakService);

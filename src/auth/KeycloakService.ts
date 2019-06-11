@@ -1,3 +1,4 @@
+import {RequestHandler} from 'express';
 import {provide} from 'inversify-binding-decorators';
 import Keycloak from 'keycloak-connect';
 import TYPE from '../constant/TYPE';
@@ -32,11 +33,11 @@ export class KeycloakService {
         });
     }
 
-    public middleware(): any {
+    public middleware(): RequestHandler {
         return this.keycloak.middleware();
     }
 
-    public protect(): any {
+    public protect(): RequestHandler {
         return this.keycloak.protect();
     }
 

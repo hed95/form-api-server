@@ -1,7 +1,7 @@
 import {ValidationResult} from '@hapi/joi';
 import {inject} from 'inversify';
 import {provide} from 'inversify-binding-decorators';
-import {Op} from 'sequelize';
+import Transaction, {Op} from 'sequelize';
 import {User} from '../auth/User';
 import TYPE from '../constant/TYPE';
 import InternalServerError from '../error/InternalServerError';
@@ -35,16 +35,19 @@ export class FormService {
         this.formCommentRepository = formCommentRepository;
     }
 
-    public async create(user: User, payload: any): Promise<FormVersion> {
+    public async create(user: User, payload: object): Promise<FormVersion> {
         const validationResult: ValidationResult<object> = this.formSchemaValidator.validate(payload);
         if (validationResult.error) {
             logger.error('Failed validation on create', validationResult.error.details);
             return Promise.reject(new ValidationError('Failed to validate form', validationResult.error.details));
         }
-
+        // @ts-ignore
         const title: string = payload.title;
+        // @ts-ignore
         const path: string = payload.path;
+        // @ts-ignore
         const name: string = payload.name;
+        // @ts-ignore
         const accessRoles: string[] = payload.access;
 
         return await this.formRepository.sequelize.transaction(async () => {
@@ -62,6 +65,7 @@ export class FormService {
             });
             const rolesToApply: Role[] = roles.length === 0 ? [defaultRole] : roles;
             await form.$add('roles', rolesToApply);
+            // @ts-ignore
             payload._id = form.id;
 
             const today = new Date();
@@ -259,7 +263,7 @@ export class FormService {
 
     }
 
-    public async update(id: string, form: any, currentUser: User) {
+    public async update(id: string, form: object, currentUser: User) {
         const oldVersion = await this.formVersionRepository.findOne({
             where: {
                 formId: {
@@ -280,16 +284,20 @@ export class FormService {
         }
 
         const currentDate = new Date();
-        return this.formVersionRepository.sequelize.transaction(async (t: any) => {
+        return this.formVersionRepository.sequelize.transaction(async () => {
             await oldVersion.update({
                 validTo: currentDate,
                 latest: false,
                 updateBy: currentUser.details.email,
             });
             logger.info('Updated previous version to be invalid');
+
             const newVersion = await new FormVersion({
+                // @ts-ignore
                 title: form.title,
+                // @ts-ignore
                 name: form.name,
+                // @ts-ignore
                 path: form.path,
                 schema: form,
                 formId: oldVersion.form.id,
@@ -362,7 +370,7 @@ export class FormService {
     }
 
     public async createComment(id: string, user: User, comment: FormComment): Promise<FormComment> {
-        return await this.formRepository.sequelize.transaction(async (t: any) => {
+        return await this.formRepository.sequelize.transaction(async () => {
             const form = await this.getForm(id, user);
             if (!form) {
                 throw new ResourceNotFoundError(`Form with id ${id} does not exist`);
@@ -396,7 +404,7 @@ export class FormService {
     private async getForm(formId: string, user: User, includeComments: boolean = false) {
         const defaultRole = await Role.defaultRole();
 
-        const query: any = {
+        const query: object = {
             where: {
                 id: {
                     [Op.eq]: formId,
@@ -424,6 +432,7 @@ export class FormService {
 
         };
         if (includeComments) {
+            // @ts-ignore
             query.include.push({
                 model: FormComment,
                 as: 'comments',
