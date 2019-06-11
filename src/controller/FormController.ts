@@ -26,9 +26,9 @@ import ResourceNotFoundError from '../error/ResourceNotFoundError';
 import ValidationError from '../error/ValidationError';
 import {FormComment} from '../model/FormComment';
 import {FormVersion} from '../model/FormVersion';
+import {Role} from '../model/Role';
 import {FormService} from '../service/FormService';
 import logger from '../util/logger';
-import {Role} from "../model/Role";
 
 @ApiPath({
     path: '/forms',
@@ -139,8 +139,8 @@ export class FormController extends BaseHttpController {
 
     @httpPut('/:id/roles', TYPE.ProtectMiddleware)
     public async updateRoles(@requestParam('id') id: string,
-                        @requestBody() roles: Role[], @response() res: express.Response,
-                        @principal() currentUser: User): Promise<void> {
+                             @requestBody() roles: Role[], @response() res: express.Response,
+                             @principal() currentUser: User): Promise<void> {
         try {
             await this.formService.updateRoles(id, roles, currentUser);
             res.status(200);
@@ -299,6 +299,5 @@ export class FormController extends BaseHttpController {
         }
 
     }
-
 
 }

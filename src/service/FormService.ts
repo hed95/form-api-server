@@ -398,6 +398,17 @@ export class FormService {
         return null;
     }
 
+    public async updateRoles(formId: string, roles: Role[], user: User): Promise<void> {
+        const form: Form = await this.getForm(formId, user);
+        if (!form) {
+            throw new ResourceNotFoundError(`Form with id ${formId} does not exist`);
+        }
+        await form.$set('roles', roles);
+        logger.info(`Role updated`, {
+            formId,
+        });
+    }
+
     private async getForm(formId: string, user: User, includeComments: boolean = false) {
         const defaultRole = await Role.defaultRole();
 
@@ -440,17 +451,5 @@ export class FormService {
             });
         }
         return await this.formRepository.findOne(query);
-    }
-
-
-    public async updateRoles(formId: string, roles: Role[], user: User): Promise<void> {
-        const form: Form = await this.getForm(formId, user);
-        if (!form) {
-            throw new ResourceNotFoundError(`Form with id ${formId} does not exist`);
-        }
-        await form.$set("roles", roles);
-        logger.info(`Role updated`, {
-            formId: formId
-        });
     }
 }
