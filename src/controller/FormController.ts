@@ -28,6 +28,7 @@ import {FormComment} from '../model/FormComment';
 import {FormVersion} from '../model/FormVersion';
 import {FormService} from '../service/FormService';
 import logger from '../util/logger';
+import {Role} from "../model/Role";
 
 @ApiPath({
     path: '/forms',
@@ -121,12 +122,33 @@ export class FormController extends BaseHttpController {
                 res.json({
                     message: `For with id: ${id} does not exist`,
                 });
-            }
-            if (e instanceof ValidationError) {
+            } else if (e instanceof ValidationError) {
                 const validationError = e as ValidationError;
                 res.status(400);
                 res.json({
                     exception: validationError.get(),
+                });
+            } else {
+                res.status(500);
+                res.json({
+                    exception: e.toString(),
+                });
+            }
+        }
+    }
+
+    @httpPut('/:id/roles', TYPE.ProtectMiddleware)
+    public async updateRoles(@requestParam('id') id: string,
+                        @requestBody() roles: Role[], @response() res: express.Response,
+                        @principal() currentUser: User): Promise<void> {
+        try {
+            await this.formService.updateRoles(id, roles, currentUser);
+            res.status(200);
+        } catch (e) {
+            if (e instanceof ResourceNotFoundError) {
+                res.status(404);
+                res.json({
+                    message: `For with id: ${id} does not exist`,
                 });
             } else {
                 res.status(500);
@@ -277,4 +299,6 @@ export class FormController extends BaseHttpController {
         }
 
     }
+
+
 }

@@ -558,7 +558,45 @@ describe("FormService", () => {
         } catch(e) {
             expect(e instanceof ResourceNotFoundError).to.be.eq(true);
         }
-    })
+    });
+
+    it('can update form roles', async() => {
+        const form = await formRepository.create({
+            createdBy: "test@test.com"
+        });
+
+        const defaultRole = await Role.defaultRole();
+
+        await form.$add("roles", [defaultRole]);
+
+        await new FormVersion({
+            name: "Test Form ABC 123",
+            title: "Test form title",
+            schema: {
+                components: [],
+                display: "wizard"
+            },
+            formId: form.id,
+            latest: true,
+            validFrom: new Date(),
+            validTo: null
+        }).save();
+
+
+        const newRole = await new Role({
+            name: "NewRoleForTesting",
+            title: "Test title",
+            active: true
+        }).save();
+
+        const user = new User("id", "test", [newRole]);
+
+        await formService.updateRoles(form.id, [newRole], user);
+
+        const result: FormVersion = await formService.findForm(form.id, user);
+        expect(result.form.roles.length).to.be.eq(1);
+        expect(result.form.roles[0].name).to.be.eq('NewRoleForTesting');
+    });
 });
 
 

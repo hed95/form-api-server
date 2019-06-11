@@ -12,6 +12,7 @@ import InternalServerError from "../../../src/error/InternalServerError";
 import {Form} from "../../../src/model/Form";
 import ValidationError from "../../../src/error/ValidationError";
 import {FormComment} from "../../../src/model/FormComment";
+import {Role} from "../../../src/model/Role";
 
 describe("FormController", () => {
 
@@ -133,7 +134,7 @@ describe("FormController", () => {
         expect(mockResponse.getStatus()).to.eq(400);
     });
 
-    it ('returns 500 if something went wrong', async() => {
+    it('returns 500 if something went wrong', async () => {
         const user = new User("id", "email");
 
         // @ts-ignore
@@ -143,7 +144,7 @@ describe("FormController", () => {
         expect(mockResponse.getStatus()).to.eq(500);
     });
 
-    it('can create a comment', async() => {
+    it('can create a comment', async () => {
         const user = new User("id", "email");
         const formComment: FormComment = Object.assign(FormComment.prototype, {});
         formComment.comment = "Hello";
@@ -157,7 +158,7 @@ describe("FormController", () => {
 
     });
 
-    it('fails to create comment if service throws ResourceNotFound', async() => {
+    it('fails to create comment if service throws ResourceNotFound', async () => {
         const user = new User("id", "email");
         const formComment: FormComment = Object.assign(FormComment.prototype, {});
         formComment.comment = "Hello";
@@ -170,7 +171,7 @@ describe("FormController", () => {
         expect(mockResponse.getStatus()).to.eq(404);
     });
 
-    it('returns 500 for any internal server error', async() => {
+    it('returns 500 for any internal server error', async () => {
         const user = new User("id", "email");
         const formComment: FormComment = Object.assign(FormComment.prototype, {});
         formComment.comment = "Hello";
@@ -181,6 +182,19 @@ describe("FormController", () => {
         await formController.createComment("formId", formComment, mockResponse, user);
 
         expect(mockResponse.getStatus()).to.eq(500);
+    });
+
+    it('can update form roles', async () => {
+        const user = new User("id", "email");
+        const newRole: Role = Object.assign(Role.prototype, {});
+        newRole.name = "Hello";
+
+        // @ts-ignore
+        formService.updateRoles("formId", [newRole], user).returns(Promise.resolve());
+
+        await formController.updateRoles("formId", [newRole], mockResponse, user);
+
+        expect(mockResponse.getStatus()).to.eq(200);
     });
 
 });
