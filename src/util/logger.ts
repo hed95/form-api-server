@@ -1,18 +1,18 @@
-import {createLogger, format, transports} from "winston";
+import {createLogger, format, transports} from 'winston';
 const {combine, json, splat} = format;
 
 const logger = createLogger({
     format: combine(
         format.timestamp({
-            format: 'YYYY-MM-DD HH:mm:ss'
+            format: 'YYYY-MM-DD HH:mm:ss',
         }),
         format.errors({ stack: true }),
         splat(),
-        json()
+        json(),
     ),
     defaultMeta: { service: 'form-api-service' },
     transports: [
-        new transports.Console()
+        new transports.Console(),
     ],
     exitOnError: false,
 });

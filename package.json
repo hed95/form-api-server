@@ -11,16 +11,17 @@
     "watch-ts": "tsc -w",
     "test": "npm run test:all ",
     "clean-coverage": "rm -rf ./coverage",
+    "tslint": "tslint --project tsconfig.json",
+    "tslint:fix": "tslint --project tsconfig.json --fix",
     "test:int": "nyc --report-dir=./coverage/int mocha --file ./test/integration/setup-test.ts -r ts-node/register test/integration/**/*.spec.ts ",
     "test:unit": "nyc --report-dir=./coverage/unit mocha -r ts-node/register test/unit/**/*.spec.ts",
     "test:all": "npm run clean-coverage && npm run test:unit && npm run test:int"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged && npm run build-ts && npm run test"
+      "pre-commit": "tsc --noEmit && npm run tslint:fix && npm run test"
     }
   },
-  "lint-staged": {},
   "nyc": {
     "reporter": [
       "html",
@@ -61,7 +62,9 @@
     "@types/mocha": "^5.2.6",
     "@types/node": "^12.0.2",
     "chai": "^4.2.0",
+    "eslint": "^5.16.0",
     "husky": "^2.4.0",
+    "lint": "^0.7.0",
     "mocha": "^6.1.4",
     "nyc": "^14.1.1",
     "sqlite3": "^4.0.8",

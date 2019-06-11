@@ -8,8 +8,5 @@ export default {
     FormSchemaValidator: Symbol.for('FormSchemaValidator'),
     KeycloakService: Symbol.for('KeycloakService'),
     ProtectMiddleware: Symbol.for('ProtectMiddleware'),
-    FormCommentRepository: Symbol.for('FormCommentRepository')
+    FormCommentRepository: Symbol.for('FormCommentRepository'),
 };
-
-
-

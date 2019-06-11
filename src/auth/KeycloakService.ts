@@ -15,8 +15,8 @@ export class KeycloakService {
             url: string,
             resource: string,
             bearerOnly: string,
-            realm: string
-        } = require('../config/config')["keycloak"];
+            realm: string,
+        } = require('../config/config').keycloak;
 
         this.authUrl = keycloakConfig.url;
         this.authResource = keycloakConfig.resource;
@@ -26,9 +26,9 @@ export class KeycloakService {
         this.keycloak = new Keycloak({}, {
             'auth-server-url': this.authUrl,
             'bearer-only': this.authBearerOnly,
+            'enable-cors': true,
             'realm': this.authRealm,
             'resource': this.authResource,
-            'enable-cors': true
         });
     }
 

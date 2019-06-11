@@ -1,27 +1,27 @@
-import {BelongsToMany, Column, CreatedAt, DataType, Model, Table} from "sequelize-typescript";
-import {Role} from "./Role";
-import {FormRoles} from "./FormRoles";
-import {FormCommentary} from "./FormCommentary";
-import {FormComment} from "./FormComment";
+import {BelongsToMany, Column, CreatedAt, DataType, Model, Table} from 'sequelize-typescript';
+import {FormComment} from './FormComment';
+import {FormCommentary} from './FormCommentary';
+import {FormRoles} from './FormRoles';
+import {Role} from './Role';
 
 @Table
 export class Form extends Model<Form> {
     @Column({
         type: DataType.UUID,
         defaultValue: DataType.UUIDV4,
-        primaryKey: true
+        primaryKey: true,
     })
-    id: string;
+    public id: string;
 
     @CreatedAt
-    createdOn: Date;
+    public createdOn: Date;
 
     @Column
-    createdBy: string;
+    public createdBy: string;
 
-    @BelongsToMany(() => Role, () => FormRoles, 'formId', "roleId")
-    roles: Role[];
+    @BelongsToMany(() => Role, () => FormRoles, 'formId', 'roleId')
+    public roles: Role[];
 
-    @BelongsToMany(() => FormComment, () => FormCommentary, 'formId', "commentId")
-    comments: FormComment[];
+    @BelongsToMany(() => FormComment, () => FormCommentary, 'formId', 'commentId')
+    public comments: FormComment[];
 }

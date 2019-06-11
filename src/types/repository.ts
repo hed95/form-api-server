@@ -1,8 +1,8 @@
-import {Form} from "../model/Form";
-import {FormVersion} from "../model/FormVersion";
-import {FormRoles} from "../model/FormRoles";
-import {Role} from "../model/Role";
-import {FormComment} from "../model/FormComment";
+import {Form} from '../model/Form';
+import {FormComment} from '../model/FormComment';
+import {FormRoles} from '../model/FormRoles';
+import {FormVersion} from '../model/FormVersion';
+import {Role} from '../model/Role';
 
 export type FormRepository = typeof Form;
 export type FormVersionRepository = typeof FormVersion;

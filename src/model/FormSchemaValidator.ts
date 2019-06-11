@@ -1,10 +1,16 @@
-import * as Joi from '@hapi/joi'
-import {ValidationResult} from '@hapi/joi'
-import {provide} from "inversify-binding-decorators";
-import TYPE from "../constant/TYPE";
+import * as Joi from '@hapi/joi';
+import {ValidationResult} from '@hapi/joi';
+import {provide} from 'inversify-binding-decorators';
+import TYPE from '../constant/TYPE';
 
 @provide(TYPE.FormSchemaValidator)
 export class FormSchemaValidator {
+
+    public validate(payload: object): ValidationResult<object> {
+        return Joi.validate(payload, this.schema(), {
+            abortEarly: false,
+        });
+    }
 
     private schema(): object {
         return Joi.object().keys({
@@ -16,16 +22,9 @@ export class FormSchemaValidator {
             type: Joi.string().required(),
             tags: Joi.array().items(Joi.string()).allow(),
             owner: Joi.string().allow(),
-            display: Joi.string().valid("form", "wizard", "pdf"),
+            display: Joi.string().valid('form', 'wizard', 'pdf'),
             access: Joi.array().items(Joi.any()),
-            submissionAccess: Joi.array().items(Joi.any())
-        })
-    }
-
-
-    public validate(payload: object): ValidationResult<object> {
-        return Joi.validate(payload, this.schema(), {
-            abortEarly: false,
+            submissionAccess: Joi.array().items(Joi.any()),
         });
     }
 }

@@ -1,25 +1,24 @@
-import {inject} from "inversify";
-import TYPE from "../constant/TYPE";
-import {FormVersion} from "../model/FormVersion";
-import {FormCommentRepository, FormRepository, FormVersionRepository, RoleRepository} from "../types/repository";
-import logger from "../util/logger";
-import {provide} from "inversify-binding-decorators";
-import {Op} from "sequelize";
-import {Form} from "../model/Form";
-import {Role} from "../model/Role";
-import {User} from "../auth/User";
-import ResourceNotFoundError from "../error/ResourceNotFoundError";
-import {FormSchemaValidator} from "../model/FormSchemaValidator";
-import {ValidationResult} from "@hapi/joi";
-import ValidationError from "../error/ValidationError";
-import InternalServerError from "../error/InternalServerError";
-import {FormComment} from "../model/FormComment";
-
+import {ValidationResult} from '@hapi/joi';
+import {inject} from 'inversify';
+import {provide} from 'inversify-binding-decorators';
+import {Op} from 'sequelize';
+import {User} from '../auth/User';
+import TYPE from '../constant/TYPE';
+import InternalServerError from '../error/InternalServerError';
+import ResourceNotFoundError from '../error/ResourceNotFoundError';
+import ValidationError from '../error/ValidationError';
+import {Form} from '../model/Form';
+import {FormComment} from '../model/FormComment';
+import {FormSchemaValidator} from '../model/FormSchemaValidator';
+import {FormVersion} from '../model/FormVersion';
+import {Role} from '../model/Role';
+import {FormCommentRepository, FormRepository, FormVersionRepository, RoleRepository} from '../types/repository';
+import logger from '../util/logger';
 
 @provide(TYPE.FormService)
 export class FormService {
-    readonly formRepository: FormRepository;
-    readonly formVersionRepository: FormVersionRepository;
+    public readonly formRepository: FormRepository;
+    public readonly formVersionRepository: FormVersionRepository;
     private readonly formSchemaValidator: FormSchemaValidator;
     private readonly roleRepository: RoleRepository;
     private readonly formCommentRepository: FormCommentRepository;
@@ -33,14 +32,14 @@ export class FormService {
         this.formVersionRepository = formVersionRepository;
         this.formSchemaValidator = formSchemaValidator;
         this.roleRepository = roleRepository;
-        this.formCommentRepository = formCommentRepository
+        this.formCommentRepository = formCommentRepository;
     }
 
     public async create(user: User, payload: any): Promise<FormVersion> {
         const validationResult: ValidationResult<object> = this.formSchemaValidator.validate(payload);
         if (validationResult.error) {
-            logger.error("Failed validation on create", validationResult.error.details);
-            return Promise.reject(new ValidationError("Failed to validate form", validationResult.error.details));
+            logger.error('Failed validation on create', validationResult.error.details);
+            return Promise.reject(new ValidationError('Failed to validate form', validationResult.error.details));
         }
 
         const title: string = payload.title;
@@ -54,62 +53,63 @@ export class FormService {
             const roles = accessRoles.length >= 1 ? await this.roleRepository.findAll({
                 where: {
                     id: {
-                        [Op.in]: accessRoles
-                    }
-                }
+                        [Op.in]: accessRoles,
+                    },
+                },
             }) : [];
             const form = await this.formRepository.create({
                 createdBy: user.details.email,
             });
             const rolesToApply: Role[] = roles.length === 0 ? [defaultRole] : roles;
-            await form.$add("roles", rolesToApply);
-            payload["_id"] = form.id;
+            await form.$add('roles', rolesToApply);
+            payload._id = form.id;
 
             const today = new Date();
             const formVersion = await this.formVersionRepository.create({
-                title: title,
-                path: path,
-                name: name,
+                title,
+                path,
+                name,
                 schema: payload,
                 formId: form.id,
                 validFrom: today,
                 validTo: null,
                 latest: true,
-                updatedBy: user.details.email
+                updatedBy: user.details.email,
             });
 
             return await this.formVersionRepository.findByPk(formVersion.id, {
                 include: [{
                     model: Form, include: [{
-                        model: Role
-                    }]
-                }]
-            })
+                        model: Role,
+                    }],
+                }],
+            });
 
         });
     }
 
-    public async getAllForms(user: User, limit: number = 20, offset: number = 0): Promise<{ total: number, forms: FormVersion[] }> {
+    public async getAllForms(user: User, limit: number = 20, offset: number = 0):
+        Promise<{ total: number, forms: FormVersion[] }> {
         const defaultRole = await Role.defaultRole();
         const result: { rows: FormVersion[], count: number } = await this.formVersionRepository
             .findAndCountAll({
-                limit: limit,
-                offset: offset,
+                limit,
+                offset,
                 where: {
                     latest: {
-                        [Op.eq]: true
+                        [Op.eq]: true,
                     },
                     validTo: {
-                        [Op.eq]: null
-                    }
+                        [Op.eq]: null,
+                    },
                 },
                 include: [{
                     model: Form, include: [{
                         model: Role,
-                        as: "roles",
-                        attributes: ["id", "name"],
+                        as: 'roles',
+                        attributes: ['id', 'name'],
                         through: {
-                            attributes: []
+                            attributes: [],
                         },
                         where: {
                             name: {
@@ -117,16 +117,16 @@ export class FormService {
                                     [Op.in]: user.details.roles.map((role: Role) => {
                                         return role.name;
                                     }),
-                                    [Op.eq]: defaultRole.name
-                                }
-                            }
-                        }
-                    }]
-                }]
+                                    [Op.eq]: defaultRole.name,
+                                },
+                            },
+                        },
+                    }],
+                }],
             });
         return {
             total: result.count,
-            forms: result.rows
+            forms: result.rows,
         };
     }
 
@@ -137,15 +137,15 @@ export class FormService {
             const latestVersion = await this.formVersionRepository.findOne({
                 where: {
                     formId: {
-                        [Op.eq]: formId
+                        [Op.eq]: formId,
                     },
                     latest: {
-                        [Op.eq]: true
+                        [Op.eq]: true,
                     },
                     validTo: {
-                        [Op.eq]: null
-                    }
-                }
+                        [Op.eq]: null,
+                    },
+                },
             });
 
             if (!latestVersion) {
@@ -154,9 +154,9 @@ export class FormService {
             const versionToRestore = await this.formVersionRepository.findOne({
                 where: {
                     id: {
-                        [Op.eq]: formVersionId
-                    }
-                }
+                        [Op.eq]: formVersionId,
+                    },
+                },
             });
             if (!versionToRestore) {
                 throw new ResourceNotFoundError(`Version ${formVersionId} does not exist`);
@@ -164,7 +164,7 @@ export class FormService {
 
             await latestVersion.update({
                 validTo: date,
-                latest: false
+                latest: false,
             });
 
             await versionToRestore.update({
@@ -172,7 +172,7 @@ export class FormService {
                 validFrom: date,
                 validTo: null,
             });
-            profiler.done({"message": `restored form id ${formId} to version ${versionToRestore.id}`});
+            profiler.done({message: `restored form id ${formId} to version ${versionToRestore.id}`});
             return versionToRestore;
         });
     }
@@ -187,22 +187,22 @@ export class FormService {
                 offset: 0,
                 where: {
                     formId: {
-                        [Op.eq]: formId
+                        [Op.eq]: formId,
                     },
                     latest: {
-                        [Op.eq]: true
+                        [Op.eq]: true,
                     },
                     validTo: {
-                        [Op.eq]: null
-                    }
+                        [Op.eq]: null,
+                    },
                 },
                 include: [{
                     model: Form, include: [{
                         model: Role,
-                        as: "roles",
-                        attributes: ["id", "name"],
+                        as: 'roles',
+                        attributes: ['id', 'name'],
                         through: {
-                            attributes: []
+                            attributes: [],
                         },
                         where: {
                             name: {
@@ -210,15 +210,15 @@ export class FormService {
                                     [Op.in]: user.details.roles.map((role: Role) => {
                                         return role.name;
                                     }),
-                                    [Op.eq]: defaultRole.name
-                                }
-                            }
-                        }
-                    }]
-                }]
+                                    [Op.eq]: defaultRole.name,
+                                },
+                            },
+                        },
+                    }],
+                }],
             });
         } finally {
-            profiler.done({"message": `completed getting form for ${formId}`})
+            profiler.done({message: `completed getting form for ${formId}`});
         }
     }
 
@@ -226,7 +226,7 @@ export class FormService {
         offset: number,
         limit: number,
         versions: FormVersion[],
-        total: number
+        total: number,
     }> {
         const profiler = logger.startTimer();
         const form = await this.getForm(formId, user);
@@ -237,89 +237,46 @@ export class FormService {
         const result: { rows: FormVersion[], count: number } = await this.formVersionRepository.findAndCountAll({
             where: {
                 formId: {
-                    [Op.eq]: formId
-                }
+                    [Op.eq]: formId,
+                },
             },
             order: [['validFrom', 'ASC']],
-            offset: offset,
-            limit: limit,
+            offset,
+            limit,
         });
         try {
             return Promise.resolve(
                 {
-                    offset: offset,
-                    limit: limit,
+                    offset,
+                    limit,
                     versions: result.rows,
-                    total: result.count
+                    total: result.count,
                 },
             );
         } finally {
-            profiler.done({"message": "completed get all versions operation"})
+            profiler.done({message: 'completed get all versions operation'});
         }
 
-    }
-
-    private async getForm(formId: string, user: User, includeComments: boolean = false) {
-        const defaultRole = await Role.defaultRole();
-
-        const query: any = {
-            where: {
-                id: {
-                    [Op.eq]: formId
-                }
-            },
-            include: [
-                {
-                    model: Role,
-                    as: "roles",
-                    attributes: ["id", "name"],
-                    through: {
-                        attributes: []
-                    },
-                    where: {
-                        name: {
-                            [Op.or]: {
-                                [Op.in]: user.details.roles.map((role: Role) => {
-                                    return role.name;
-                                }),
-                                [Op.eq]: defaultRole.name
-                            }
-                        }
-                    }
-                }]
-
-        };
-        if (includeComments) {
-            query.include.push({
-                model: FormComment,
-                as: 'comments',
-                attributes: ["id", "createdBy", "comment", "createdOn"],
-                through: {
-                    attributes: []
-                }
-            })
-        }
-        return await this.formRepository.findOne(query);
     }
 
     public async update(id: string, form: any, currentUser: User) {
         const oldVersion = await this.formVersionRepository.findOne({
             where: {
                 formId: {
-                    [Op.eq]: id
-                }
+                    [Op.eq]: id,
+                },
             },
             include: [{
-                model: Form
-            }]
+                model: Form,
+            }],
         });
         if (!oldVersion) {
             throw new ResourceNotFoundError(`Form with ${id} does not exist for update`);
         }
         const validationResult: ValidationResult<object> = this.formSchemaValidator.validate(form);
         if (validationResult.error) {
-            logger.error("Failed to update from", validationResult.error.details);
-            return Promise.reject(new ValidationError("Failed to validate form", validationResult.error.details));
+            logger.error('Failed to update from', validationResult.error.details);
+            return Promise.reject(new ValidationError('Failed to validate form', validationResult.error.details));
         }
 
         const currentDate = new Date();
@@ -327,9 +284,9 @@ export class FormService {
             await oldVersion.update({
                 validTo: currentDate,
                 latest: false,
-                updateBy: currentUser.details.email
+                updateBy: currentUser.details.email,
             });
-            logger.info("Updated previous version to be invalid");
+            logger.info('Updated previous version to be invalid');
             const newVersion = await new FormVersion({
                 title: form.title,
                 name: form.name,
@@ -339,7 +296,7 @@ export class FormService {
                 validFrom: currentDate,
                 updatedBy: currentUser.details.email,
                 validaTo: null,
-                latest: true
+                latest: true,
             }).save({});
             logger.info(`New version created. New version id ${newVersion.id} for form id ${oldVersion.form.id}`);
             return newVersion;
@@ -347,7 +304,7 @@ export class FormService {
         });
     }
 
-    async delete(id: string, user: User): Promise<boolean> {
+    public async delete(id: string, user: User): Promise<boolean> {
 
         const defaultRole = await Role.defaultRole();
 
@@ -356,22 +313,22 @@ export class FormService {
             offset: 0,
             where: {
                 formId: {
-                    [Op.eq]: id
+                    [Op.eq]: id,
                 },
                 latest: {
-                    [Op.eq]: true
+                    [Op.eq]: true,
                 },
                 validTo: {
-                    [Op.eq]: null
-                }
+                    [Op.eq]: null,
+                },
             },
             include: [{
                 model: Form, include: [{
                     model: Role,
-                    as: "roles",
-                    attributes: ["id", "name"],
+                    as: 'roles',
+                    attributes: ['id', 'name'],
                     through: {
-                        attributes: []
+                        attributes: [],
                     },
                     where: {
                         name: {
@@ -379,12 +336,12 @@ export class FormService {
                                 [Op.in]: user.details.roles.map((role: Role) => {
                                     return role.name;
                                 }),
-                                [Op.eq]: defaultRole.name
-                            }
-                        }
-                    }
-                }]
-            }]
+                                [Op.eq]: defaultRole.name,
+                            },
+                        },
+                    },
+                }],
+            }],
         });
 
         if (!version) {
@@ -396,7 +353,7 @@ export class FormService {
                 updatedBy: user.details.email,
                 validTo: today,
                 updatedAt: today,
-                latest: false
+                latest: false,
             });
         } catch (e) {
             throw new InternalServerError(e.toString());
@@ -404,7 +361,7 @@ export class FormService {
         return true;
     }
 
-    async createComment(id: string, user: User, comment: FormComment): Promise<FormComment> {
+    public async createComment(id: string, user: User, comment: FormComment): Promise<FormComment> {
         return await this.formRepository.sequelize.transaction(async (t: any) => {
             const form = await this.getForm(id, user);
             if (!form) {
@@ -412,18 +369,18 @@ export class FormService {
             }
             const today = new Date();
             if (!comment.createdOn) {
-                comment.set("createdOn", today);
+                comment.set('createdOn', today);
             }
             if (!comment.createdBy) {
-                comment.set("createdBy", user.details.email);
+                comment.set('createdBy', user.details.email);
             }
             const commentCreated = await comment.save({});
-            await form.$add("comments", [commentCreated]);
+            await form.$add('comments', [commentCreated]);
             return commentCreated;
         });
     }
 
-    async getComments(id: string, user: User): Promise<FormComment[]> {
+    public async getComments(id: string, user: User): Promise<FormComment[]> {
         const form = await this.getForm(id, user, true);
         if (!form) {
             throw new ResourceNotFoundError(`Form with id ${id} does not exist`);
@@ -431,7 +388,51 @@ export class FormService {
         return form.comments;
     }
 
-    async find(): Promise<{ total: number, forms: FormVersion[] }> {
+    public async find(): Promise<{ total: number, forms: FormVersion[] }> {
+        logger.info('Performing search...');
         return null;
+    }
+
+    private async getForm(formId: string, user: User, includeComments: boolean = false) {
+        const defaultRole = await Role.defaultRole();
+
+        const query: any = {
+            where: {
+                id: {
+                    [Op.eq]: formId,
+                },
+            },
+            include: [
+                {
+                    model: Role,
+                    as: 'roles',
+                    attributes: ['id', 'name'],
+                    through: {
+                        attributes: [],
+                    },
+                    where: {
+                        name: {
+                            [Op.or]: {
+                                [Op.in]: user.details.roles.map((role: Role) => {
+                                    return role.name;
+                                }),
+                                [Op.eq]: defaultRole.name,
+                            },
+                        },
+                    },
+                }],
+
+        };
+        if (includeComments) {
+            query.include.push({
+                model: FormComment,
+                as: 'comments',
+                attributes: ['id', 'createdBy', 'comment', 'createdOn'],
+                through: {
+                    attributes: [],
+                },
+            });
+        }
+        return await this.formRepository.findOne(query);
     }
 }

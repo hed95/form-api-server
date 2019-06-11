@@ -1,23 +1,23 @@
 import {Container} from 'inversify';
-import TYPE from "../constant/TYPE";
-import {Form} from "../model/Form";
-import {FormService} from "../service/FormService";
-import {FormCommentRepository, FormRepository, FormVersionRepository, RoleRepository} from "../types/repository";
-import logger from "../util/logger";
-import {FormVersion} from "../model/FormVersion";
-import {Role} from "../model/Role";
-import {SequelizeProvider} from "../model/SequelizeProvider";
-import {FormSchemaValidator} from "../model/FormSchemaValidator";
-import {KeycloakService} from "../auth/KeycloakService";
-import {ProtectMiddleware} from "../middleware/ProtectMiddleware";
-import {FormComment} from "../model/FormComment";
+import {KeycloakService} from '../auth/KeycloakService';
+import TYPE from '../constant/TYPE';
+import {ProtectMiddleware} from '../middleware/ProtectMiddleware';
+import {Form} from '../model/Form';
+import {FormComment} from '../model/FormComment';
+import {FormSchemaValidator} from '../model/FormSchemaValidator';
+import {FormVersion} from '../model/FormVersion';
+import {Role} from '../model/Role';
+import {SequelizeProvider} from '../model/SequelizeProvider';
+import {FormService} from '../service/FormService';
+import {FormCommentRepository, FormRepository, FormVersionRepository, RoleRepository} from '../types/repository';
+import logger from '../util/logger';
 
 export class ApplicationContext {
     private readonly container: Container;
 
     constructor() {
         this.container = new Container({
-            defaultScope: 'Singleton'
+            defaultScope: 'Singleton',
 
         });
         this.container.bind<KeycloakService>(TYPE.KeycloakService).to(KeycloakService);
@@ -30,9 +30,7 @@ export class ApplicationContext {
         this.container.bind<RoleRepository>(TYPE.RoleRepository).toConstantValue(Role);
         this.container.bind<FormService>(TYPE.FormService).to(FormService);
 
-
-
-        logger.info("Application context initialised");
+        logger.info('Application context initialised');
     }
 
     public get(serviceIdentifier: string | symbol): any {

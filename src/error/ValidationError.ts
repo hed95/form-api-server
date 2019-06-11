@@ -1,4 +1,4 @@
-import {ValidationErrorItem} from "@hapi/joi";
+import {ValidationErrorItem} from '@hapi/joi';
 
 class ValidationError extends Error {
     private readonly errors: ValidationErrorItem[];

@@ -2,8 +2,8 @@ import * as express from 'express';
 import {inject} from 'inversify';
 import {provide} from 'inversify-binding-decorators';
 import {BaseMiddleware} from 'inversify-express-utils';
-import TYPE from '../constant/TYPE';
 import {KeycloakService} from '../auth/KeycloakService';
+import TYPE from '../constant/TYPE';
 
 @provide(TYPE.ProtectMiddleware)
 export class ProtectMiddleware extends BaseMiddleware {

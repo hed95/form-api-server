@@ -1,11 +1,11 @@
-import {BaseHttpController, controller, httpGet, queryParam} from "inversify-express-utils";
-import {Role} from "../model/Role";
-import logger from "../util/logger";
-import {inject} from "inversify";
-import TYPE from "../constant/TYPE";
-import {RoleRepository} from "../types/repository";
+import {inject} from 'inversify';
+import {BaseHttpController, controller, httpGet, queryParam} from 'inversify-express-utils';
+import TYPE from '../constant/TYPE';
+import {Role} from '../model/Role';
+import {RoleRepository} from '../types/repository';
+import logger from '../util/logger';
 
-@controller("/api/roles")
+@controller('/api/roles')
 export class RolesController extends BaseHttpController {
 
     constructor(@inject(TYPE.RoleRepository) private readonly roleRepository: RoleRepository) {
@@ -13,16 +13,17 @@ export class RolesController extends BaseHttpController {
     }
 
     @httpGet('/:id', TYPE.ProtectMiddleware)
-    public async roles(@queryParam("limit") limit: number = 20, @queryParam("offset") offset: number = 0): Promise<{ total: number, roles: Role[] }> {
+    public async roles(@queryParam('limit') limit: number = 20, @queryParam('offset') offset: number = 0):
+        Promise<{ total: number, roles: Role[] }> {
         const profiler = logger.startTimer();
         const result: { rows: Role[], count: number } = await this.roleRepository.findAndCountAll({
-            limit: limit,
-            offset: offset
+            limit,
+            offset,
         });
-        profiler.done({message: "roles returned"});
+        profiler.done({message: 'roles returned'});
         return {
             total: result.count,
-            roles: result.rows
-        }
+            roles: result.rows,
+        };
     }
 }

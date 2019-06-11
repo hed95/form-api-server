@@ -1,52 +1,52 @@
-import {AllowNull, BelongsTo, Column, DataType, ForeignKey, Model, Table, UpdatedAt} from "sequelize-typescript";
-import {Form} from "./Form";
+import {AllowNull, BelongsTo, Column, DataType, ForeignKey, Model, Table, UpdatedAt} from 'sequelize-typescript';
+import {Form} from './Form';
 
 @Table
 export class FormVersion extends Model<FormVersion> {
     @Column({
         type: DataType.UUID,
         defaultValue: DataType.UUIDV4,
-        primaryKey: true
+        primaryKey: true,
     })
-    id: string;
+    public id: string;
 
     @AllowNull(false)
     @Column
-    name: string;
+    public name: string;
 
     @AllowNull(false)
     @Column
-    title: string;
+    public title: string;
 
     @Column
-    path: string;
+    public path: string;
 
     @UpdatedAt
-    updatedOn: Date;
+    public updatedOn: Date;
 
     @Column
-    updatedBy: string;
+    public updatedBy: string;
 
     @AllowNull(false)
     @Column({
-        type: DataType.JSON
+        type: DataType.JSON,
     })
-    schema: object;
+    public schema: object;
 
-    @Column({comment: ""})
-    validFrom: Date;
+    @Column({comment: ''})
+    public validFrom: Date;
 
-    @Column({comment: "if validTo is null then this is the latest version of the form"})
-    validTo: Date;
+    @Column({comment: 'if validTo is null then this is the latest version of the form'})
+    public validTo: Date;
 
     @BelongsTo(() => Form)
-    form?: Form;
+    public form?: Form;
 
     @ForeignKey(() => Form)
     @Column
-    formId: string;
+    public formId: string;
 
     @Column
-    latest: boolean;
+    public latest: boolean;
 
 }

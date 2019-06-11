@@ -1,12 +1,12 @@
-import {interfaces} from "inversify-express-utils";
 import * as express from 'express';
-import {inject, injectable} from "inversify";
-import {User} from "./User";
-import TYPE from "../constant/TYPE";
-import {KeycloakService} from "./KeycloakService";
-import {Role} from "../model/Role";
-import logger from "../util/logger";
-import Keycloak = require("keycloak-connect");
+import {inject, injectable} from 'inversify';
+import {interfaces} from 'inversify-express-utils';
+import Keycloak = require('keycloak-connect');
+import TYPE from '../constant/TYPE';
+import {Role} from '../model/Role';
+import logger from '../util/logger';
+import {KeycloakService} from './KeycloakService';
+import {User} from './User';
 
 @injectable()
 export class KeycloakAuthProvider implements interfaces.AuthProvider {
@@ -17,7 +17,7 @@ export class KeycloakAuthProvider implements interfaces.AuthProvider {
     public async getUser(
         req: express.Request,
         res: express.Response,
-        next: express.NextFunction
+        next: express.NextFunction,
     ): Promise<interfaces.Principal> {
         const instance: Keycloak = this.keycloakService.keycloakInstance();
         try {
@@ -30,8 +30,8 @@ export class KeycloakAuthProvider implements interfaces.AuthProvider {
             const user = new User(email, email, roles);
             return Promise.resolve(user);
         } catch (err) {
-            logger.warn("Failed to get user details", {
-                error: err.toString()
+            logger.warn('Failed to get user details', {
+                error: err.toString(),
             });
             return Promise.resolve(null);
         }
