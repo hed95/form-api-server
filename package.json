@@ -4,6 +4,7 @@
   "description": "Form API Server",
   "main": "index.js",
   "scripts": {
+    "precommit": "lint-staged",
     "build-ts": "tsc",
     "start": "npm run serve",
     "serve": "node dist/bootstrap.js",
