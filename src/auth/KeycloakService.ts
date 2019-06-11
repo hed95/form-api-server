@@ -17,7 +17,7 @@ export class KeycloakService {
             resource: string,
             bearerOnly: string,
             realm: string,
-        } = require('appConfig.ts').keycloak;
+        } = require('../config/appConfig').keycloak;
 
         this.authUrl = keycloakConfig.url;
         this.authResource = keycloakConfig.resource;
