@@ -16,5 +16,5 @@ USER 1000
 
 EXPOSE 8080
 
-ENTRYPOINT exec npm run start
+ENTRYPOINT exec npm run db:migrate && npm run start
 

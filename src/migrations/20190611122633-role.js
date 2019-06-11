@@ -8,7 +8,8 @@ module.exports = {
             id: {
                 type: DataType.UUID,
                 primaryKey: true,
-                allowNull: false
+                allowNull: false,
+                defaultValue: DataType.UUIDV4
             },
             createOn: {
                 type: DataType.DATE,
