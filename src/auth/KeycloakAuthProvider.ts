@@ -1,12 +1,12 @@
 import * as express from 'express';
 import {inject, injectable} from 'inversify';
 import {interfaces} from 'inversify-express-utils';
+import Keycloak from 'keycloak-connect';
 import TYPE from '../constant/TYPE';
 import {Role} from '../model/Role';
 import logger from '../util/logger';
 import {KeycloakService} from './KeycloakService';
 import {User} from './User';
-import Keycloak = require('keycloak-connect');
 
 const keycloakService = inject(TYPE.KeycloakService);
 
