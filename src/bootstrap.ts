@@ -1,8 +1,8 @@
-import 'reflect-metadata';
 import * as bodyParser from 'body-parser';
 import cors from 'cors';
 import * as express from 'express';
 import {InversifyExpressServer} from 'inversify-express-utils';
+import 'reflect-metadata';
 import * as swagger from 'swagger-express-ts';
 import {SwaggerDefinitionConstant} from 'swagger-express-ts';
 import {KeycloakAuthProvider} from './auth/KeycloakAuthProvider';
