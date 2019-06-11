@@ -4,7 +4,6 @@
   "description": "Form API Server",
   "main": "index.js",
   "scripts": {
-    "precommit": "lint-staged",
     "build-ts": "tsc",
     "start": "npm run serve",
     "serve": "node dist/bootstrap.js",
@@ -16,12 +15,12 @@
     "test:unit": "nyc --report-dir=./coverage/unit mocha -r ts-node/register test/unit/**/*.spec.ts",
     "test:all": "npm run clean-coverage && npm run test:unit && npm run test:int"
   },
-  "lint-staged": {
-    "*.ts": [
-      "npm run lint",
-      "git add"
-    ]
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   },
+  "lint-staged": {},
   "nyc": {
     "reporter": [
       "html",
