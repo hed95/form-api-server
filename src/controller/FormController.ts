@@ -78,6 +78,19 @@ export class FormController extends BaseHttpController {
         }
     }
 
+
+    @httpGet('/', TYPE.ProtectMiddleware)
+    public async getForms(@queryParam('limit') limit: number = 20,
+                          @queryParam('offset') offset: number = 0,
+                          @queryParam('select') attributes: string[] = [],
+                          @principal() currentUser: User): Promise<{ total: number, forms: FormVersion[] }> {
+
+        return await
+            this.formService.getAllForms(currentUser, limit, offset, attributes);
+
+    }
+
+
     @httpGet('/:id/versions', TYPE.ProtectMiddleware)
     public async allVersions(@requestParam('id') id: string,
                              @queryParam('offset') offset: number = 0,
