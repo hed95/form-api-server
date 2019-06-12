@@ -53,18 +53,18 @@ export class FormService {
                 where: {
                     [Op.or]: [{
                         title: {
-                            [Op.eq]: title
-                        }
+                            [Op.eq]: title,
+                        },
                     }, {
                         name: {
-                            [Op.eq]: name
-                        }
+                            [Op.eq]: name,
+                        },
                     }, {
                         path: {
-                            [Op.eq]: path
-                        }
-                    }]
-                }
+                            [Op.eq]: path,
+                        },
+                    }],
+                },
             });
 
             if (loaded) {
@@ -77,9 +77,9 @@ export class FormService {
                             type: 'exists',
                             context: {
                                 key: 'title',
-                                label: 'title'
-                            }
-                        }
+                                label: 'title',
+                            },
+                        },
                     );
                 }
                 if (loaded.path === path) {
@@ -90,9 +90,9 @@ export class FormService {
                             type: 'exists',
                             context: {
                                 key: 'path',
-                                label: 'path'
-                            }
-                        }
+                                label: 'path',
+                            },
+                        },
                     );
                 }
                 if (loaded.name === name) {
@@ -103,9 +103,9 @@ export class FormService {
                             type: 'exists',
                             context: {
                                 key: 'name',
-                                label: 'name'
-                            }
-                        }
+                                label: 'name',
+                            },
+                        },
                     );
                 }
                 throw new ValidationError(`Form already exists`, validationErrors);
@@ -191,7 +191,7 @@ export class FormService {
         };
 
         if (attributes.length !== 0) {
-            query.attributes = attributes
+            query.attributes = attributes;
         }
 
         const result: { rows: FormVersion[], count: number } = await this.formVersionRepository

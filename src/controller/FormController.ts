@@ -78,7 +78,6 @@ export class FormController extends BaseHttpController {
         }
     }
 
-
     @httpGet('/', TYPE.ProtectMiddleware)
     public async getForms(@queryParam('limit') limit: number = 20,
                           @queryParam('offset') offset: number = 0,
@@ -89,7 +88,6 @@ export class FormController extends BaseHttpController {
             this.formService.getAllForms(currentUser, limit, offset, attributes);
 
     }
-
 
     @httpGet('/:id/versions', TYPE.ProtectMiddleware)
     public async allVersions(@requestParam('id') id: string,
