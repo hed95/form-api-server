@@ -21,12 +21,7 @@ export class SequelizeProvider {
 
     constructor() {
         const config = require('../config/dbconfig')[process.env.NODE_ENV || 'test'];
-        logger.info(`use config.use_env_variable ${config.use_env_variable}`);
-        if (config.use_env_variable) {
-            this.sequelize = new Sequelize(process.env[config.use_env_variable], config);
-        } else {
-            this.sequelize = new Sequelize(config.database, config.username, config.password, config);
-        }
+        this.sequelize = new Sequelize(config);
         this.sequelize.addModels([FormRoles, Role, Form, FormVersion, FormCommentary, FormComment]);
     }
 

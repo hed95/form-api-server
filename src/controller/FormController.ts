@@ -9,6 +9,7 @@ import {
     httpPut,
     principal,
     queryParam,
+    request,
     requestBody,
     requestParam,
     response,
@@ -29,6 +30,7 @@ import {FormVersion} from '../model/FormVersion';
 import {Role} from '../model/Role';
 import {FormService} from '../service/FormService';
 import logger from '../util/logger';
+
 
 @ApiPath({
     path: '/forms',
@@ -78,11 +80,14 @@ export class FormController extends BaseHttpController {
         }
     }
 
+
     @httpGet('/', TYPE.ProtectMiddleware)
     public async getForms(@queryParam('limit') limit: number = 20,
                           @queryParam('offset') offset: number = 0,
                           @queryParam('select') attributes: string[] = [],
                           @principal() currentUser: User): Promise<{ total: number, forms: FormVersion[] }> {
+
+
 
         return await
             this.formService.getAllForms(currentUser, limit, offset, attributes);
