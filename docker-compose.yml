@@ -13,37 +13,57 @@ services:
       - postgres_data_form:/var/lib/data/postgresqlform/data
     environment:
       POSTGRES_DB: formdb
-      POSTGRES_USER: formdb
+      POSTGRES_USER: formuser
       POSTGRES_PASSWORD: password
     ports:
-      - '5432:5432'
+      - '5435:5432'
+    networks:
+      - db
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U formdb"]
+      test: ["CMD-SHELL", "pg_isready -U formuser"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 20s
+    labels:
+      - "traefik.enable=false"
 
   formapi:
     build: .
     container_name: formapi
     environment:
       - NODE_ENV=production
-      - DB_USERNAME=formdb
+      - DB_USERNAME=formuser
       - DB_PASSWORD=password
       - DB_NAME=formdb
-      - DB_HOSTNAME=
-      - DATABASE_URL=postgres://formdb:password@postgres_formapi:5432/formdb
-      - AUTH_URL=http://keycloak.lodev.xyz/auth
-      - AUTH_RESOURCE=form-api-server
+      - DB_HOSTNAME=postgres_formapi
+      - DB_PORT=5432
+      - AUTH_URL=${AUTH_URL}
+      - AUTH_RESOURCE=AUTH_CLIENT_ID
       - AUTH_BEARER_ONLY=true
-      - AUTH_REALM=dev
+      - AUTH_REALM=${AUTH_REALM}
     depends_on:
       - postgres_formapi
+    networks:
+      - web
+      - db
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/heathz"]
       interval: 5s
       timeout: 2s
       retries: 15
       start_period: 30s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.frontend.rule=Host:formapi.${DOMAINNAME}"
+      - "traefik.port=3000"
+      - "traefik.protocol=http"
+      - "traefik.docker.network=web"
 
+networks:
+  db:
+    external:
+      name: db
+  web:
+    external:
+      name: web
