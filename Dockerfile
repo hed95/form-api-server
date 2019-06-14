@@ -16,5 +16,5 @@ USER 1000
 
 EXPOSE 8080
 
-ENTRYPOINT exec npm run dbmigrate && npm run start
+ENTRYPOINT npm run dbmigrate && exec node dist/bootstrap.js
 

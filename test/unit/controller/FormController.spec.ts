@@ -197,4 +197,30 @@ describe("FormController", () => {
         expect(mockResponse.getStatus()).to.eq(200);
     });
 
+    it('can return forms', async() => {
+        const user = new User("id", "email");
+        Object.assign(FormVersion, {});
+        Object.assign(Form, {});
+        const form: Form = Object.assign(Form.prototype, {});
+        const version: FormVersion = Object.assign(FormVersion.prototype, {});
+        form.id = 'formId';
+        version.schema = {
+            display: 'form',
+            components: []
+        };
+        version.form = form;
+        // @ts-ignore
+        formService.getAllForms(Arg.any(), Arg.any(), Arg.any(), Arg.any()).returns(Promise.resolve({
+            total : 1,
+            forms: [version]
+        }));
+
+        const result : {total: number, forms: FormVersion[]}
+            = await formController.getForms(20, 0, [], user);
+
+        expect(result.total).to.be.eq(1);
+        expect(result.forms.length).to.be.eq(1);
+
+    });
+
 });

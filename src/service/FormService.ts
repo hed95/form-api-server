@@ -1,7 +1,7 @@
-import {ValidationResult} from '@hapi/joi';
+import {ValidationErrorItem, ValidationResult} from '@hapi/joi';
 import {inject} from 'inversify';
 import {provide} from 'inversify-binding-decorators';
-import {Op} from 'sequelize';
+import {FindAndCountOptions, Op} from 'sequelize';
 import {User} from '../auth/User';
 import TYPE from '../constant/TYPE';
 import InternalServerError from '../error/InternalServerError';
@@ -48,6 +48,68 @@ export class FormService {
         const accessRoles: string[] = payload.access;
 
         return await this.formRepository.sequelize.transaction(async () => {
+
+            const loaded = await this.formVersionRepository.findOne({
+                where: {
+                    [Op.or]: [{
+                        title: {
+                            [Op.eq]: title,
+                        },
+                    }, {
+                        name: {
+                            [Op.eq]: name,
+                        },
+                    }, {
+                        path: {
+                            [Op.eq]: path,
+                        },
+                    }],
+                },
+            });
+
+            if (loaded) {
+                const validationErrors: ValidationErrorItem[] = [];
+                if (loaded.title === title) {
+                    validationErrors.push(
+                        {
+                            message: `${title} already exists`,
+                            path: ['title'],
+                            type: 'exists',
+                            context: {
+                                key: 'title',
+                                label: 'title',
+                            },
+                        },
+                    );
+                }
+                if (loaded.path === path) {
+                    validationErrors.push(
+                        {
+                            message: `${path} already exists`,
+                            path: ['path'],
+                            type: 'exists',
+                            context: {
+                                key: 'path',
+                                label: 'path',
+                            },
+                        },
+                    );
+                }
+                if (loaded.name === name) {
+                    validationErrors.push(
+                        {
+                            message: `${name} already exists`,
+                            path: ['name'],
+                            type: 'exists',
+                            context: {
+                                key: 'name',
+                                label: 'name',
+                            },
+                        },
+                    );
+                }
+                throw new ValidationError(`Form already exists`, validationErrors);
+            }
             const defaultRole = await Role.defaultRole();
 
             const roles = accessRoles.length >= 1 ? await this.roleRepository.findAll({
@@ -89,42 +151,51 @@ export class FormService {
         });
     }
 
-    public async getAllForms(user: User, limit: number = 20, offset: number = 0):
+    public async getAllForms(user: User,
+                             limit: number = 20,
+                             offset: number = 0,
+                             attributes: string[] = []):
         Promise<{ total: number, forms: FormVersion[] }> {
         const defaultRole = await Role.defaultRole();
-        const result: { rows: FormVersion[], count: number } = await this.formVersionRepository
-            .findAndCountAll({
-                limit,
-                offset,
-                where: {
-                    latest: {
-                        [Op.eq]: true,
-                    },
-                    validTo: {
-                        [Op.eq]: null,
-                    },
+        const query: FindAndCountOptions = {
+            limit,
+            offset,
+            where: {
+                latest: {
+                    [Op.eq]: true,
                 },
-                include: [{
-                    model: Form, include: [{
-                        model: Role,
-                        as: 'roles',
-                        attributes: ['id', 'name'],
-                        through: {
-                            attributes: [],
-                        },
-                        where: {
-                            name: {
-                                [Op.or]: {
-                                    [Op.in]: user.details.roles.map((role: Role) => {
-                                        return role.name;
-                                    }),
-                                    [Op.eq]: defaultRole.name,
-                                },
+                validTo: {
+                    [Op.eq]: null,
+                },
+            },
+            include: [{
+                model: Form, include: [{
+                    model: Role,
+                    as: 'roles',
+                    attributes: ['id', 'name'],
+                    through: {
+                        attributes: [],
+                    },
+                    where: {
+                        name: {
+                            [Op.or]: {
+                                [Op.in]: user.details.roles.map((role: Role) => {
+                                    return role.name;
+                                }),
+                                [Op.eq]: defaultRole.name,
                             },
                         },
-                    }],
+                    },
                 }],
-            });
+            }],
+        };
+
+        if (attributes.length !== 0) {
+            query.attributes = attributes;
+        }
+
+        const result: { rows: FormVersion[], count: number } = await this.formVersionRepository
+            .findAndCountAll(query);
         return {
             total: result.count,
             forms: result.rows,
@@ -391,11 +462,6 @@ export class FormService {
             throw new ResourceNotFoundError(`Form with id ${id} does not exist`);
         }
         return form.comments;
-    }
-
-    public async find(): Promise<{ total: number, forms: FormVersion[] }> {
-        logger.info('Performing search...');
-        return null;
     }
 
     public async updateRoles(formId: string, roles: Role[], user: User): Promise<void> {

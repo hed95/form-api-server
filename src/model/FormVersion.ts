@@ -43,7 +43,9 @@ export class FormVersion extends Model<FormVersion> {
     public form?: Form;
 
     @ForeignKey(() => Form)
-    @Column
+    @Column({
+        type: DataType.UUID,
+    })
     public formId: string;
 
     @Column

@@ -25,6 +25,9 @@ describe("FormService", () => {
             title: "Test title",
             active: true
         }).save();
+        basicForm.name = "";
+        basicForm.path = "";
+        basicForm.title = "";
     });
 
     it('appcontext loads service and repository', async () => {
@@ -457,6 +460,9 @@ describe("FormService", () => {
             active: true
         });
         const user = new User("id", "test", [role]);
+        basicForm.name = "new";
+        basicForm.path = "new";
+        basicForm.title = "new";
         const version = await formService.create(user, basicForm);
         expect(version).to.be.not.null;
         expect(version.schema).to.be.not.null;
@@ -474,6 +480,9 @@ describe("FormService", () => {
             active: true
         });
         const user = new User("id", "test", [role]);
+        basicForm.name = "new2";
+        basicForm.path = "new2";
+        basicForm.title = "new2";
         const version = await formService.create(user, basicForm);
         expect(version).to.be.not.null;
         expect(version.schema).to.be.not.null;
@@ -543,7 +552,7 @@ describe("FormService", () => {
 
         const user = new User("id", "test", [role]);
         const formComment = new FormComment({
-           comment: "FormCommentary test"
+            comment: "FormCommentary test"
         });
         await formService.createComment(form.id, user, formComment);
         const comments: FormComment[] = await formService.getComments(form.id, user);
@@ -555,12 +564,12 @@ describe("FormService", () => {
         try {
             const user = new User("id", "test", [role]);
             await formService.getComments("xx", user);
-        } catch(e) {
+        } catch (e) {
             expect(e instanceof ResourceNotFoundError).to.be.eq(true);
         }
     });
 
-    it('can update form roles', async() => {
+    it('can update form roles', async () => {
         const form = await formRepository.create({
             createdBy: "test@test.com"
         });
@@ -596,6 +605,152 @@ describe("FormService", () => {
         const result: FormVersion = await formService.findForm(form.id, user);
         expect(result.form.roles.length).to.be.eq(1);
         expect(result.form.roles[0].name).to.be.eq('NewRoleForTesting');
+    });
+
+    it('select forms with title and id only', async () => {
+        await formRepository.sequelize.transaction(async (transaction: any) => {
+            const value = 1;
+            const index = 1;
+            const form = await formRepository.create({
+                createdBy: `test${value}@test.com`
+            });
+            await form.$add("roles", [role]);
+
+            const formName = `Test Form ABC${index}${value}`;
+            await new FormVersion({
+                name: formName,
+                title: "Test form title",
+                schema: {
+                    components: [],
+                    display: "wizard"
+                },
+                formId: form.id,
+                latest: false,
+                validFrom: new Date(),
+                validTo: new Date()
+            }).save();
+
+            await new FormVersion({
+                name: formName,
+                title: "Test form title",
+                schema: {
+                    components: [],
+                    display: "wizard"
+                },
+                formId: form.id,
+                latest: true,
+                validFrom: new Date(),
+                validTo: null
+            }).save();
+        });
+        await formRepository.sequelize.transaction(async (transaction: any) => {
+            const value = 1;
+            const index = 1;
+            const form = await formRepository.create({
+                createdBy: `test${value}@test.com`
+            });
+            await form.$add("roles", [role]);
+
+            const formName = `Test Form ABC${index}${value}Y`;
+            await new FormVersion({
+                name: formName,
+                title: "Test form title",
+                schema: {
+                    components: [],
+                    display: "wizard"
+                },
+                formId: form.id,
+                latest: false,
+                validFrom: new Date(),
+                validTo: new Date()
+            }).save();
+
+            await new FormVersion({
+                name: formName,
+                title: "Test form title",
+                schema: {
+                    components: [],
+                    display: "wizard"
+                },
+                formId: form.id,
+                latest: true,
+                validFrom: new Date(),
+                validTo: null
+            }).save();
+        });
+
+        await formRepository.sequelize.transaction(async (transaction: any) => {
+            const value = 2;
+            const index = 2;
+
+            const anotherRole = await new Role({
+                name: "Test Role XCX",
+                title: "Test title",
+                active: true
+            }).save();
+
+            const form = await formRepository.create({
+                createdBy: `test${value}@test.com`
+            });
+
+            await form.$add("roles", [anotherRole]);
+
+            const formName = `Test Form ABC${index}${value}X`;
+            await new FormVersion({
+                name: formName,
+                title: "Test form title",
+                schema: {
+                    components: [],
+                    display: "wizard"
+                },
+                formId: form.id,
+                latest: false,
+                validFrom: new Date(),
+                validTo: new Date()
+            }).save();
+
+            await new FormVersion({
+                name: formName,
+                title: "Test form title",
+                schema: {
+                    components: [],
+                    display: "wizard"
+                },
+                formId: form.id,
+                latest: true,
+                validFrom: new Date(),
+                validTo: null
+            }).save();
+        });
+        const results: { total: number, forms: FormVersion[] } = await formService.getAllForms(new User("id", "test", [role]), 20, 0, ['title', 'id']);
+        expect(results.total).to.be.gte(2);
+
+        expect(results.forms[0].title).to.be.not.null;
+        expect(results.forms[0].schema).to.be.eq(undefined);
+        expect(results.forms[0].latest).to.be.eq(undefined);
+
+    });
+
+    it('cannot create form if title already exists', async () => {
+        const role = new Role({
+            name: "Test Role New One two three",
+            title: "Test title",
+            active: true
+        });
+        const user = new User("id", "test", [role]);
+        basicForm.name = "newA";
+        basicForm.path = "newA";
+        basicForm.title = "newA";
+        await formService.create(user, basicForm);
+
+        try {
+            await formService.create(user, basicForm);
+        } catch (e) {
+            expect(e instanceof ValidationError).to.be.eq(true);
+            const validationError = e as ValidationError;
+            expect(validationError.get().length).to.be.eq(3);
+        }
+
     });
 });
 

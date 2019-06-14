@@ -13,10 +13,14 @@ export class FormCommentary extends Model<FormCommentary> {
     public id: string;
 
     @ForeignKey(() => Form)
-    @Column
+    @Column({
+        type: DataType.UUID,
+    })
     public formId: string;
 
     @ForeignKey(() => FormComment)
-    @Column
+    @Column({
+        type: DataType.UUID,
+    })
     public commentId: string;
 }

@@ -39,7 +39,6 @@ services:
       - DB_HOSTNAME=postgres_formapi
       - DB_PORT=5432
       - AUTH_URL=${AUTH_URL}
-      - AUTH_RESOURCE=AUTH_CLIENT_ID
       - AUTH_BEARER_ONLY=true
       - AUTH_REALM=${AUTH_REALM}
     depends_on:
@@ -48,7 +47,7 @@ services:
       - web
       - db
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/heathz"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/heathz"]
       interval: 5s
       timeout: 2s
       retries: 15

@@ -42,9 +42,6 @@ export const basicForm : any = {
         }
     ],
     "display": "form",
-    "title": "Apples and Oranges",
-    "path": "applesandoranges",
-    "name": "applesAndOranges",
     "access": [],
     "submissionAccess": [],
 };
