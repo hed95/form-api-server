@@ -13,6 +13,7 @@ import {Form} from "../../../src/model/Form";
 import ValidationError from "../../../src/error/ValidationError";
 import {FormComment} from "../../../src/model/FormComment";
 import {Role} from "../../../src/model/Role";
+import {any} from "@hapi/joi";
 
 describe("FormController", () => {
 
@@ -210,13 +211,13 @@ describe("FormController", () => {
         };
         version.form = form;
         // @ts-ignore
-        formService.getAllForms(Arg.any(), Arg.any(), Arg.any(), Arg.any()).returns(Promise.resolve({
+        formService.getAllForms(Arg.any(), Arg.any(), Arg.any(), Arg.any(), Arg.any()).returns(Promise.resolve({
             total : 1,
             forms: [version]
         }));
 
         const result : {total: number, forms: FormVersion[]}
-            = await formController.getForms(20, 0, [], user);
+            = await formController.getForms(20, 0, [], [], user);
 
         expect(result.total).to.be.eq(1);
         expect(result.forms.length).to.be.eq(1);

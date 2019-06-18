@@ -1,11 +1,22 @@
 import {inject} from 'inversify';
-import {BaseHttpController, controller, httpGet, queryParam} from 'inversify-express-utils';
+import {
+    BaseHttpController,
+    controller,
+    httpGet,
+    httpPost,
+    principal,
+    queryParam,
+    requestBody,
+    response,
+} from 'inversify-express-utils';
 import TYPE from '../constant/TYPE';
 import {Role} from '../model/Role';
 import {RoleRepository} from '../types/repository';
 import logger from '../util/logger';
+import {User} from '../auth/User';
+import * as express from 'express';
 
-@controller('/api/roles')
+@controller('/roles')
 export class RolesController extends BaseHttpController {
 
     constructor(@inject(TYPE.RoleRepository) private readonly roleRepository: RoleRepository) {
@@ -25,5 +36,12 @@ export class RolesController extends BaseHttpController {
             total: result.count,
             roles: result.rows,
         };
+    }
+
+    @httpPost('/', TYPE.ProtectMiddleware)
+    public async create(@requestBody() roles: Role[],
+                        @response() res: express.Response,
+                        @principal() currentUser: User): Promise<void> {
+        logger.info(`Adding new roles`);
     }
 }

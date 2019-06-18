@@ -1,7 +1,7 @@
 import {ValidationErrorItem, ValidationResult} from '@hapi/joi';
 import {inject} from 'inversify';
 import {provide} from 'inversify-binding-decorators';
-import {FindAndCountOptions, Op} from 'sequelize';
+import {FindAndCountOptions, Op, WhereOptions} from 'sequelize';
 import {User} from '../auth/User';
 import TYPE from '../constant/TYPE';
 import InternalServerError from '../error/InternalServerError';
@@ -14,6 +14,7 @@ import {FormVersion} from '../model/FormVersion';
 import {Role} from '../model/Role';
 import {FormRepository, FormVersionRepository, RoleRepository} from '../types/repository';
 import logger from '../util/logger';
+import _ from 'lodash';
 
 @provide(TYPE.FormService)
 export class FormService {
@@ -154,20 +155,33 @@ export class FormService {
     public async getAllForms(user: User,
                              limit: number = 20,
                              offset: number = 0,
+                             filterQuery: object = null,
                              attributes: string[] = []):
         Promise<{ total: number, forms: FormVersion[] }> {
         const defaultRole = await Role.defaultRole();
+
+        const whereQueryOptions: WhereOptions = {
+            latest: {
+                [Op.eq]: true,
+            },
+            validTo: {
+                [Op.eq]: null,
+            },
+        };
+        if (filterQuery) {
+            const keys: string[] = Object.keys(filterQuery);
+            if (keys.length > 0) {
+                _.forEach(keys, (key) => {
+                    // @ts-ignore
+                    whereQueryOptions[key] = filterQuery[key];
+                });
+            }
+        }
+
         const query: FindAndCountOptions = {
             limit,
             offset,
-            where: {
-                latest: {
-                    [Op.eq]: true,
-                },
-                validTo: {
-                    [Op.eq]: null,
-                },
-            },
+            where: whereQueryOptions,
             include: [{
                 model: Form, include: [{
                     model: Role,

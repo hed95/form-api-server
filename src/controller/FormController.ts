@@ -9,7 +9,6 @@ import {
     httpPut,
     principal,
     queryParam,
-    request,
     requestBody,
     requestParam,
     response,
@@ -30,7 +29,8 @@ import {FormVersion} from '../model/FormVersion';
 import {Role} from '../model/Role';
 import {FormService} from '../service/FormService';
 import logger from '../util/logger';
-
+import _ from 'lodash';
+import {QueryParser} from '../util/QueryParser';
 
 @ApiPath({
     path: '/forms',
@@ -39,6 +39,8 @@ import logger from '../util/logger';
 })
 @controller('/forms')
 export class FormController extends BaseHttpController {
+
+    private readonly queryParser: QueryParser = new QueryParser();
 
     constructor(@inject(TYPE.FormService) private readonly formService: FormService) {
         super();
@@ -80,17 +82,24 @@ export class FormController extends BaseHttpController {
         }
     }
 
+    @httpPost('/:id/submission', TYPE.ProtectMiddleware)
+    public async validateSubmission(@requestParam('id') id: string,
+                                    @requestBody() form: object,
+                                    @response() res: express.Response,
+                                    @principal() currentUser: User): Promise<void> {
+        logger.info(`Initiating a submission for validation`);
+    }
 
     @httpGet('/', TYPE.ProtectMiddleware)
     public async getForms(@queryParam('limit') limit: number = 20,
                           @queryParam('offset') offset: number = 0,
                           @queryParam('select') attributes: string[] = [],
+                          @queryParam('filter') filter: string[] = [],
                           @principal() currentUser: User): Promise<{ total: number, forms: FormVersion[] }> {
 
-
-
+        const filterQuery: object = filter.length !== 0 ? this.queryParser.parse(filter) : null;
         return await
-            this.formService.getAllForms(currentUser, limit, offset, attributes);
+            this.formService.getAllForms(currentUser, limit, offset, filterQuery, attributes);
 
     }
 

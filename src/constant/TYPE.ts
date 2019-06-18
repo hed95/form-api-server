@@ -9,4 +9,5 @@ export default {
     KeycloakService: Symbol.for('KeycloakService'),
     ProtectMiddleware: Symbol.for('ProtectMiddleware'),
     FormCommentRepository: Symbol.for('FormCommentRepository'),
+    ValidationService: Symbol.for('ValidationService'),
 };
