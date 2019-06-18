@@ -29,7 +29,6 @@ import {FormVersion} from '../model/FormVersion';
 import {Role} from '../model/Role';
 import {FormService} from '../service/FormService';
 import logger from '../util/logger';
-import _ from 'lodash';
 import {QueryParser} from '../util/QueryParser';
 
 @ApiPath({
@@ -95,11 +94,28 @@ export class FormController extends BaseHttpController {
                           @queryParam('offset') offset: number = 0,
                           @queryParam('select') attributes: string[] = [],
                           @queryParam('filter') filter: string[] = [],
-                          @principal() currentUser: User): Promise<{ total: number, forms: FormVersion[] }> {
+                          @principal() currentUser: User,
+                          @response() res: express.Response): Promise<{ total: number, forms: FormVersion[] }> {
 
-        const filterQuery: object = filter.length !== 0 ? this.queryParser.parse(filter) : null;
-        return await
-            this.formService.getAllForms(currentUser, limit, offset, filterQuery, attributes);
+        try {
+            const filterQuery: object = filter.length !== 0 ? this.queryParser.parse(filter) : null;
+            return await
+                this.formService.getAllForms(currentUser, limit, offset, filterQuery, attributes);
+        } catch (e) {
+            if (e instanceof ValidationError) {
+                const validationError = e as ValidationError;
+                res.status(400);
+                res.json({
+                    exception: validationError.get(),
+                });
+            } else {
+                res.status(500);
+                res.json({
+                    exception: e.toString()
+                });
+            }
+        }
+
 
     }
 

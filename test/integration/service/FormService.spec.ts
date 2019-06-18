@@ -871,7 +871,7 @@ describe("FormService", () => {
             }).save();
         });
 
-        const query: object = new QueryParser().parse(['title_eq_Test form X', 'name_eq_Test Form ABC11']);
+        const query: object = new QueryParser().parse(['title__eq__Test form X', 'name__eq__Test Form ABC11']);
 
         const results: { total: number, forms: FormVersion[] } = await formService.getAllForms(new User("id", "test", [role]), 20, 0, {
             title: {
@@ -890,6 +890,34 @@ describe("FormService", () => {
         expect(resultsWithRaw.total).to.be.gte(1);
         expect(resultsWithRaw.forms.length).to.be.gte(1);
 
+    });
+
+    it('can find title with startsWith', async() => {
+        await formRepository.sequelize.transaction(async (transaction: any) => {
+            const form = await formRepository.create({
+                createdBy: `test@test.com`
+            });
+            await form.$add("roles", [role]);
+
+            const formName = `Apple with title`;
+            await new FormVersion({
+                name: formName,
+                title: "Apple with title",
+                schema: {
+                    components: [],
+                    display: "wizard"
+                },
+                formId: form.id,
+                latest: true,
+                validFrom: new Date(),
+                validTo: null
+            }).save();
+        });
+        const query: object = new QueryParser().parse(['title__startsWith__Apple']);
+
+        const results: { total: number, forms: FormVersion[] } = await formService.getAllForms(new User("id", "test", [role]), 20, 0, query, []);
+
+        expect(results.total).to.be.eq(1);
     });
 });
 

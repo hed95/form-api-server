@@ -217,7 +217,7 @@ describe("FormController", () => {
         }));
 
         const result : {total: number, forms: FormVersion[]}
-            = await formController.getForms(20, 0, [], [], user);
+            = await formController.getForms(20, 0, [], [], user, mockResponse);
 
         expect(result.total).to.be.eq(1);
         expect(result.forms.length).to.be.eq(1);
