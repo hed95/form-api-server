@@ -111,11 +111,10 @@ export class FormController extends BaseHttpController {
             } else {
                 res.status(500);
                 res.json({
-                    exception: e.toString()
+                    exception: e.toString(),
                 });
             }
         }
-
 
     }
 

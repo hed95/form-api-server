@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import {Op} from "sequelize";
-import ValidationError from "../error/ValidationError";
+import {Op} from 'sequelize';
+import ValidationError from '../error/ValidationError';
 
 export class QueryParser {
 
@@ -19,7 +19,7 @@ export class QueryParser {
         Op.iLike,
         Op.endsWith,
         Op.contains,
-        Op.startsWith
+        Op.startsWith,
     ];
 
     public parse(filters: string[]): object {
@@ -32,15 +32,15 @@ export class QueryParser {
                 const operator: symbol = Symbol.for(`${matches[2]}`);
 
                 const foundOperator = _.find(this.operators, (op: symbol) => {
-                    return op === operator
+                    return op === operator;
                 });
 
                 if (!foundOperator) {
-                    throw new ValidationError("Invalid operator", [{
+                    throw new ValidationError('Invalid operator', [{
                         message: `${matches[2]} invalid operator`,
                         type: 'invalid-operator',
-                        path:[],
-                        context: {}
+                        path: [],
+                        context: {},
                     }]);
                 }
 
