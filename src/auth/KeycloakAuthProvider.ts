@@ -20,7 +20,7 @@ export class KeycloakAuthProvider implements interfaces.AuthProvider {
         res: express.Response,
         next: express.NextFunction,
     ): Promise<interfaces.Principal> {
-        if (!req.path.endsWith("healthz") &&  !req.path.endsWith("readiness")) {
+        if (!req.path.endsWith('healthz') &&  !req.path.endsWith('readiness')) {
             const instance: Keycloak = this.keycloakService.keycloakInstance();
             try {
                 const grant: Keycloak.Grant = await instance.getGrant(req, res);
@@ -34,7 +34,7 @@ export class KeycloakAuthProvider implements interfaces.AuthProvider {
             } catch (err) {
                 logger.warn('Failed to get user details', {
                     error: err.toString(),
-                    url: req.url
+                    url: req.url,
                 });
                 return Promise.resolve(null);
             }

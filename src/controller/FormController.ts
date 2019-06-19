@@ -77,7 +77,7 @@ export class FormController extends BaseHttpController {
                 id,
                 exception: 'Not valid UUID',
                 resource: 'Form',
-            })
+            });
         } else {
             const formVersion = await this.formService.findForm(id, currentUser);
             if (!formVersion) {
