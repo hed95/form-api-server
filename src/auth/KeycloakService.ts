@@ -2,6 +2,7 @@ import {RequestHandler} from 'express';
 import {provide} from 'inversify-binding-decorators';
 import Keycloak from 'keycloak-connect';
 import TYPE from '../constant/TYPE';
+import logger from "../util/logger";
 
 @provide(TYPE.KeycloakService)
 export class KeycloakService {

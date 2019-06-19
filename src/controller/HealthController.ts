@@ -10,7 +10,7 @@ export class HealthController extends BaseHttpController {
     }
 
     @httpGet('/readiness')
-    public readiness(): string {
-        return 'READY';
+    public readiness(@response() res: express.Response): void {
+        res.json({status: 'READY'});
     }
 }

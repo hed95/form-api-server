@@ -20,22 +20,26 @@ export class KeycloakAuthProvider implements interfaces.AuthProvider {
         res: express.Response,
         next: express.NextFunction,
     ): Promise<interfaces.Principal> {
-        const instance: Keycloak = this.keycloakService.keycloakInstance();
-        try {
-            const grant: Keycloak.Grant = await instance.getGrant(req, res);
-            // @ts-ignore
-            const email = grant.access_token.content.email;
-            const roles = grant.access_token.content.realm_access.roles.map((role: string) => {
-                return new Role({name: role});
-            });
-            const user = new User(email, email, roles);
-            return Promise.resolve(user);
-        } catch (err) {
-            logger.warn('Failed to get user details', {
-                error: err.toString(),
-            });
+        if (!req.path.endsWith("healthz") &&  !req.path.endsWith("readiness")) {
+            const instance: Keycloak = this.keycloakService.keycloakInstance();
+            try {
+                const grant: Keycloak.Grant = await instance.getGrant(req, res);
+                // @ts-ignore
+                const email = grant.access_token.content.email;
+                const roles = grant.access_token.content.realm_access.roles.map((role: string) => {
+                    return new Role({name: role});
+                });
+                const user = new User(email, email, roles);
+                return Promise.resolve(user);
+            } catch (err) {
+                logger.warn('Failed to get user details', {
+                    error: err.toString(),
+                    url: req.url
+                });
+                return Promise.resolve(null);
+            }
+        } else {
             return Promise.resolve(null);
         }
-
     }
 }

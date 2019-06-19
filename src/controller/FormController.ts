@@ -30,6 +30,7 @@ import {Role} from '../model/Role';
 import {FormService} from '../service/FormService';
 import logger from '../util/logger';
 import {QueryParser} from '../util/QueryParser';
+import Validator from 'validator';
 
 @ApiPath({
     path: '/forms',
@@ -69,15 +70,25 @@ export class FormController extends BaseHttpController {
     public async get(@requestParam('id') id: string,
                      @response() res: express.Response,
                      @principal() currentUser: User): Promise<void> {
-        const formVersion = await this.formService.findForm(id, currentUser);
-        if (!formVersion) {
-            res.status(404).send({
+        const isUUID: boolean = Validator.isUUID(id);
+
+        if (!isUUID) {
+            res.status(400).json({
                 id,
-                exception: 'Resource not found',
+                exception: 'Not valid UUID',
                 resource: 'Form',
-            });
+            })
         } else {
-            res.json(formVersion.schema);
+            const formVersion = await this.formService.findForm(id, currentUser);
+            if (!formVersion) {
+                res.status(404).send({
+                    id,
+                    exception: 'Resource not found',
+                    resource: 'Form',
+                });
+            } else {
+                res.json(formVersion.schema);
+            }
         }
     }
 
@@ -207,8 +218,8 @@ export class FormController extends BaseHttpController {
         try {
 
             const formVersion = await this.formService.create(currentUser, form);
-            res.status(201);
-            res.location(`/form/${formVersion.form.id}`);
+            res.setHeader('Location', `/form/${formVersion.form.id}`);
+            res.sendStatus(201);
         } catch (err) {
             if (err instanceof ValidationError) {
                 const validationError = err as ValidationError;
@@ -324,8 +335,8 @@ export class FormController extends BaseHttpController {
                                @principal() currentUser: User): Promise<void> {
 
         try {
-            const created: FormComment = await this.formService.createComment(id, currentUser, comment);
-            res.status(201).json(created);
+            await this.formService.createComment(id, currentUser, comment);
+            res.sendStatus(201);
         } catch (e) {
             if (e instanceof ResourceNotFoundError) {
                 res.status(404).send({

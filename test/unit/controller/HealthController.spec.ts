@@ -20,7 +20,8 @@ describe("Health Controller", () => {
     });
 
     it('can get readiness', () => {
-        const result = healthController.readiness();
-        expect(result).to.eq("READY");
+        healthController.readiness(mockResponse);
+        const data = mockResponse.getJsonData();
+        expect(data.status).to.be.eq('READY');
     });
 });

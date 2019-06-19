@@ -20,8 +20,10 @@ export class SequelizeProvider {
     private readonly sequelize: Sequelize;
 
     constructor() {
-        const config = require('../config/dbconfig')[process.env.NODE_ENV || 'test'];
+        const env = process.env.NODE_ENV || 'test';
+        const config = require('../config/dbconfig')[env];
         this.sequelize = new Sequelize(config);
+        this.sequelize.options.logging = logger.debug.bind(logger);
         this.sequelize.addModels([FormRoles, Role, Form, FormVersion, FormCommentary, FormComment]);
     }
 

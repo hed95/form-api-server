@@ -20,7 +20,7 @@ services:
     networks:
       - db
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U formuser"]
+      test: ["CMD-SHELL", "pg_isready -U formuser formdb"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -41,13 +41,14 @@ services:
       - AUTH_URL=${AUTH_URL}
       - AUTH_BEARER_ONLY=true
       - AUTH_REALM=${AUTH_REALM}
+      - AUTH_CLIENT_ID=${AUTH_CLIENT_ID}
     depends_on:
       - postgres_formapi
     networks:
       - web
       - db
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/heathz"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/v1/healthz"]
       interval: 5s
       timeout: 2s
       retries: 15

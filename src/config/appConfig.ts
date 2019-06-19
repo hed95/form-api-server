@@ -4,5 +4,6 @@ module.exports = {
         resource: process.env.AUTH_CLIENT_ID || 'form-api-server',
         bearerOnly: process.env.AUTH_BEARER_ONLY || 'true',
         realm: process.env.AUTH_REALM || 'dev',
-    },
+        confidentialPort: 0
+    }
 };

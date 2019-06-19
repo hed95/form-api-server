@@ -117,6 +117,7 @@
     "swagger-express-ts": "^1.0.1",
     "swagger-ui-dist": "^3.22.3",
     "uninstall": "0.0.0",
+    "validator": "^11.0.0",
     "winston": "^3.2.1"
   }
 }

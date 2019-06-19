@@ -3,6 +3,7 @@ export class MockResponse {
     private jsonData: object;
     private statusData: number;
     private locationData: string;
+    private headers: object = {};
 
     public json(data: object): MockResponse {
         this.jsonData = data;
@@ -33,6 +34,17 @@ export class MockResponse {
     }
 
     public getLocation() : string {
-        return this.locationData;
+        // @ts-ignore
+        return this.locationData ? this.locationData : this.headers['Location'];
+    }
+    public sendStatus(status: number) {
+        this.statusData = status;
+        return this;
+    }
+
+    public setHeader(name: string, value: string) {
+        // @ts-ignore
+        this.headers[name] = value;
+        return this;
     }
 }

@@ -113,7 +113,7 @@ export class FormService {
             }
             const defaultRole = await Role.defaultRole();
 
-            const roles = accessRoles.length >= 1 ? await this.roleRepository.findAll({
+            const roles = accessRoles && accessRoles.length >= 1 ? await this.roleRepository.findAll({
                 where: {
                     id: {
                         [Op.in]: accessRoles,

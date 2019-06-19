@@ -13,7 +13,6 @@ import {Form} from "../../../src/model/Form";
 import ValidationError from "../../../src/error/ValidationError";
 import {FormComment} from "../../../src/model/FormComment";
 import {Role} from "../../../src/model/Role";
-import {any} from "@hapi/joi";
 
 describe("FormController", () => {
 
@@ -42,7 +41,7 @@ describe("FormController", () => {
         // @ts-ignore
         formService.findForm(Arg.any(), Arg.any()).returns(Promise.resolve(version));
 
-        await formController.get("id", mockResponse, user);
+        await formController.get("ea1ddad5-aec3-44a4-a730-07b50b8be752", mockResponse, user);
         expect(mockResponse.getJsonData()).to.be.eq(version.schema);
     });
 
@@ -52,7 +51,7 @@ describe("FormController", () => {
         // @ts-ignore
         formService.findForm(Arg.any(), Arg.any()).returns(Promise.resolve(null));
 
-        await formController.get("id", mockResponse, user);
+        await formController.get("ea1ddad5-aec3-44a4-a730-07b50b8be752", mockResponse, user);
         expect(mockResponse.getStatus()).to.eq(404);
     });
 

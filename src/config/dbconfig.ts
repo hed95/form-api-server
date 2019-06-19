@@ -1,7 +1,7 @@
 module.exports = {
     test: {
         dialect: 'sqlite',
-        storage: ':memory:',
+        storage: ':memory:'
     },
     production: {
         username: process.env.DB_USERNAME,
@@ -9,7 +9,6 @@ module.exports = {
         database: process.env.DB_NAME,
         host: process.env.DB_HOSTNAME,
         port: process.env.DB_PORT,
-        dialect: 'postgres',
-        logging: false,
+        dialect: 'postgres'
     },
 };
