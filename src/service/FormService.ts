@@ -16,7 +16,7 @@ import {FormRepository, FormVersionRepository} from '../types/repository';
 import logger from '../util/logger';
 import _ from 'lodash';
 import {Sequelize} from 'sequelize-typescript';
-import {RoleService} from "./RoleService";
+import {RoleService} from './RoleService';
 
 @provide(TYPE.FormService)
 export class FormService {

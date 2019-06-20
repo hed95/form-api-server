@@ -14,8 +14,8 @@ import {Role} from '../model/Role';
 import logger from '../util/logger';
 import {User} from '../auth/User';
 import * as express from 'express';
-import {RoleService} from "../service/RoleService";
-import ValidationError from "../error/ValidationError";
+import {RoleService} from '../service/RoleService';
+import ValidationError from '../error/ValidationError';
 
 @controller('/roles')
 export class RolesController extends BaseHttpController {
@@ -37,7 +37,7 @@ export class RolesController extends BaseHttpController {
     }
 
     @httpPost('/', TYPE.ProtectMiddleware)
-    public async create(@requestBody() roles: { name: string, description: string }[],
+    public async create(@requestBody() roles: Array<{ name: string, description: string }>,
                         @response() res: express.Response,
                         @principal() currentUser: User): Promise<void> {
         logger.info(`Adding new roles`);

@@ -11,7 +11,7 @@ import {SequelizeProvider} from '../model/SequelizeProvider';
 import {FormService} from '../service/FormService';
 import {FormCommentRepository, FormRepository, FormVersionRepository, RoleRepository} from '../types/repository';
 import logger from '../util/logger';
-import {RoleService} from "../service/RoleService";
+import {RoleService} from '../service/RoleService';
 
 export class ApplicationContext {
     private readonly container: Container;

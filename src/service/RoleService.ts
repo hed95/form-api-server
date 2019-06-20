@@ -1,15 +1,15 @@
-import {provide} from "inversify-binding-decorators";
-import TYPE from "../constant/TYPE";
-import {inject} from "inversify";
-import {RoleRepository} from "../types/repository";
-import {Role} from "../model/Role";
+import {provide} from 'inversify-binding-decorators';
+import TYPE from '../constant/TYPE';
+import {inject} from 'inversify';
+import {RoleRepository} from '../types/repository';
+import {Role} from '../model/Role';
 import _ from 'lodash';
-import {Op} from "sequelize";
-import {User} from "../auth/User";
-import logger from "../util/logger";
+import {Op} from 'sequelize';
+import {User} from '../auth/User';
+import logger from '../util/logger';
 import * as Joi from '@hapi/joi';
 import {ValidationResult} from '@hapi/joi';
-import ValidationError from "../error/ValidationError";
+import ValidationError from '../error/ValidationError';
 
 @provide(TYPE.RoleService)
 export class RoleService {
@@ -17,19 +17,19 @@ export class RoleService {
     constructor(@inject(TYPE.RoleRepository) private readonly roleRepository: RoleRepository) {
     }
 
-    public async createRoles(roles: { name: string, description: string }[], user: User): Promise<Role[]> {
+    public async createRoles(roles: Array<{ name: string, description: string }>, user: User): Promise<Role[]> {
 
         const roleSchema = Joi.object().keys({
             name: Joi.string().required(),
-            description: Joi.string()
+            description: Joi.string(),
         });
 
         const validation: ValidationResult<object> = Joi.validate(roles, Joi.array().items(roleSchema), {
-            abortEarly: false
+            abortEarly: false,
         });
 
         if (validation.error) {
-            throw new ValidationError("Roles not complete", validation.error.details);
+            throw new ValidationError('Roles not complete', validation.error.details);
         }
 
         const profiler = logger.startTimer();
@@ -37,15 +37,15 @@ export class RoleService {
             return {
                 name: role.name,
                 description: role.description,
-                active: true
+                active: true,
             };
         }), {
-            returning: true
+            returning: true,
         });
         profiler.done({
             message: `Created new roles`,
-            roles: roles,
-            user: user.details.email
+            roles,
+            user: user.details.email,
         });
         return result;
 
@@ -66,8 +66,8 @@ export class RoleService {
 
     public async roles(limit: number = 20, offset: number = 0): Promise<{ rows: Role[], count: number }> {
         return await this.roleRepository.findAndCountAll({
-            limit: limit,
-            offset: offset
+            limit,
+            offset,
         });
     }
 
