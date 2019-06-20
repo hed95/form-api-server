@@ -28,7 +28,7 @@ export class QueryParser {
         _.forEach(filters, (filter) => {
             if (reg.test(filter)) {
                 const matches = filter.match(reg);
-                const field = matches[1];
+                const field = `schema.${matches[1]}`;
                 const operator: symbol = Symbol.for(`${matches[2]}`);
 
                 const foundOperator = _.find(this.operators, (op: symbol) => {

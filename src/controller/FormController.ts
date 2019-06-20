@@ -9,6 +9,7 @@ import {
     httpPut,
     principal,
     queryParam,
+    request,
     requestBody,
     requestParam,
     response,
@@ -87,7 +88,7 @@ export class FormController extends BaseHttpController {
                     resource: 'Form',
                 });
             } else {
-                res.json(formVersion.schema);
+                res.json(formVersion);
             }
         }
     }
@@ -103,15 +104,24 @@ export class FormController extends BaseHttpController {
     @httpGet('/', TYPE.ProtectMiddleware)
     public async getForms(@queryParam('limit') limit: number = 20,
                           @queryParam('offset') offset: number = 0,
-                          @queryParam('select') attributes: string[] = [],
-                          @queryParam('filter') filter: string[] = [],
+                          @queryParam('select') attributes: string = null,
+                          @queryParam('filter') filter: string = null,
                           @principal() currentUser: User,
                           @response() res: express.Response): Promise<{ total: number, forms: FormVersion[] }> {
 
         try {
-            const filterQuery: object = filter.length !== 0 ? this.queryParser.parse(filter) : null;
+            const filterQuery: object = filter && filter.split(',').length !== 0 ?
+                this.queryParser.parse(filter.split(',')) : null;
+
+            const fieldAttributes: string[] = attributes ? attributes.split(',') : [];
+
             return await
-                this.formService.getAllForms(currentUser, limit, offset, filterQuery, attributes);
+                this.formService.getAllForms(currentUser,
+                    limit,
+                    offset,
+                    filterQuery,
+                    fieldAttributes);
+
         } catch (e) {
             if (e instanceof ValidationError) {
                 const validationError = e as ValidationError;
@@ -212,13 +222,14 @@ export class FormController extends BaseHttpController {
 
     @httpPost('/', TYPE.ProtectMiddleware)
     public async create(@requestBody() form: object,
+                        @request() req: express.Request,
                         @response() res: express.Response,
                         @principal() currentUser: User): Promise<void> {
         logger.info(`Creating new form`);
         try {
 
             const formVersion = await this.formService.create(currentUser, form);
-            res.setHeader('Location', `/form/${formVersion.form.id}`);
+            res.setHeader('Location', `${req.path}/${formVersion.form.id}`);
             res.sendStatus(201);
         } catch (err) {
             if (err instanceof ValidationError) {

@@ -15,6 +15,7 @@ import {Role} from '../model/Role';
 import {FormRepository, FormVersionRepository, RoleRepository} from '../types/repository';
 import logger from '../util/logger';
 import _ from 'lodash';
+import {Sequelize} from 'sequelize-typescript';
 
 @provide(TYPE.FormService)
 export class FormService {
@@ -49,19 +50,19 @@ export class FormService {
         const accessRoles: string[] = payload.access;
 
         return await this.formRepository.sequelize.transaction(async () => {
-
+            const profiler = logger.startTimer();
             const loaded = await this.formVersionRepository.findOne({
                 where: {
                     [Op.or]: [{
-                        title: {
+                        'schema.title': {
                             [Op.eq]: title,
                         },
                     }, {
-                        name: {
+                        'schema.name': {
                             [Op.eq]: name,
                         },
                     }, {
-                        path: {
+                        'schema.path': {
                             [Op.eq]: path,
                         },
                     }],
@@ -70,7 +71,8 @@ export class FormService {
 
             if (loaded) {
                 const validationErrors: ValidationErrorItem[] = [];
-                if (loaded.title === title) {
+                // @ts-ignore
+                if (loaded.schema.title === title) {
                     validationErrors.push(
                         {
                             message: `${title} already exists`,
@@ -83,7 +85,8 @@ export class FormService {
                         },
                     );
                 }
-                if (loaded.path === path) {
+                // @ts-ignore
+                if (loaded.schema.path === path) {
                     validationErrors.push(
                         {
                             message: `${path} already exists`,
@@ -96,7 +99,8 @@ export class FormService {
                         },
                     );
                 }
-                if (loaded.name === name) {
+                // @ts-ignore
+                if (loaded.schema.name === name) {
                     validationErrors.push(
                         {
                             message: `${name} already exists`,
@@ -130,9 +134,6 @@ export class FormService {
 
             const today = new Date();
             const formVersion = await this.formVersionRepository.create({
-                title,
-                path,
-                name,
                 schema: payload,
                 formId: form.id,
                 validFrom: today,
@@ -141,13 +142,15 @@ export class FormService {
                 updatedBy: user.details.email,
             });
 
-            return await this.formVersionRepository.findByPk(formVersion.id, {
+            const createdVersion =  await this.formVersionRepository.findByPk(formVersion.id, {
                 include: [{
                     model: Form, include: [{
                         model: Role,
                     }],
                 }],
             });
+            profiler.done({message: 'Created form', user: user.details.email});
+            return createdVersion;
 
         });
     }
@@ -158,9 +161,11 @@ export class FormService {
                              filterQuery: object = null,
                              attributes: string[] = []):
         Promise<{ total: number, forms: FormVersion[] }> {
+
+        const profiler = logger.startTimer();
         const defaultRole = await Role.defaultRole();
 
-        const whereQueryOptions: WhereOptions = {
+        const baseQueryOptions: WhereOptions = {
             latest: {
                 [Op.eq]: true,
             },
@@ -173,7 +178,7 @@ export class FormService {
             if (keys.length > 0) {
                 _.forEach(keys, (key) => {
                     // @ts-ignore
-                    whereQueryOptions[key] = filterQuery[key];
+                    baseQueryOptions[key] = filterQuery[key];
                 });
             }
         }
@@ -181,9 +186,10 @@ export class FormService {
         const query: FindAndCountOptions = {
             limit,
             offset,
-            where: whereQueryOptions,
+            where: baseQueryOptions,
             include: [{
-                model: Form, include: [{
+                model: Form,
+                include: [{
                     model: Role,
                     as: 'roles',
                     attributes: ['id', 'name'],
@@ -205,11 +211,14 @@ export class FormService {
         };
 
         if (attributes.length !== 0) {
-            query.attributes = attributes;
+            // @ts-ignore
+            query.attributes = _.map(attributes, (attribute) => {
+                return [Sequelize.json(`schema.${attribute}`), attribute];
+            });
         }
 
-        const result: { rows: FormVersion[], count: number } = await this.formVersionRepository
-            .findAndCountAll(query);
+        const result: { rows: FormVersion[], count: number } = await this.formVersionRepository.findAndCountAll(query);
+        profiler.done({message: 'Completed getAllForms', user: user.details.email});
         return {
             total: result.count,
             forms: result.rows,
@@ -304,7 +313,7 @@ export class FormService {
                 }],
             });
         } finally {
-            profiler.done({message: `completed getting form for ${formId}`});
+            profiler.done({message: `completed getting form for ${formId}`, user: user.details.email});
         }
     }
 
@@ -340,7 +349,7 @@ export class FormService {
                 },
             );
         } finally {
-            profiler.done({message: 'completed get all versions operation'});
+            profiler.done({message: 'completed get all versions operation', user: user.details.email});
         }
 
     }
@@ -375,12 +384,6 @@ export class FormService {
             logger.info('Updated previous version to be invalid');
 
             const newVersion = await new FormVersion({
-                // @ts-ignore
-                title: form.title,
-                // @ts-ignore
-                name: form.name,
-                // @ts-ignore
-                path: form.path,
                 schema: form,
                 formId: oldVersion.form.id,
                 validFrom: currentDate,

@@ -13,15 +13,18 @@ import {Form} from "../../../src/model/Form";
 import ValidationError from "../../../src/error/ValidationError";
 import {FormComment} from "../../../src/model/FormComment";
 import {Role} from "../../../src/model/Role";
+import {MockRequest} from "../../MockRequest";
 
 describe("FormController", () => {
 
     let mockResponse: any;
+    let mockRequest: any;
     let formController: FormController;
     let formService: FormService;
 
     beforeEach(() => {
         mockResponse = new MockResponse();
+        mockRequest = new MockRequest("/forms");
         formService = Substitute.for<FormService>();
         formController = new FormController(formService);
 
@@ -42,7 +45,7 @@ describe("FormController", () => {
         formService.findForm(Arg.any(), Arg.any()).returns(Promise.resolve(version));
 
         await formController.get("ea1ddad5-aec3-44a4-a730-07b50b8be752", mockResponse, user);
-        expect(mockResponse.getJsonData()).to.be.eq(version.schema);
+        expect(mockResponse.getJsonData()).to.be.eq(version);
     });
 
     it('returns 404 if form not present', async () => {
@@ -117,10 +120,10 @@ describe("FormController", () => {
         // @ts-ignore
         formService.create(Arg.any(), Arg.any()).returns(Promise.resolve(version));
 
-        await formController.create({}, mockResponse, user);
+        await formController.create({}, mockRequest, mockResponse, user);
 
         expect(mockResponse.getStatus()).to.eq(201);
-        expect(mockResponse.getLocation()).to.eq("/form/formId");
+        expect(mockResponse.getLocation()).to.eq("/forms/formId");
 
     });
 
@@ -130,7 +133,7 @@ describe("FormController", () => {
         // @ts-ignore
         formService.create(Arg.any(), Arg.any()).returns(Promise.reject(new ValidationError("Failed validation", [])));
 
-        await formController.create({}, mockResponse, user);
+        await formController.create({}, mockRequest, mockResponse, user);
         expect(mockResponse.getStatus()).to.eq(400);
     });
 
@@ -140,7 +143,7 @@ describe("FormController", () => {
         // @ts-ignore
         formService.create(Arg.any(), Arg.any()).returns(Promise.reject(new InternalServerError("Something went wrong")));
 
-        await formController.create({}, mockResponse, user);
+        await formController.create({}, mockRequest, mockResponse, user);
         expect(mockResponse.getStatus()).to.eq(500);
     });
 
@@ -216,7 +219,7 @@ describe("FormController", () => {
         }));
 
         const result : {total: number, forms: FormVersion[]}
-            = await formController.getForms(20, 0, [], [], user, mockResponse);
+            = await formController.getForms(20, 0, null, null, user, mockResponse);
 
         expect(result.total).to.be.eq(1);
         expect(result.forms.length).to.be.eq(1);

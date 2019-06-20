@@ -10,17 +10,6 @@ export class FormVersion extends Model<FormVersion> {
     })
     public id: string;
 
-    @AllowNull(false)
-    @Column
-    public name: string;
-
-    @AllowNull(false)
-    @Column
-    public title: string;
-
-    @Column
-    public path: string;
-
     @UpdatedAt
     public updatedOn: Date;
 
@@ -29,7 +18,7 @@ export class FormVersion extends Model<FormVersion> {
 
     @AllowNull(false)
     @Column({
-        type: DataType.JSON,
+        type: DataType.JSONB,
     })
     public schema: object;
 
@@ -50,5 +39,4 @@ export class FormVersion extends Model<FormVersion> {
 
     @Column
     public latest: boolean;
-
 }

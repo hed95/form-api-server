@@ -619,9 +619,9 @@ describe("FormService", () => {
 
             const formName = `Test Form ABC${index}${value}`;
             await new FormVersion({
-                name: formName,
-                title: "Test form title",
                 schema: {
+                    name: formName,
+                    title: "Test form title",
                     components: [],
                     display: "wizard"
                 },
@@ -632,9 +632,9 @@ describe("FormService", () => {
             }).save();
 
             await new FormVersion({
-                name: formName,
-                title: "Test form title",
                 schema: {
+                    name: formName,
+                    title: "Test form title",
                     components: [],
                     display: "wizard"
                 },
@@ -654,9 +654,10 @@ describe("FormService", () => {
 
             const formName = `Test Form ABC${index}${value}Y`;
             await new FormVersion({
-                name: formName,
-                title: "Test form title",
                 schema: {
+                    _id: form.id,
+                    name: formName,
+                    title: "Test form title",
                     components: [],
                     display: "wizard"
                 },
@@ -667,9 +668,10 @@ describe("FormService", () => {
             }).save();
 
             await new FormVersion({
-                name: formName,
-                title: "Test form title",
                 schema: {
+                    _id: form.id,
+                    name: formName,
+                    title: "Test form title",
                     components: [],
                     display: "wizard"
                 },
@@ -698,9 +700,10 @@ describe("FormService", () => {
 
             const formName = `Test Form ABC${index}${value}X`;
             await new FormVersion({
-                name: formName,
-                title: "Test form title",
                 schema: {
+                    _id: form.id,
+                    name: formName,
+                    title: "Test form title",
                     components: [],
                     display: "wizard"
                 },
@@ -711,9 +714,10 @@ describe("FormService", () => {
             }).save();
 
             await new FormVersion({
-                name: formName,
-                title: "Test form title",
                 schema: {
+                    _id: form.id,
+                    name: formName,
+                    title: "Test form title",
                     components: [],
                     display: "wizard"
                 },
@@ -723,10 +727,13 @@ describe("FormService", () => {
                 validTo: null
             }).save();
         });
-        const results: { total: number, forms: FormVersion[] } = await formService.getAllForms(new User("id", "test", [role]), 20, 0, null, ['title', 'id']);
+        const results: { total: number, forms: FormVersion[] } = await formService.getAllForms(new User("id", "test", [role]), 20, 0, null, ['title', '_id']);
         expect(results.total).to.be.gte(2);
 
+        // @ts-ignore
         expect(results.forms[0].title).to.be.not.null;
+        // @ts-ignore
+        expect(results.forms[0]._id).to.be.not.null;
         expect(results.forms[0].schema).to.be.eq(undefined);
         expect(results.forms[0].latest).to.be.eq(undefined);
 
@@ -766,9 +773,9 @@ describe("FormService", () => {
 
             const formName = `Test Form ABC${index}${value}`;
             await new FormVersion({
-                name: formName,
-                title: "Test form X",
                 schema: {
+                    name: formName,
+                    title: "Test form X",
                     components: [],
                     display: "wizard"
                 },
@@ -779,9 +786,9 @@ describe("FormService", () => {
             }).save();
 
             await new FormVersion({
-                name: formName,
-                title: "Test form X",
                 schema: {
+                    name: formName,
+                    title: "Test form X",
                     components: [],
                     display: "wizard"
                 },
@@ -801,9 +808,9 @@ describe("FormService", () => {
 
             const formName = `Test Form X ABC${index}${value}Y`;
             await new FormVersion({
-                name: formName,
-                title: "Test X form title",
                 schema: {
+                    name: formName,
+                    title: "Test X form title",
                     components: [],
                     display: "wizard"
                 },
@@ -814,9 +821,9 @@ describe("FormService", () => {
             }).save();
 
             await new FormVersion({
-                name: formName,
-                title: "Test X form title",
                 schema: {
+                    name: formName,
+                    title: "Test X form title",
                     components: [],
                     display: "wizard"
                 },
@@ -845,9 +852,9 @@ describe("FormService", () => {
 
             const formName = `Test XX Form ABC${index}${value}X`;
             await new FormVersion({
-                name: formName,
-                title: "Test Y form title",
                 schema: {
+                    name: formName,
+                    title: "Test Y form title",
                     components: [],
                     display: "wizard"
                 },
@@ -858,9 +865,9 @@ describe("FormService", () => {
             }).save();
 
             await new FormVersion({
-                name: formName,
-                title: "Test form title",
                 schema: {
+                    name: formName,
+                    title: "Test form title",
                     components: [],
                     display: "wizard"
                 },
@@ -874,10 +881,10 @@ describe("FormService", () => {
         const query: object = new QueryParser().parse(['title__eq__Test form X', 'name__eq__Test Form ABC11']);
 
         const results: { total: number, forms: FormVersion[] } = await formService.getAllForms(new User("id", "test", [role]), 20, 0, {
-            title: {
+            'schema.title': {
                 [Op.eq]: 'Test form X'
             },
-            name: {
+            'schema.name': {
                 [Op.eq]: 'Test Form ABC11'
             }
         }, []);
@@ -901,9 +908,9 @@ describe("FormService", () => {
 
             const formName = `Apple with title`;
             await new FormVersion({
-                name: formName,
-                title: "Apple with title",
                 schema: {
+                    name: formName,
+                    title: "Apple with title",
                     components: [],
                     display: "wizard"
                 },

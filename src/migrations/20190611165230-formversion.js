@@ -19,24 +19,12 @@ module.exports = {
                 type: DataType.STRING,
                 allowNull: false
             },
-            name: {
-                type: DataType.STRING,
-                allowNull: false
-            },
-            title: {
-                type: DataType.STRING,
-                allowNull: false
-            },
-            path: {
-                type: DataType.STRING,
-                allowNull: false
-            },
             updatedBy: {
                 type: DataType.STRING,
                 allowNull: false
             },
             schema: {
-                type: DataType.JSON,
+                type: DataType.JSONB,
                 allowNull: false
             },
             validFrom: {
