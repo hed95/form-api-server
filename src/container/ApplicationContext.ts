@@ -11,6 +11,7 @@ import {SequelizeProvider} from '../model/SequelizeProvider';
 import {FormService} from '../service/FormService';
 import {FormCommentRepository, FormRepository, FormVersionRepository, RoleRepository} from '../types/repository';
 import logger from '../util/logger';
+import {RoleService} from "../service/RoleService";
 
 export class ApplicationContext {
     private readonly container: Container;
@@ -28,6 +29,7 @@ export class ApplicationContext {
         this.container.bind<FormVersionRepository>(TYPE.FormVersionRepository).toConstantValue(FormVersion);
         this.container.bind<FormCommentRepository>(TYPE.FormCommentRepository).toConstantValue(FormComment);
         this.container.bind<RoleRepository>(TYPE.RoleRepository).toConstantValue(Role);
+        this.container.bind<RoleService>(TYPE.RoleService).to(RoleService);
         this.container.bind<FormService>(TYPE.FormService).to(FormService);
 
         logger.info('Application context initialised');

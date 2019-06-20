@@ -10,4 +10,5 @@ export default {
     ProtectMiddleware: Symbol.for('ProtectMiddleware'),
     FormCommentRepository: Symbol.for('FormCommentRepository'),
     ValidationService: Symbol.for('ValidationService'),
+    RoleService: Symbol.for('RoleService')
 };

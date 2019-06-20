@@ -12,26 +12,27 @@ import {FormComment} from '../model/FormComment';
 import {FormSchemaValidator} from '../model/FormSchemaValidator';
 import {FormVersion} from '../model/FormVersion';
 import {Role} from '../model/Role';
-import {FormRepository, FormVersionRepository, RoleRepository} from '../types/repository';
+import {FormRepository, FormVersionRepository} from '../types/repository';
 import logger from '../util/logger';
 import _ from 'lodash';
 import {Sequelize} from 'sequelize-typescript';
+import {RoleService} from "./RoleService";
 
 @provide(TYPE.FormService)
 export class FormService {
     public readonly formRepository: FormRepository;
     public readonly formVersionRepository: FormVersionRepository;
     private readonly formSchemaValidator: FormSchemaValidator;
-    private readonly roleRepository: RoleRepository;
+    private readonly roleService: RoleService;
 
     constructor(@inject(TYPE.FormRepository) formRepository: FormRepository,
                 @inject(TYPE.FormVersionRepository) formVersionRepository: FormVersionRepository,
                 @inject(TYPE.FormSchemaValidator) formSchemaValidator: FormSchemaValidator,
-                @inject(TYPE.RoleRepository) roleRepository: RoleRepository) {
+                @inject(TYPE.RoleService) roleService: RoleService) {
         this.formRepository = formRepository;
         this.formVersionRepository = formVersionRepository;
         this.formSchemaValidator = formSchemaValidator;
-        this.roleRepository = roleRepository;
+        this.roleService = roleService;
     }
 
     public async create(user: User, payload: object): Promise<FormVersion> {
@@ -117,13 +118,7 @@ export class FormService {
             }
             const defaultRole = await Role.defaultRole();
 
-            const roles = accessRoles && accessRoles.length >= 1 ? await this.roleRepository.findAll({
-                where: {
-                    id: {
-                        [Op.in]: accessRoles,
-                    },
-                },
-            }) : [];
+            const roles = await this.roleService.findByIds(accessRoles);
             const form = await this.formRepository.create({
                 createdBy: user.details.email,
             });
@@ -142,7 +137,7 @@ export class FormService {
                 updatedBy: user.details.email,
             });
 
-            const createdVersion =  await this.formVersionRepository.findByPk(formVersion.id, {
+            const createdVersion = await this.formVersionRepository.findByPk(formVersion.id, {
                 include: [{
                     model: Form, include: [{
                         model: Role,

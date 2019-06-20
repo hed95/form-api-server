@@ -23,7 +23,7 @@ export class SequelizeProvider {
         const env = process.env.NODE_ENV || 'test';
         const config = require('../config/dbconfig')[env];
         this.sequelize = new Sequelize(config);
-        this.sequelize.options.logging = logger.debug.bind(logger);
+        this.sequelize.options.logging = env === 'test' ? true : logger.debug.bind(logger);
         this.sequelize.addModels([FormRoles, Role, Form, FormVersion, FormCommentary, FormComment]);
     }
 
