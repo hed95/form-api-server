@@ -1,6 +1,6 @@
 import {QueryParser} from "../../../src/util/QueryParser";
 import {expect} from 'chai';
-import ValidationError from "../../../src/error/ValidationError";
+import ResourceValidationError from "../../../src/error/ResourceValidationError";
 
 describe("Query Parser", () => {
 
@@ -17,10 +17,19 @@ describe("Query Parser", () => {
            const queries: string[] = ["title__blah__abc xxxx"];
            queryParser.parse(queries);
        } catch (e) {
-           expect(e instanceof ValidationError);
-           const error = e as ValidationError;
+           expect(e instanceof ResourceValidationError);
+           const error = e as ResourceValidationError;
            expect(error.message).to.be.eq("Invalid operator");
        }
-
+   });
+   it('throws error if sql in value', () => {
+       try {
+           const queries: string[] = ['title__startsWith__\' DROP FORMVERSION'];
+           queryParser.parse(queries);
+       } catch (e) {
+           expect(e instanceof ResourceValidationError);
+           const error = e as ResourceValidationError;
+           expect(error.message).to.be.eq("Potential SQL in value");
+       }
    });
 });

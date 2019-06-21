@@ -15,7 +15,7 @@ import logger from '../util/logger';
 import {User} from '../auth/User';
 import * as express from 'express';
 import {RoleService} from '../service/RoleService';
-import ValidationError from '../error/ValidationError';
+import ResourceValidationError from '../error/ResourceValidationError';
 
 @controller('/roles')
 export class RolesController extends BaseHttpController {
@@ -45,8 +45,8 @@ export class RolesController extends BaseHttpController {
             await this.roleService.createRoles(roles, currentUser);
             res.sendStatus(201);
         } catch (e) {
-            if (e instanceof ValidationError) {
-                const validationError = e as ValidationError;
+            if (e instanceof ResourceValidationError) {
+                const validationError = e as ResourceValidationError;
                 res.status(400);
                 res.json({
                     exception: validationError.get(),

@@ -17,21 +17,7 @@ Sequelize.useCLS(namespace);
 @provide(TYPE.SequelizeProvider)
 export class SequelizeProvider {
 
-    private readonly sequelize: Sequelize;
-
-    constructor() {
-        const env = process.env.NODE_ENV || 'test';
-        const config = require('../config/dbconfig')[env];
-        this.sequelize = new Sequelize(config);
-        this.sequelize.options.logging = env === 'test' ? true : logger.debug.bind(logger);
-        this.sequelize.addModels([FormRoles, Role, Form, FormVersion, FormCommentary, FormComment]);
-    }
-
-    public getSequelize(): Sequelize {
-        return this.sequelize;
-    }
-
-    public async initDefaultRole(roleName: string = 'anonymous'): Promise<void> {
+    public static async initDefaultRole(roleName: string = 'anonymous'): Promise<void> {
         const role = await Role.findOne({
             where: {
                 name: {
@@ -50,5 +36,19 @@ export class SequelizeProvider {
             logger.info(`${roleName} already exists so not creating`);
         }
 
+    }
+
+    private readonly sequelize: Sequelize;
+
+    constructor() {
+        const env = process.env.NODE_ENV || 'test';
+        const config = require('../config/dbconfig')[env];
+        this.sequelize = new Sequelize(config);
+        this.sequelize.options.logging = env === 'test' ? true : logger.debug.bind(logger);
+        this.sequelize.addModels([FormRoles, Role, Form, FormVersion, FormCommentary, FormComment]);
+    }
+
+    public getSequelize(): Sequelize {
+        return this.sequelize;
     }
 }

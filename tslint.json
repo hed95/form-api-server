@@ -19,12 +19,6 @@
       "single"
     ],
     "only-arrow-functions": true,
-    "no-any": [
-      true,
-      {
-        "ignore-rest-args": true
-      }
-    ],
     "no-unused-variable": [
       true,
       {

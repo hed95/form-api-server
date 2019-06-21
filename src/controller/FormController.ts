@@ -24,7 +24,7 @@ import {
 import {User} from '../auth/User';
 import TYPE from '../constant/TYPE';
 import ResourceNotFoundError from '../error/ResourceNotFoundError';
-import ValidationError from '../error/ValidationError';
+import ResourceValidationError from '../error/ResourceValidationError';
 import {FormComment} from '../model/FormComment';
 import {FormVersion} from '../model/FormVersion';
 import {Role} from '../model/Role';
@@ -123,8 +123,8 @@ export class FormController extends BaseHttpController {
                     fieldAttributes);
 
         } catch (e) {
-            if (e instanceof ValidationError) {
-                const validationError = e as ValidationError;
+            if (e instanceof ResourceValidationError) {
+                const validationError = e as ResourceValidationError;
                 res.status(400);
                 res.json({
                     exception: validationError.get(),
@@ -183,8 +183,8 @@ export class FormController extends BaseHttpController {
                 res.json({
                     message: `For with id: ${id} does not exist`,
                 });
-            } else if (e instanceof ValidationError) {
-                const validationError = e as ValidationError;
+            } else if (e instanceof ResourceValidationError) {
+                const validationError = e as ResourceValidationError;
                 res.status(400);
                 res.json({
                     exception: validationError.get(),
@@ -232,8 +232,8 @@ export class FormController extends BaseHttpController {
             res.setHeader('Location', `${req.path}/${formVersion.form.id}`);
             res.sendStatus(201);
         } catch (err) {
-            if (err instanceof ValidationError) {
-                const validationError = err as ValidationError;
+            if (err instanceof ResourceValidationError) {
+                const validationError = err as ResourceValidationError;
                 res.status(400);
                 res.json({
                     exception: validationError.get(),

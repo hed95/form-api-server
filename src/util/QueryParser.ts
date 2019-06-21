@@ -1,6 +1,9 @@
 import _ from 'lodash';
 import {Op} from 'sequelize';
-import ValidationError from '../error/ValidationError';
+import ResourceValidationError from '../error/ResourceValidationError';
+import xregexp from 'xregexp';
+
+const paranoid = xregexp('((%27)|(\'))|(--)|((%23)|(#))', 'i');
 
 export class QueryParser {
 
@@ -36,7 +39,7 @@ export class QueryParser {
                 });
 
                 if (!foundOperator) {
-                    throw new ValidationError('Invalid operator', [{
+                    throw new ResourceValidationError('Invalid operator', [{
                         message: `${matches[2]} invalid operator`,
                         type: 'invalid-operator',
                         path: [],
@@ -45,6 +48,14 @@ export class QueryParser {
                 }
 
                 const value = matches[3];
+                if (paranoid.test(value)) {
+                    throw new ResourceValidationError('Potential SQL in value', [{
+                        message: `${matches[3]} invalid`,
+                        type: 'invalid-term',
+                        path: [],
+                        context: {},
+                    }]);
+                }
                 // @ts-ignore
                 convertedFilter[field] = {
                     [operator]: value,

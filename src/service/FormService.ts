@@ -6,7 +6,7 @@ import {User} from '../auth/User';
 import TYPE from '../constant/TYPE';
 import InternalServerError from '../error/InternalServerError';
 import ResourceNotFoundError from '../error/ResourceNotFoundError';
-import ValidationError from '../error/ValidationError';
+import ResourceValidationError from '../error/ResourceValidationError';
 import {Form} from '../model/Form';
 import {FormComment} from '../model/FormComment';
 import {FormSchemaValidator} from '../model/FormSchemaValidator';
@@ -39,7 +39,8 @@ export class FormService {
         const validationResult: ValidationResult<object> = this.formSchemaValidator.validate(payload);
         if (validationResult.error) {
             logger.error('Failed validation on create', validationResult.error.details);
-            return Promise.reject(new ValidationError('Failed to validate form', validationResult.error.details));
+            return Promise.reject(new ResourceValidationError('Failed to validate form',
+                validationResult.error.details));
         }
         // @ts-ignore
         const title: string = payload.title;
@@ -114,7 +115,7 @@ export class FormService {
                         },
                     );
                 }
-                throw new ValidationError(`Form already exists`, validationErrors);
+                throw new ResourceValidationError(`Form already exists`, validationErrors);
             }
             const defaultRole = await Role.defaultRole();
 
@@ -366,7 +367,8 @@ export class FormService {
         const validationResult: ValidationResult<object> = this.formSchemaValidator.validate(form);
         if (validationResult.error) {
             logger.error('Failed to update from', validationResult.error.details);
-            return Promise.reject(new ValidationError('Failed to validate form', validationResult.error.details));
+            return Promise.reject(new ResourceValidationError('Failed to validate form',
+                validationResult.error.details));
         }
 
         const currentDate = new Date();

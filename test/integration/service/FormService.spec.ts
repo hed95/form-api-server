@@ -9,7 +9,7 @@ import {Op} from "sequelize";
 import {User} from "../../../src/auth/User";
 
 import ResourceNotFoundError from "../../../src/error/ResourceNotFoundError";
-import ValidationError from "../../../src/error/ValidationError";
+import ResourceValidationError from "../../../src/error/ResourceValidationError";
 import {basicForm} from "../../form";
 import {FormComment} from "../../../src/model/FormComment";
 import {QueryParser} from "../../../src/util/QueryParser";
@@ -448,8 +448,8 @@ describe("FormService", () => {
         try {
             await formService.create(user, {});
         } catch (err) {
-            expect(err instanceof ValidationError).to.eq(true);
-            const validationError = err as ValidationError;
+            expect(err instanceof ResourceValidationError).to.eq(true);
+            const validationError = err as ResourceValidationError;
             expect(validationError.get().length).to.be.eq(4);
         }
     });
@@ -754,8 +754,8 @@ describe("FormService", () => {
         try {
             await formService.create(user, basicForm);
         } catch (e) {
-            expect(e instanceof ValidationError).to.be.eq(true);
-            const validationError = e as ValidationError;
+            expect(e instanceof ResourceValidationError).to.be.eq(true);
+            const validationError = e as ResourceValidationError;
             expect(validationError.get().length).to.be.eq(3);
         }
 

@@ -4,7 +4,7 @@ import TYPE from "../../../src/constant/TYPE";
 import {RoleService} from "../../../src/service/RoleService";
 import {User} from "../../../src/auth/User";
 import {Role} from "../../../src/model/Role";
-import ValidationError from "../../../src/error/ValidationError";
+import ResourceValidationError from "../../../src/error/ResourceValidationError";
 
 
 describe('RoleService', () => {
@@ -44,8 +44,8 @@ describe('RoleService', () => {
            const user: User = new User("test", "test", []);
            await roleService.createRoles(rolesToCreate, user);
        }  catch (e) {
-           expect(e instanceof ValidationError);
-           const error = e as ValidationError;
+           expect(e instanceof ResourceValidationError);
+           const error = e as ResourceValidationError;
            expect(error.get().length).to.be.eq(2)
        }
     });

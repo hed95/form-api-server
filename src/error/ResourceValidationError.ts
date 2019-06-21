@@ -1,6 +1,6 @@
 import {ValidationErrorItem} from '@hapi/joi';
 
-class ValidationError extends Error {
+class ResourceValidationError extends Error {
     private readonly errors: ValidationErrorItem[];
 
     constructor(message: string, errors: ValidationErrorItem[]) {
@@ -8,7 +8,7 @@ class ValidationError extends Error {
         this.name = this.constructor.name;
         this.errors = errors;
         Error.captureStackTrace(this, this.constructor);
-        Object.setPrototypeOf(this, ValidationError.prototype);
+        Object.setPrototypeOf(this, ResourceValidationError.prototype);
     }
 
     public get() {
@@ -16,4 +16,4 @@ class ValidationError extends Error {
     }
 }
 
-export default ValidationError;
+export default ResourceValidationError;

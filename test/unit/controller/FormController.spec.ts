@@ -10,7 +10,7 @@ import {Arg, Substitute} from '@fluffy-spoon/substitute';
 import ResourceNotFoundError from "../../../src/error/ResourceNotFoundError";
 import InternalServerError from "../../../src/error/InternalServerError";
 import {Form} from "../../../src/model/Form";
-import ValidationError from "../../../src/error/ValidationError";
+import ResourceValidationError from "../../../src/error/ResourceValidationError";
 import {FormComment} from "../../../src/model/FormComment";
 import {Role} from "../../../src/model/Role";
 import {MockRequest} from "../../MockRequest";
@@ -131,7 +131,7 @@ describe("FormController", () => {
         const user = new User("id", "email");
 
         // @ts-ignore
-        formService.create(Arg.any(), Arg.any()).returns(Promise.reject(new ValidationError("Failed validation", [])));
+        formService.create(Arg.any(), Arg.any()).returns(Promise.reject(new ResourceValidationError("Failed validation", [])));
 
         await formController.create({}, mockRequest, mockResponse, user);
         expect(mockResponse.getStatus()).to.eq(400);

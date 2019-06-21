@@ -7,7 +7,7 @@ import {Arg, Substitute} from '@fluffy-spoon/substitute';
 import {MockRequest} from "../../MockRequest";
 import {RoleService} from "../../../src/service/RoleService";
 import {User} from "../../../src/auth/User";
-import ValidationError from "../../../src/error/ValidationError";
+import ResourceValidationError from "../../../src/error/ResourceValidationError";
 import {FormVersion} from "../../../src/model/FormVersion";
 import {Role} from "../../../src/model/Role";
 
@@ -40,7 +40,7 @@ describe("RoleController", () => {
     it('throws 400 for bad roles', async () => {
         const user = new User("id", "email");
         // @ts-ignore
-        roleService.createRoles(Arg.any(), Arg.any()).returns(Promise.reject(new ValidationError("Failed", [])));
+        roleService.createRoles(Arg.any(), Arg.any()).returns(Promise.reject(new ResourceValidationError("Failed", [])));
         await rolesController.create([], mockResponse, user);
         expect(mockResponse.getStatus()).to.be.eq(400);
     });

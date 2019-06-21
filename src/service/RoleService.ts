@@ -9,7 +9,7 @@ import {User} from '../auth/User';
 import logger from '../util/logger';
 import * as Joi from '@hapi/joi';
 import {ValidationResult} from '@hapi/joi';
-import ValidationError from '../error/ValidationError';
+import ResourceValidationError from '../error/ResourceValidationError';
 
 @provide(TYPE.RoleService)
 export class RoleService {
@@ -29,7 +29,7 @@ export class RoleService {
         });
 
         if (validation.error) {
-            throw new ValidationError('Roles not complete', validation.error.details);
+            throw new ResourceValidationError('Roles not complete', validation.error.details);
         }
 
         const profiler = logger.startTimer();

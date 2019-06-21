@@ -16,5 +16,5 @@ before(async () => {
     process.env.NODE_ENV = "test";
     sequelizeProvider = applicationContext.get(TYPE.SequelizeProvider);
     await sequelizeProvider.getSequelize().sync({force: true});
-    await sequelizeProvider.initDefaultRole();
+    await SequelizeProvider.initDefaultRole();
 });
