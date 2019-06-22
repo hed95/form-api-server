@@ -24,12 +24,30 @@ describe('Validation Service', () => {
         formService.findForm(Arg.any(), Arg.any()).returns(Promise.resolve(version));
 
         const result = await underTest.validate("formId", {
-            data: {
-                textField: null
+            "data" : {
+                "textField" : null
+
             }
         }, user);
 
        expect(result.length).to.be.eq(1);
+    });
+
+    it('validation successful', async () => {
+        const user = new User("id", "email");
+        Object.assign(FormVersion, {});
+        const version: FormVersion = Object.assign(FormVersion.prototype, {});
+        version.schema = basicForm;
+        // @ts-ignore
+        formService.findForm(Arg.any(), Arg.any()).returns(Promise.resolve(version));
+
+        const result = await underTest.validate("formId", {
+            data: {
+                textField: 'xxxx'
+            }
+        }, user);
+
+        expect(result.length).to.be.eq(0);
     });
 
     it('can validate number field', async() => {

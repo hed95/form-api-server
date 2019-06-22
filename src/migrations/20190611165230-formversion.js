@@ -5,7 +5,7 @@ const DataType = require("sequelize");
 module.exports = {
     up: (queryInterface, Sequelize) => {
         return queryInterface.createTable("FORMVERSION", {
-            id: {
+            versionId: {
                 type: DataType.UUID,
                 primaryKey: true,
                 allowNull: false,
@@ -19,7 +19,7 @@ module.exports = {
                 type: DataType.STRING,
                 allowNull: false
             },
-            updatedBy: {
+            createdBy: {
                 type: DataType.STRING,
                 allowNull: false
             },

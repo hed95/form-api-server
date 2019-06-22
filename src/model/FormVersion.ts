@@ -8,13 +8,13 @@ export class FormVersion extends Model<FormVersion> {
         defaultValue: DataType.UUIDV4,
         primaryKey: true,
     })
-    public id: string;
+    public versionId: string;
 
     @UpdatedAt
     public updatedOn: Date;
 
     @Column
-    public updatedBy: string;
+    public createdBy: string;
 
     @AllowNull(false)
     @Column({

@@ -29,9 +29,13 @@ import {FormComment} from '../model/FormComment';
 import {FormVersion} from '../model/FormVersion';
 import {Role} from '../model/Role';
 import {FormService} from '../service/FormService';
-import logger from '../util/logger';
 import {QueryParser} from '../util/QueryParser';
 import Validator from 'validator';
+import {ValidationService} from '../service/ValidationService';
+import {ValidationError} from '@hapi/joi';
+import {FormResourceAssembler} from './FormResourceAssembler';
+import logger from '../util/logger';
+import _ from 'lodash';
 
 @ApiPath({
     path: '/forms',
@@ -43,7 +47,10 @@ export class FormController extends BaseHttpController {
 
     private readonly queryParser: QueryParser = new QueryParser();
 
-    constructor(@inject(TYPE.FormService) private readonly formService: FormService) {
+    constructor(@inject(TYPE.FormService) private readonly formService: FormService,
+                @inject(TYPE.ValidationService) private readonly validationService: ValidationService,
+                @inject(TYPE.FormResourceAssembler) private readonly formResourceAssembler: FormResourceAssembler,
+    ) {
         super();
     }
 
@@ -69,6 +76,7 @@ export class FormController extends BaseHttpController {
     })
     @httpGet('/:id', TYPE.ProtectMiddleware)
     public async get(@requestParam('id') id: string,
+                     @request() req: express.Request,
                      @response() res: express.Response,
                      @principal() currentUser: User): Promise<void> {
         const isUUID: boolean = Validator.isUUID(id);
@@ -88,17 +96,47 @@ export class FormController extends BaseHttpController {
                     resource: 'Form',
                 });
             } else {
-                res.json(formVersion);
+                const form = this.formResourceAssembler.toResource(formVersion, req);
+                res.json(form);
             }
         }
     }
 
-    @httpPost('/:id/submission', TYPE.ProtectMiddleware)
+    @httpPost('/:id/validate', TYPE.ProtectMiddleware)
     public async validateSubmission(@requestParam('id') id: string,
-                                    @requestBody() form: object,
+                                    @requestBody() submission: object,
                                     @response() res: express.Response,
                                     @principal() currentUser: User): Promise<void> {
-        logger.info(`Initiating a submission for validation`);
+        logger.info(`Initiating a submission for validation ${JSON.stringify(submission)}`);
+        try {
+            const validationErrors: ValidationError[] = await this.validationService.validate(id,
+                submission,
+                currentUser);
+            if (validationErrors.length !== 0) {
+                res.status(400).send(validationErrors);
+            } else {
+                res.sendStatus(200);
+            }
+        } catch (e) {
+            if (e instanceof ResourceNotFoundError) {
+                res.status(404).send({
+                    id,
+                    exception: 'Resource not found',
+                    resource: 'Form',
+                });
+            } else if (e instanceof ResourceValidationError) {
+                const validationError = e as ResourceValidationError;
+                res.status(400);
+                res.json({
+                    exception: validationError.get(),
+                });
+
+            } else {
+                res.status(500).send({
+                    exception: e.toString(),
+                });
+            }
+        }
     }
 
     @httpGet('/', TYPE.ProtectMiddleware)
@@ -107,7 +145,8 @@ export class FormController extends BaseHttpController {
                           @queryParam('select') attributes: string = null,
                           @queryParam('filter') filter: string = null,
                           @principal() currentUser: User,
-                          @response() res: express.Response): Promise<{ total: number, forms: FormVersion[] }> {
+                          @request() req: express.Request,
+                          @response() res: express.Response): Promise<{ total: number, forms: object[] }> {
 
         try {
             const filterQuery: object = filter && filter.split(',').length !== 0 ?
@@ -115,13 +154,23 @@ export class FormController extends BaseHttpController {
 
             const fieldAttributes: string[] = attributes ? attributes.split(',') : [];
 
-            return await
+            const result: { total: number, forms: FormVersion[] } = await
                 this.formService.getAllForms(currentUser,
                     limit,
                     offset,
                     filterQuery,
                     fieldAttributes);
-
+            const forms: { total: number, forms: object[] } = {
+                total: 0,
+                forms: [],
+            };
+            if (result.total !== 0) {
+                forms.total = result.total;
+                forms.forms = _.map(result.forms, (form: FormVersion) =>  {
+                    return this.formResourceAssembler.toResource(form, req);
+                });
+            }
+            return forms;
         } catch (e) {
             if (e instanceof ResourceValidationError) {
                 const validationError = e as ResourceValidationError;
@@ -143,6 +192,7 @@ export class FormController extends BaseHttpController {
     public async allVersions(@requestParam('id') id: string,
                              @queryParam('offset') offset: number = 0,
                              @queryParam('limit') limit: number = 20,
+                             @request() req: express.Request,
                              @response() res: express.Response,
                              @principal() currentUser: User): Promise<void> {
 
@@ -153,7 +203,15 @@ export class FormController extends BaseHttpController {
                 versions: FormVersion[],
                 total: number,
             } = await this.formService.findAllVersions(id, offset, limit, currentUser);
-            res.json(result);
+
+            res.json({
+                offset: result.offset,
+                limit: result.limit,
+                total: result.total,
+                versions: _.map(result.versions, (version: FormVersion) => {
+                    return this.formResourceAssembler.toResource(version, req, true);
+                }),
+            });
         } catch (e) {
             if (e instanceof ResourceNotFoundError) {
                 res.status(404).send({
@@ -229,7 +287,7 @@ export class FormController extends BaseHttpController {
         try {
 
             const formVersion = await this.formService.create(currentUser, form);
-            res.setHeader('Location', `${req.path}/${formVersion.form.id}`);
+            res.setHeader('Location', `${req.baseUrl}${req.path}/${formVersion}`);
             res.sendStatus(201);
         } catch (err) {
             if (err instanceof ResourceValidationError) {

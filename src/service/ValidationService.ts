@@ -33,7 +33,7 @@ export class ValidationService {
         }
         // @ts-ignore
         if (!submission.data) {
-            logger.warning(`No submission data provided for validation`);
+            logger.warn(`No submission data provided for validation`);
             throw new ResourceValidationError(`No submission data provided`, [{
                 message: 'No submission data provided to validate',
                 path: ['data'],
@@ -45,12 +45,14 @@ export class ValidationService {
         const schema = this.buildSchema({}, form.schema.components, submission.data, submission);
 
         const validationErrors: ValidationError[] = [];
-
         await JoiX.validate(submission.data, schema, {stripUnknown: true, abortEarly: false},
-            (validationError: ValidationError, value: object) => {
-                validationErrors.push(validationError);
+                (validationError: ValidationError, value: object) => {
+                if (validationError) {
+                    validationErrors.push(validationError);
+                }
             });
 
+        logger.info(`Validation errors ${validationErrors.length}`);
         return Promise.resolve(validationErrors);
     }
 
@@ -120,7 +122,7 @@ export class ValidationService {
 
                     _.set(row, component.key, sandbox.value);
                 } catch (e) {
-                    logger.error("Failed to evaluate calculatedValue", e);
+                    logger.error('Failed to evaluate calculatedValue', e);
                 }
             } else {
                 try {
@@ -130,7 +132,7 @@ export class ValidationService {
                         _,
                     }));
                 } catch (e) {
-                    logger.error("Failed to evaluate calculatedValue", e);
+                    logger.error('Failed to evaluate calculatedValue', e);
                 }
             }
         }

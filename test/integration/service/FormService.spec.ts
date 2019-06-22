@@ -174,19 +174,19 @@ describe("FormService", () => {
         }).save();
 
 
-        const latest: FormVersion = await formService.restore(form.id, oldVersion.id);
+        const latest: FormVersion = await formService.restore(form.id, oldVersion.versionId);
 
-        expect(latest.id).to.eq(oldVersion.id);
+        expect(latest.versionId).to.eq(oldVersion.versionId);
         expect(latest.validTo).to.be.null;
         expect(latest.latest).to.be.eq(true);
 
         const user = new User("id", "test", [role]);
         const loaded: FormVersion = await formService.findForm(form.id, user);
-        expect(loaded.id).to.be.eq(latest.id);
+        expect(loaded.versionId).to.be.eq(latest.versionId);
 
         const result = await FormVersion.findOne({
             where: {
-                id: {[Op.eq]: lastVersion.id}
+                versionId: {[Op.eq]: lastVersion.versionId}
             }
         });
         expect(result.validTo).to.be.not.null;
@@ -466,9 +466,8 @@ describe("FormService", () => {
         basicForm.title = "new";
         const version = await formService.create(user, basicForm);
         expect(version).to.be.not.null;
-        expect(version.schema).to.be.not.null;
 
-        const loaded = await formService.findForm(version.formId, user);
+        const loaded = await formService.findForm(version, user);
         expect(loaded).to.be.not.null;
         expect(loaded.form.roles.length).to.eq(1);
         expect(loaded.form.roles[0].name).to.eq("anonymous");
@@ -484,15 +483,14 @@ describe("FormService", () => {
         basicForm.name = "new2";
         basicForm.path = "new2";
         basicForm.title = "new2";
-        const version = await formService.create(user, basicForm);
-        expect(version).to.be.not.null;
-        expect(version.schema).to.be.not.null;
+        const formId: string = await formService.create(user, basicForm);
+        expect(formId).to.be.not.null;
 
 
-        const deleted = await formService.delete(version.formId, user);
+        const deleted = await formService.delete(formId, user);
         expect(deleted).to.eq(true);
 
-        const loaded = await formService.findForm(version.formId, user);
+        const loaded = await formService.findForm(formId, user);
         expect(loaded).to.be.null;
 
     });

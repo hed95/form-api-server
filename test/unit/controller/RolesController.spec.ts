@@ -20,7 +20,7 @@ describe("RoleController", () => {
 
     beforeEach(() => {
         mockResponse = new MockResponse();
-        mockRequest = new MockRequest("/roles");
+        mockRequest = new MockRequest("/roles", "/baseUrl");
         roleService = Substitute.for<RoleService>();
         rolesController = new RolesController(roleService);
 

@@ -30,7 +30,7 @@ describe("FormVersion", () => {
         expect(result.id).to.not.be.null;
         expect(result.schema).to.eq(schema);
         expect(result.formId).to.not.eq('');
-        const loaded = await FormVersion.findByPk(result.id, {
+        const loaded = await FormVersion.findByPk(result.versionId, {
             include: [
                 {model: Form}
             ]

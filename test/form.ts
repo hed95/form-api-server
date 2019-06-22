@@ -1,5 +1,4 @@
 export const basicForm: any = {
-    "_id": "5d0b8b8b2d590d00161be8f6",
     "type": "form",
     "components": [
         {

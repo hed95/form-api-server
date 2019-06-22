@@ -35,7 +35,7 @@ export class FormService {
         this.roleService = roleService;
     }
 
-    public async create(user: User, payload: object): Promise<FormVersion> {
+    public async create(user: User, payload: object): Promise<string> {
         const validationResult: ValidationResult<object> = this.formSchemaValidator.validate(payload);
         if (validationResult.error) {
             logger.error('Failed validation on create', validationResult.error.details);
@@ -125,29 +125,18 @@ export class FormService {
             });
             const rolesToApply: Role[] = roles.length === 0 ? [defaultRole] : roles;
             await form.$add('roles', rolesToApply);
-            // @ts-ignore
-            payload._id = form.id;
-
             const today = new Date();
-            const formVersion = await this.formVersionRepository.create({
+            await this.formVersionRepository.create({
                 schema: payload,
                 formId: form.id,
                 validFrom: today,
                 validTo: null,
                 latest: true,
-                updatedBy: user.details.email,
+                createdBy: user.details.email,
             });
 
-            const createdVersion = await this.formVersionRepository.findByPk(formVersion.id, {
-                include: [{
-                    model: Form, include: [{
-                        model: Role,
-                    }],
-                }],
-            });
             profiler.done({message: 'Created form', user: user.details.email});
-            return createdVersion;
-
+            return form.id;
         });
     }
 
@@ -244,7 +233,7 @@ export class FormService {
             }
             const versionToRestore = await this.formVersionRepository.findOne({
                 where: {
-                    id: {
+                    versionId: {
                         [Op.eq]: formVersionId,
                     },
                 },
@@ -288,7 +277,9 @@ export class FormService {
                     },
                 },
                 include: [{
-                    model: Form, include: [{
+                    model: Form,
+                    attributes: ['id'],
+                    include: [{
                         model: Role,
                         as: 'roles',
                         attributes: ['id', 'name'],
