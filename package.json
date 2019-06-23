@@ -10,7 +10,7 @@
     "serve": "node dist/bootstrap.js",
     "watch-node": "nodemon dist/bootstrap.js",
     "watch-ts": "tsc -w",
-    "test": "npm run test:all ",
+    "test": "npm run test:all",
     "clean-coverage": "rm -rf ./coverage",
     "tslint": "tslint --project tsconfig.json",
     "tslint:fix": "tslint --project tsconfig.json --fix",

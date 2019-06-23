@@ -12,6 +12,8 @@ import {ApplicationContext} from './container/ApplicationContext';
 import './controller';
 import {SequelizeProvider} from './model/SequelizeProvider';
 import logger from './util/logger';
+import ResourceNotFoundError from './error/ResourceNotFoundError';
+import ResourceValidationError from './error/ResourceValidationError';
 
 const port = process.env.PORT || 3000;
 const applicationContext: ApplicationContext = new ApplicationContext();
@@ -64,6 +66,47 @@ server.setConfig((app: express.Application) => {
         optionsSuccessStatus: 200,
     }));
     app.use(bodyParser.json());
+}).setErrorConfig((app: express.Application) => {
+    app.use((err: Error,
+             req: express.Request,
+             res: express.Response,
+             next: express.NextFunction) => {
+        logger.error('An exception occurred', {
+            exception: err,
+        });
+        // @ts-ignore
+        const user: string = req.kauth.grant.access_token.content.email;
+        if (err instanceof ResourceNotFoundError) {
+            const resourceNotFoundError = err as ResourceNotFoundError;
+            res.status(404);
+            res.json({
+                message: resourceNotFoundError.message,
+                type: 'RESOURCE_NOT_FOUND',
+                requestedBy: user,
+                path: req.path,
+                method: req.method,
+            });
+        } else if (err instanceof ResourceValidationError) {
+            const validationError = err as ResourceValidationError;
+            res.status(400);
+            res.json({
+                validationErrors: validationError.get(),
+                type: 'VALIDATION_FAILURE',
+                requestedBy: user,
+                path: req.path,
+                method: req.method,
+            });
+        } else {
+            res.status(500);
+            res.json({
+                exception: err.toString(),
+                type: 'APPLICATION_ERROR',
+                requestedBy: user,
+                path: req.path,
+                method: req.method,
+            });
+        }
+    });
 });
 
 const expressApplication = server.build();

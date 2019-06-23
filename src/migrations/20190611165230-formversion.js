@@ -23,6 +23,10 @@ module.exports = {
                 type: DataType.STRING,
                 allowNull: false
             },
+            updatedBy: {
+                type: DataType.STRING,
+                allowNull: true
+            },
             schema: {
                 type: DataType.JSONB,
                 allowNull: false

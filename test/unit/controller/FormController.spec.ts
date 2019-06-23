@@ -7,16 +7,12 @@ import {MockResponse} from "../../MockResponse";
 import {User} from "../../../src/auth/User";
 import {FormVersion} from "../../../src/model/FormVersion";
 import {Arg, Substitute} from '@fluffy-spoon/substitute';
-import ResourceNotFoundError from "../../../src/error/ResourceNotFoundError";
-import InternalServerError from "../../../src/error/InternalServerError";
 import {Form} from "../../../src/model/Form";
-import ResourceValidationError from "../../../src/error/ResourceValidationError";
 import {FormComment} from "../../../src/model/FormComment";
 import {Role} from "../../../src/model/Role";
 import {MockRequest} from "../../MockRequest";
 import {ValidationService} from "../../../src/service/ValidationService";
 import {FormResourceAssembler} from "../../../src/controller/FormResourceAssembler";
-import {any} from "@hapi/joi";
 
 describe("FormController", () => {
 
@@ -61,15 +57,6 @@ describe("FormController", () => {
         expect(JSON.stringify(mockResponse.getJsonData())).to.be.eq(JSON.stringify(version.schema));
     });
 
-    it('returns 404 if form not present', async () => {
-        const user = new User("id", "email");
-
-        // @ts-ignore
-        formService.findForm(Arg.any(), Arg.any()).returns(Promise.resolve(null));
-
-        await formController.get("ea1ddad5-aec3-44a4-a730-07b50b8be752", mockRequest,mockResponse, user);
-        expect(mockResponse.getStatus()).to.eq(404);
-    });
 
     it('returns all versions', async () => {
 
@@ -97,27 +84,6 @@ describe("FormController", () => {
 
     });
 
-    it('throws exception if form not accessible for versions', async () => {
-        const user = new User("id", "email");
-
-        // @ts-ignore
-        formService.findAllVersions(Arg.any(), Arg.any(), Arg.any(), Arg.any()).returns(Promise.reject(new ResourceNotFoundError("Not found")));
-
-        await formController.allVersions("id", 0, 20, mockRequest, mockResponse, user);
-        expect(mockResponse.getStatus()).to.eq(404);
-    });
-
-    it('throws exception for internal exception', async () => {
-        const user = new User("id", "email");
-
-        // @ts-ignore
-        formService.findAllVersions(Arg.any(), Arg.any(), Arg.any(), Arg.any()).returns(Promise.reject(new InternalServerError("Something went wrong")));
-
-        await formController.allVersions("id", 0, 20, mockRequest, mockResponse, user);
-        expect(mockResponse.getStatus()).to.eq(500);
-        expect(mockResponse.getJsonData().exception).to.eq("InternalServerError: Something went wrong");
-    });
-
     it('can create a form', async () => {
         const user = new User("id", "email");
         Object.assign(FormVersion, {});
@@ -140,25 +106,6 @@ describe("FormController", () => {
 
     });
 
-    it('cannot create a form if validation fails', async () => {
-        const user = new User("id", "email");
-
-        // @ts-ignore
-        formService.create(Arg.any(), Arg.any()).returns(Promise.reject(new ResourceValidationError("Failed validation", [])));
-
-        await formController.create({}, mockRequest, mockResponse, user);
-        expect(mockResponse.getStatus()).to.eq(400);
-    });
-
-    it('returns 500 if something went wrong', async () => {
-        const user = new User("id", "email");
-
-        // @ts-ignore
-        formService.create(Arg.any(), Arg.any()).returns(Promise.reject(new InternalServerError("Something went wrong")));
-
-        await formController.create({}, mockRequest, mockResponse, user);
-        expect(mockResponse.getStatus()).to.eq(500);
-    });
 
     it('can create a comment', async () => {
         const user = new User("id", "email");
@@ -174,31 +121,7 @@ describe("FormController", () => {
 
     });
 
-    it('fails to create comment if service throws ResourceNotFound', async () => {
-        const user = new User("id", "email");
-        const formComment: FormComment = Object.assign(FormComment.prototype, {});
-        formComment.comment = "Hello";
 
-        // @ts-ignore
-        formService.createComment("formId", user, formComment).returns(Promise.reject(new ResourceNotFoundError("Failed")));
-
-        await formController.createComment("formId", formComment, mockResponse, user);
-
-        expect(mockResponse.getStatus()).to.eq(404);
-    });
-
-    it('returns 500 for any internal server error', async () => {
-        const user = new User("id", "email");
-        const formComment: FormComment = Object.assign(FormComment.prototype, {});
-        formComment.comment = "Hello";
-
-        // @ts-ignore
-        formService.createComment("formId", user, formComment).returns(Promise.reject(new InternalServerError("Failed")));
-
-        await formController.createComment("formId", formComment, mockResponse, user);
-
-        expect(mockResponse.getStatus()).to.eq(500);
-    });
 
     it('can update form roles', async () => {
         const user = new User("id", "email");

@@ -17,6 +17,7 @@ import logger from '../util/logger';
 import _ from 'lodash';
 import {Sequelize} from 'sequelize-typescript';
 import {RoleService} from './RoleService';
+import Validator from 'validator';
 
 @provide(TYPE.FormService)
 export class FormService {
@@ -258,6 +259,21 @@ export class FormService {
     }
 
     public async findForm(formId: string, user: User): Promise<FormVersion> {
+        const isUUID: boolean = Validator.isUUID(formId);
+        if (!isUUID) {
+            throw new ResourceValidationError('Validation failure', [
+                {
+                    message: `${formId} not valid UUID`,
+                    path: ['id'],
+                    type: 'invalid',
+                    context: {
+                        key: 'id',
+                        label: 'id',
+                    },
+                },
+            ]);
+        }
+
         const profiler = logger.startTimer();
         try {
             const defaultRole = await Role.defaultRole();
@@ -364,10 +380,11 @@ export class FormService {
 
         const currentDate = new Date();
         return this.formVersionRepository.sequelize.transaction(async () => {
+            const userId = currentUser.details.email;
             await oldVersion.update({
                 validTo: currentDate,
                 latest: false,
-                updateBy: currentUser.details.email,
+                updatedBy: userId,
             });
             logger.info('Updated previous version to be invalid');
 
@@ -375,7 +392,7 @@ export class FormService {
                 schema: form,
                 formId: oldVersion.form.id,
                 validFrom: currentDate,
-                updatedBy: currentUser.details.email,
+                createdBy: userId,
                 validaTo: null,
                 latest: true,
             }).save({});

@@ -16,6 +16,9 @@ export class FormVersion extends Model<FormVersion> {
     @Column
     public createdBy: string;
 
+    @Column
+    public updatedBy: string;
+
     @AllowNull(false)
     @Column({
         type: DataType.JSONB,
