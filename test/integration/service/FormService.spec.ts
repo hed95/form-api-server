@@ -13,6 +13,8 @@ import ResourceValidationError from "../../../src/error/ResourceValidationError"
 import {basicForm} from "../../form";
 import {FormComment} from "../../../src/model/FormComment";
 import {QueryParser} from "../../../src/util/QueryParser";
+import _ from 'lodash';
+import logger from "../../../src/util/logger";
 
 describe("FormService", () => {
 
@@ -897,7 +899,7 @@ describe("FormService", () => {
 
     });
 
-    it('can find title with startsWith', async() => {
+    it('can find title with startsWith', async () => {
         await formRepository.sequelize.transaction(async (transaction: any) => {
             const form = await formRepository.create({
                 createdBy: `test@test.com`
@@ -925,11 +927,78 @@ describe("FormService", () => {
         expect(results.total).to.be.eq(1);
     });
 
-    it('can update form', async() => {
+    it('can update form', async () => {
 
+        const role = new Role({
+            name: "Test Role New One two three",
+            title: "Test title",
+            active: true
+        });
+        const user = new User("id", "test", [role]);
+        basicForm.name = "newForm";
+        basicForm.path = "newForm";
+        basicForm.title = "newForm";
+        const version = await formService.create(user, basicForm);
 
+        expect(version).to.be.not.null;
+        let loaded = await formService.findForm(version, user);
+        // @ts-ignore
+        expect(loaded.schema.components.length).to.be.eq(2);
 
-    })
+        const toUpdate = _.cloneDeep(basicForm);
+        toUpdate.components.push({
+            "label": "Text Field A",
+            "widget": {
+                "type": "input"
+            },
+            "tableView": true,
+            "inputFormat": "plain",
+            "validate": {
+                "required": true
+            },
+            "key": "textFieldABC",
+            "type": "textfield",
+            "input": true
+        });
+
+        const updated = await formService.update(version, toUpdate, user);
+        expect(updated).to.be.not.null;
+
+        loaded = await formService.findForm(version, user);
+        // @ts-ignore
+        expect(loaded.schema.components.length).to.be.eq(3);
+    });
+
+    it('throws exception if formid for update does not exist', async () => {
+        try {
+            const user = new User("id", "test", [role]);
+            await formService.update('xxxx', basicForm, user);
+        } catch (e) {
+            expect(e instanceof ResourceNotFoundError).to.be.eq(true);
+        }
+    });
+    it('throws exception if form to update is invalid', async () => {
+        try {
+            const role = new Role({
+                name: "Test Role New One two three",
+                title: "Test title",
+                active: true
+            });
+            const user = new User("id", "test", [role]);
+            basicForm.name = "newForm";
+            basicForm.path = "newForm";
+            basicForm.title = "newForm";
+            const version = await formService.create(user, basicForm);
+
+            delete basicForm.name;
+            delete basicForm.title;
+
+            await formService.update(version, basicForm, user);
+        } catch (e) {
+            logger.error(e);
+            expect(e instanceof ResourceValidationError).to.be.eq(true);
+        }
+    });
 });
 
 
