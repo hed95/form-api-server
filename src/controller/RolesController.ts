@@ -15,7 +15,7 @@ import logger from '../util/logger';
 import {User} from '../auth/User';
 import * as express from 'express';
 import {RoleService} from '../service/RoleService';
-import ResourceValidationError from '../error/ResourceValidationError';
+import HttpStatus from 'http-status-codes';
 
 @controller('/roles')
 export class RolesController extends BaseHttpController {
@@ -41,22 +41,7 @@ export class RolesController extends BaseHttpController {
                         @response() res: express.Response,
                         @principal() currentUser: User): Promise<void> {
         logger.info(`Adding new roles`);
-        try {
-            await this.roleService.createRoles(roles, currentUser);
-            res.sendStatus(201);
-        } catch (e) {
-            if (e instanceof ResourceValidationError) {
-                const validationError = e as ResourceValidationError;
-                res.status(400);
-                res.json({
-                    exception: validationError.get(),
-                });
-            } else {
-                res.status(500);
-                res.json({
-                    exception: e.toString(),
-                });
-            }
-        }
+        await this.roleService.createRoles(roles, currentUser);
+        res.sendStatus(HttpStatus.CREATED);
     }
 }

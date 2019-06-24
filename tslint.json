@@ -11,6 +11,9 @@
     "object-literal-sort-keys": [
       false
     ],
+    "no-magic-numbers": [
+      true
+    ],
     "no-console": [
       true
     ],
@@ -18,6 +21,8 @@
       true,
       "single"
     ],
+    "curly": true,
+    "await-promise": true,
     "only-arrow-functions": true,
     "no-unused-variable": [
       true,

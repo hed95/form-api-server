@@ -34,6 +34,7 @@ import logger from '../util/logger';
 import _ from 'lodash';
 import {ValidationError} from '@hapi/joi';
 import InternalServerError from '../error/InternalServerError';
+import HttpStatus from 'http-status-codes';
 
 @ApiPath({
     path: '/forms',
@@ -92,9 +93,9 @@ export class FormController extends BaseHttpController {
             submission,
             currentUser);
         if (validationErrors.length !== 0) {
-            res.status(400).send(validationErrors);
+            res.status(HttpStatus.BAD_REQUEST).send(validationErrors);
         } else {
-            res.sendStatus(200);
+            res.sendStatus(HttpStatus.OK);
         }
     }
 
@@ -163,7 +164,7 @@ export class FormController extends BaseHttpController {
                         @principal() currentUser: User): Promise<void> {
 
         await this.formService.update(id, form, currentUser);
-        res.sendStatus(200);
+        res.sendStatus(HttpStatus.OK);
     }
 
     @httpPut('/:id/roles', TYPE.ProtectMiddleware)
@@ -171,7 +172,7 @@ export class FormController extends BaseHttpController {
                              @requestBody() roles: Role[], @response() res: express.Response,
                              @principal() currentUser: User): Promise<void> {
         await this.formService.updateRoles(id, roles, currentUser);
-        res.status(200);
+        res.status(HttpStatus.OK);
     }
 
     @httpPost('/', TYPE.ProtectMiddleware)
@@ -182,7 +183,7 @@ export class FormController extends BaseHttpController {
         logger.info(`Creating new form`);
         const formVersion = await this.formService.create(currentUser, form);
         res.setHeader('Location', `${req.baseUrl}${req.path}/${formVersion}`);
-        res.sendStatus(201);
+        res.sendStatus(HttpStatus.CREATED);
     }
 
     @ApiOperationDelete({
@@ -214,7 +215,7 @@ export class FormController extends BaseHttpController {
         logger.info(`Deleting form with id ${id}`);
         const deleted = await this.formService.delete(id, currentUser);
         if (deleted) {
-            res.status(200);
+            res.status(HttpStatus.OK);
         }
         throw new InternalServerError(`Failed to delete form with id ${id}`);
     }
@@ -277,7 +278,7 @@ export class FormController extends BaseHttpController {
                                @principal() currentUser: User): Promise<void> {
 
         await this.formService.createComment(id, currentUser, comment);
-        res.sendStatus(201);
+        res.sendStatus(HttpStatus.CREATED);
 
     }
 

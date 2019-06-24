@@ -37,14 +37,6 @@ describe("RoleController", () => {
         expect(mockResponse.getStatus()).to.be.eq(201);
     });
 
-    it('throws 400 for bad roles', async () => {
-        const user = new User("id", "email");
-        // @ts-ignore
-        roleService.createRoles(Arg.any(), Arg.any()).returns(Promise.reject(new ResourceValidationError("Failed", [])));
-        await rolesController.create([], mockResponse, user);
-        expect(mockResponse.getStatus()).to.be.eq(400);
-    });
-
     it('can get roles by ids', async() => {
         Object.assign(Role, {});
         const role: Role = Object.assign(Role.prototype, {});

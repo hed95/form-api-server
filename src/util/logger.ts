@@ -10,7 +10,7 @@ const addXRequestId = winston.format((info) => {
 });
 
 const addUserId = winston.format((info) => {
-    info['user'] = httpContext.get('x-user-id');
+    info.user = httpContext.get('x-user-id');
     return info;
 });
 

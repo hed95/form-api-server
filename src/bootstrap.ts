@@ -18,8 +18,11 @@ import morgan, {TokenIndexer} from 'morgan';
 import {LoggerStream} from './util/LoggerStream';
 import httpContext from 'express-http-context';
 import uuid from 'uuid';
+import HttpStatus from 'http-status-codes';
 
-const port = process.env.PORT || 3000;
+const defaultPort: number = 3000;
+
+const port = process.env.PORT || defaultPort;
 const applicationContext: ApplicationContext = new ApplicationContext();
 
 const container = applicationContext.iocContainer();
@@ -93,10 +96,10 @@ server.setConfig((app: express.Application) => {
             return httpContext.get('x-request-id');
         });
         return JSON.stringify({
-            'method': tokens.method(req, res),
-            'url': tokens.url(req, res),
-            'status': tokens.status(req, res),
-            'responseTimeInMs': tokens['response-time-ms'](req, res)
+            method: tokens.method(req, res),
+            url: tokens.url(req, res),
+            status: tokens.status(req, res),
+            responseTimeInMs: tokens['response-time-ms'](req, res),
         });
     }, {
         stream: new LoggerStream(),
@@ -124,7 +127,7 @@ server.setConfig((app: express.Application) => {
         const xRequestId = httpContext.get('x-request-id');
         if (err instanceof ResourceNotFoundError) {
             const resourceNotFoundError = err as ResourceNotFoundError;
-            res.status(404);
+            res.status(HttpStatus.NOT_FOUND);
             res.json({
                 'message': resourceNotFoundError.message,
                 'type': 'RESOURCE_NOT_FOUND',
@@ -135,7 +138,7 @@ server.setConfig((app: express.Application) => {
             });
         } else if (err instanceof ResourceValidationError) {
             const validationError = err as ResourceValidationError;
-            res.status(400);
+            res.status(HttpStatus.BAD_REQUEST);
             res.json({
                 'validationErrors': validationError.get(),
                 'type': 'VALIDATION_FAILURE',
@@ -145,7 +148,7 @@ server.setConfig((app: express.Application) => {
                 'x-request-id': xRequestId,
             });
         } else {
-            res.status(500);
+            res.status(HttpStatus.INTERNAL_SERVER_ERROR);
             res.json({
                 'exception': err.toString(),
                 'type': 'APPLICATION_ERROR',

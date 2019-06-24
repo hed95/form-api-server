@@ -30,9 +30,14 @@ export class QueryParser {
         const convertedFilter: object = {};
         _.forEach(filters, (filter) => {
             if (reg.test(filter)) {
+
+                const fieldMatch: number = 1;
+                const operatorMatch: number = 2;
+                const valueMatch: number = 3;
+
                 const matches = filter.match(reg);
-                const field = `schema.${matches[1]}`;
-                const operator: symbol = Symbol.for(`${matches[2]}`);
+                const field = `schema.${matches[fieldMatch]}`;
+                const operator: symbol = Symbol.for(`${matches[operatorMatch]}`);
 
                 const foundOperator = _.find(this.operators, (op: symbol) => {
                     return op === operator;
@@ -40,17 +45,17 @@ export class QueryParser {
 
                 if (!foundOperator) {
                     throw new ResourceValidationError('Invalid operator', [{
-                        message: `${matches[2]} invalid operator`,
+                        message: `${matches[operatorMatch]} invalid operator`,
                         type: 'invalid-operator',
                         path: [],
                         context: {},
                     }]);
                 }
 
-                const value = matches[3];
+                const value = matches[valueMatch];
                 if (paranoid.test(value)) {
                     throw new ResourceValidationError('Potential SQL in value', [{
-                        message: `${matches[3]} invalid`,
+                        message: `${matches[valueMatch]} invalid`,
                         type: 'invalid-term',
                         path: [],
                         context: {},
