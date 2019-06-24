@@ -6,4 +6,7 @@ module.exports = {
         realm: process.env.AUTH_REALM || 'dev',
         confidentialPort: 0,
     },
+    admin: {
+        roles: process.env.ADMIN_ROLES ? process.env.ADMIN_ROLES.split(',') : [],
+    },
 };

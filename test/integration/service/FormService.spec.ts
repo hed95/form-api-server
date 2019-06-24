@@ -33,6 +33,7 @@ describe("FormService", () => {
         basicForm.title = "";
     });
 
+
     it('appcontext loads service and repository', async () => {
         const formService: FormService = applicationContext.get(TYPE.FormService);
         expect(formService).to.be.not.null;
@@ -1000,7 +1001,7 @@ describe("FormService", () => {
         }
     });
 
-    it('can find version by id', async() => {
+    it('can find version by id', async () => {
         const user = new User("id", "test", [role]);
         basicForm.name = "newFormA";
         basicForm.path = "newFormA";
@@ -1013,6 +1014,37 @@ describe("FormService", () => {
         const loaded = await formService.findByVersionId(versionLoaded.versionId, user);
         expect(loaded).to.be.not.null;
         expect(loaded.versionId).to.be.eq(versionLoaded.versionId);
+    });
+
+    it('can get all forms without any authorization rules', async () => {
+
+        const user = new User("id", "test", [role]);
+        basicForm.name = "newForm123A";
+        basicForm.path = "newForm123A";
+        basicForm.title = "newForm123A";
+
+        await formService.create(user, basicForm);
+
+
+        basicForm.name = "newForm123B";
+        basicForm.path = "newForm123B";
+        basicForm.title = "newForm123B";
+
+        await formService.create(user, basicForm);
+
+
+        basicForm.name = "newForm123C";
+        basicForm.path = "newForm123C";
+        basicForm.title = "newForm123C";
+
+        await formService.create(user, basicForm);
+
+
+        const result = await formService.allForms();
+
+        expect(result.total).to.be.gte(3);
+
+
     });
 });
 

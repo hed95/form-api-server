@@ -19,6 +19,7 @@ import {LoggerStream} from './util/LoggerStream';
 import httpContext from 'express-http-context';
 import uuid from 'uuid';
 import HttpStatus from 'http-status-codes';
+import UnauthorizedError from './error/UnauthorizedError';
 
 const defaultPort: number = 3000;
 
@@ -146,6 +147,16 @@ server.setConfig((app: express.Application) => {
                 'path': req.path,
                 'method': req.method,
                 'x-request-id': xRequestId,
+            });
+        } else if ( err instanceof UnauthorizedError) {
+            res.status(HttpStatus.UNAUTHORIZED);
+            res.json({
+                'type': 'UNAUTHORIZED',
+                'requestedBy': user,
+                'path': req.path,
+                'method': req.method,
+                'x-request-id': xRequestId,
+                'message' : 'You are not authorized to perform the operation',
             });
         } else {
             res.status(HttpStatus.INTERNAL_SERVER_ERROR);

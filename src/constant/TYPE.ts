@@ -12,4 +12,5 @@ export default {
     ValidationService: Symbol.for('ValidationService'),
     RoleService: Symbol.for('RoleService'),
     FormResourceAssembler: Symbol.for('FormResourceAssembler'),
+    AdminProtectMiddleware: Symbol.for('AdminProtectMiddleware'),
 };

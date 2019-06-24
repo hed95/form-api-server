@@ -14,6 +14,7 @@ import logger from '../util/logger';
 import {RoleService} from '../service/RoleService';
 import {ValidationService} from '../service/ValidationService';
 import {FormResourceAssembler} from '../controller/FormResourceAssembler';
+import {AdminProtectMiddleware} from '../middleware/AdminProtectMiddleware';
 
 export class ApplicationContext {
     private readonly container: Container;
@@ -35,6 +36,7 @@ export class ApplicationContext {
         this.container.bind<RoleService>(TYPE.RoleService).to(RoleService);
         this.container.bind<FormService>(TYPE.FormService).to(FormService);
         this.container.bind<FormResourceAssembler>(TYPE.FormResourceAssembler).to(FormResourceAssembler);
+        this.container.bind<AdminProtectMiddleware>(TYPE.AdminProtectMiddleware).to(AdminProtectMiddleware);
 
         logger.info('Application context initialised');
     }

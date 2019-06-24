@@ -8,4 +8,16 @@ export class MockRequest {
     }
 
 
+    public kauth: any = {
+        grant: {
+            'access_token': {
+                content: {
+                    realm_access: {
+                        roles: ['test']
+                    }
+                }
+            }
+        }
+    }
+
 }

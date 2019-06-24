@@ -7,8 +7,6 @@ import {Arg, Substitute} from '@fluffy-spoon/substitute';
 import {MockRequest} from "../../MockRequest";
 import {RoleService} from "../../../src/service/RoleService";
 import {User} from "../../../src/auth/User";
-import ResourceValidationError from "../../../src/error/ResourceValidationError";
-import {FormVersion} from "../../../src/model/FormVersion";
 import {Role} from "../../../src/model/Role";
 
 describe("RoleController", () => {

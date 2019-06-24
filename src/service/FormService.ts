@@ -528,6 +528,28 @@ export class FormService {
         return version;
     }
 
+    public async allForms(limit: number = 20, offset: number = 0): Promise<{ total: number, versions: FormVersion[] }> {
+
+        const result: { rows: FormVersion[], count: number } = await this.formVersionRepository.findAndCountAll({
+            limit,
+            offset,
+            include: [{
+                model: Form, include: [{
+                    model: Role,
+                    as: 'roles',
+                    attributes: ['id', 'name'],
+                    through: {
+                        attributes: [],
+                    },
+                }],
+            }],
+        });
+        return {
+            total: result.count,
+            versions: result.rows,
+        };
+    }
+
     private async getForm(formId: string, user: User, includeComments: boolean = false) {
         const defaultRole = await Role.defaultRole();
 
