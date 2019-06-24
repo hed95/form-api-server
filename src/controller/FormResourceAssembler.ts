@@ -28,37 +28,37 @@ export class FormResourceAssembler implements ResourceAssembler<FormVersion, obj
                     rel: 'self',
                     title: 'Self',
                     method: 'GET',
-                    href: `${req.baseUrl}/form/${formId}`,
+                    href: `${req.baseUrl}/forms/${formId}`,
                 },
                 {
                     rel: 'allVersions',
                     title: 'Show all versions',
                     method: 'GET',
-                    href: `${req.baseUrl}/form/${formId}/versions`,
+                    href: `${req.baseUrl}/forms/${formId}/versions`,
                 },
                 {
                     rel: 'comments',
                     title: 'Show all comments',
                     method: 'GET',
-                    href: `${req.baseUrl}/form/${formId}/comments`,
+                    href: `${req.baseUrl}/forms/${formId}/comments`,
                 },
                 {
                     rel: 'create-comment',
                     title: 'Add a comment',
                     method: 'POST',
-                    href: `${req.baseUrl}/form/${formId}/comments`,
+                    href: `${req.baseUrl}/forms/${formId}/comments`,
                 },
                 {
                     rel: 'update',
                     title: 'Update form',
                     method: 'PUT',
-                    href: `${req.baseUrl}/form/${formId}`,
+                    href: `${req.baseUrl}/forms/${formId}`,
                 },
                 {
                     rel: 'delete',
                     title: 'Delete form',
                     method: 'DELETE',
-                    href: `${req.baseUrl}/form/${formId}`,
+                    href: `${req.baseUrl}/forms/${formId}`,
                 },
             ];
         }
