@@ -77,7 +77,6 @@ export class FormController extends BaseHttpController {
                      @request() req: express.Request,
                      @response() res: express.Response,
                      @principal() currentUser: User): Promise<void> {
-
         const formVersion = await this.formService.findForm(id, currentUser);
         const form = this.formResourceAssembler.toResource(formVersion, req);
         res.json(form);

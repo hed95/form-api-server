@@ -16,6 +16,8 @@ import ResourceNotFoundError from './error/ResourceNotFoundError';
 import ResourceValidationError from './error/ResourceValidationError';
 import morgan, {TokenIndexer} from 'morgan';
 import {LoggerStream} from './util/LoggerStream';
+import httpContext from 'express-http-context';
+import uuid from 'uuid';
 
 const port = process.env.PORT || 3000;
 const applicationContext: ApplicationContext = new ApplicationContext();
@@ -40,6 +42,7 @@ const server = new InversifyExpressServer(container,
 
 server.setConfig((app: express.Application) => {
     const keycloakService: KeycloakService = container.get(TYPE.KeycloakService);
+
     app.use('/api-docs/swagger', express.static('swagger'));
     app.use('/api-docs/swagger/assets', express.static('node_modules/swagger-ui-dist'));
     app.use(swagger.express(
@@ -60,7 +63,17 @@ server.setConfig((app: express.Application) => {
             },
         },
     ));
+
+    app.use(httpContext.middleware);
+    app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+        httpContext.ns.bindEmitter(req);
+        httpContext.ns.bindEmitter(res);
+        const requestId = req.headers['x-request-id'] || uuid.v4();
+        httpContext.set('x-request-id', requestId);
+        next();
+    });
     app.use(keycloakService.middleware());
+
     app.use(morgan((tokens: TokenIndexer, req: express.Request, res: express.Response) => {
         morgan.token('user', (request: express.Request, response: express.Response) => {
             // @ts-ignore
@@ -70,12 +83,16 @@ server.setConfig((app: express.Application) => {
             // @ts-ignore
             return `${Math.ceil(tokens['response-time'](request, response))} ms`;
         });
+        morgan.token('x-request-id', (request: express.Request, response: express.Response) => {
+            return httpContext.get('x-request-id');
+        });
         return JSON.stringify({
-            method: tokens.method(req, res),
-            url: tokens.url(req, res),
-            status: tokens.status(req, res),
-            responseTime: tokens['response-time-ms'](req, res),
-            user: tokens.user(req, res),
+            'method': tokens.method(req, res),
+            'url': tokens.url(req, res),
+            'status': tokens.status(req, res),
+            'responseTime': tokens['response-time-ms'](req, res),
+            'user': tokens.user(req, res),
+            'x-request-id': tokens['x-request-id'](req, res),
         });
     }, {
         stream: new LoggerStream(),
@@ -87,6 +104,7 @@ server.setConfig((app: express.Application) => {
         optionsSuccessStatus: 200,
     }));
     app.use(bodyParser.json());
+
 }).setErrorConfig((app: express.Application) => {
     app.use((err: Error,
              req: express.Request,
