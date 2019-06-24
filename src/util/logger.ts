@@ -9,9 +9,15 @@ const addXRequestId = winston.format((info) => {
     return info;
 });
 
+const addUserId = winston.format((info) => {
+    info['user'] = httpContext.get('x-user-id');
+    return info;
+});
+
 const logger = createLogger({
     format: combine(
         addXRequestId(),
+        addUserId(),
         format.timestamp({
             format: 'YYYY-MM-DD HH:mm:ss',
         }),

@@ -72,13 +72,19 @@ server.setConfig((app: express.Application) => {
         httpContext.set('x-request-id', requestId);
         next();
     });
+
     app.use(keycloakService.middleware());
 
+    app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+        httpContext.ns.bindEmitter(req);
+        httpContext.ns.bindEmitter(res);
+        // @ts-ignore
+        const user = req.kauth && req.kauth.grant ? req.kauth.grant.access_token.content.email : 'anonymous';
+        httpContext.set('x-user-id', user);
+        next();
+    });
+
     app.use(morgan((tokens: TokenIndexer, req: express.Request, res: express.Response) => {
-        morgan.token('user', (request: express.Request, response: express.Response) => {
-            // @ts-ignore
-            return request.kauth.grant ? request.kauth.grant.access_token.content.email : 'anonymous';
-        });
         morgan.token('response-time-ms', (request: express.Request, response: express.Response) => {
             // @ts-ignore
             return `${tokens['response-time'](request, response)} ms`;
@@ -90,9 +96,7 @@ server.setConfig((app: express.Application) => {
             'method': tokens.method(req, res),
             'url': tokens.url(req, res),
             'status': tokens.status(req, res),
-            'responseTimeInMs': tokens['response-time-ms'](req, res),
-            'user': tokens.user(req, res),
-            'x-request-id': tokens['x-request-id'](req, res),
+            'responseTimeInMs': tokens['response-time-ms'](req, res)
         });
     }, {
         stream: new LoggerStream(),
@@ -110,9 +114,11 @@ server.setConfig((app: express.Application) => {
              req: express.Request,
              res: express.Response,
              next: express.NextFunction) => {
-        logger.error('An exception occurred', {
-            exception: err,
-        });
+        if (err) {
+            logger.error('An exception occurred', {
+                exception: err,
+            });
+        }
         // @ts-ignore
         const user: string = req.kauth.grant.access_token.content.email;
         const xRequestId = httpContext.get('x-request-id');
