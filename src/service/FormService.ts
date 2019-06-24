@@ -80,7 +80,7 @@ export class FormService {
                         {
                             message: `${title} already exists`,
                             path: ['title'],
-                            type: 'exists',
+                            type: 'duplicate',
                             context: {
                                 key: 'title',
                                 label: 'title',
@@ -94,7 +94,7 @@ export class FormService {
                         {
                             message: `${path} already exists`,
                             path: ['path'],
-                            type: 'exists',
+                            type: 'duplicate',
                             context: {
                                 key: 'path',
                                 label: 'path',
@@ -108,7 +108,7 @@ export class FormService {
                         {
                             message: `${name} already exists`,
                             path: ['name'],
-                            type: 'exists',
+                            type: 'duplicate',
                             context: {
                                 key: 'name',
                                 label: 'name',

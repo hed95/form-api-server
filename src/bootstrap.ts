@@ -14,6 +14,8 @@ import {SequelizeProvider} from './model/SequelizeProvider';
 import logger from './util/logger';
 import ResourceNotFoundError from './error/ResourceNotFoundError';
 import ResourceValidationError from './error/ResourceValidationError';
+import morgan, {TokenIndexer} from 'morgan';
+import {LoggerStream} from './util/LoggerStream';
 
 const port = process.env.PORT || 3000;
 const applicationContext: ApplicationContext = new ApplicationContext();
@@ -59,6 +61,25 @@ server.setConfig((app: express.Application) => {
         },
     ));
     app.use(keycloakService.middleware());
+    app.use(morgan((tokens: TokenIndexer, req: express.Request, res: express.Response) => {
+        morgan.token('user', (request: express.Request, response: express.Response) => {
+            // @ts-ignore
+            return request.kauth.grant ? request.kauth.grant.access_token.content.email : 'anonymous';
+        });
+        morgan.token('response-time-ms', (request: express.Request, response: express.Response) => {
+            // @ts-ignore
+            return `${Math.ceil(tokens['response-time'](request, response))} ms`;
+        });
+        return JSON.stringify({
+            method: tokens.method(req, res),
+            url: tokens.url(req, res),
+            status: tokens.status(req, res),
+            responseTime: tokens['response-time-ms'](req, res),
+            user: tokens.user(req, res),
+        });
+    }, {
+        stream: new LoggerStream(),
+    }));
     app.use(bodyParser.urlencoded({
         extended: true,
     }));
