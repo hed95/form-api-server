@@ -81,7 +81,7 @@ server.setConfig((app: express.Application) => {
         });
         morgan.token('response-time-ms', (request: express.Request, response: express.Response) => {
             // @ts-ignore
-            return `${Math.ceil(tokens['response-time'](request, response))} ms`;
+            return `${tokens['response-time'](request, response)} ms`;
         });
         morgan.token('x-request-id', (request: express.Request, response: express.Response) => {
             return httpContext.get('x-request-id');
@@ -90,7 +90,7 @@ server.setConfig((app: express.Application) => {
             'method': tokens.method(req, res),
             'url': tokens.url(req, res),
             'status': tokens.status(req, res),
-            'responseTime': tokens['response-time-ms'](req, res),
+            'responseTimeInMs': tokens['response-time-ms'](req, res),
             'user': tokens.user(req, res),
             'x-request-id': tokens['x-request-id'](req, res),
         });
@@ -115,34 +115,38 @@ server.setConfig((app: express.Application) => {
         });
         // @ts-ignore
         const user: string = req.kauth.grant.access_token.content.email;
+        const xRequestId = httpContext.get('x-request-id');
         if (err instanceof ResourceNotFoundError) {
             const resourceNotFoundError = err as ResourceNotFoundError;
             res.status(404);
             res.json({
-                message: resourceNotFoundError.message,
-                type: 'RESOURCE_NOT_FOUND',
-                requestedBy: user,
-                path: req.path,
-                method: req.method,
+                'message': resourceNotFoundError.message,
+                'type': 'RESOURCE_NOT_FOUND',
+                'requestedBy': user,
+                'path': req.path,
+                'method': req.method,
+                'x-request-id': xRequestId,
             });
         } else if (err instanceof ResourceValidationError) {
             const validationError = err as ResourceValidationError;
             res.status(400);
             res.json({
-                validationErrors: validationError.get(),
-                type: 'VALIDATION_FAILURE',
-                requestedBy: user,
-                path: req.path,
-                method: req.method,
+                'validationErrors': validationError.get(),
+                'type': 'VALIDATION_FAILURE',
+                'requestedBy': user,
+                'path': req.path,
+                'method': req.method,
+                'x-request-id': xRequestId,
             });
         } else {
             res.status(500);
             res.json({
-                exception: err.toString(),
-                type: 'APPLICATION_ERROR',
-                requestedBy: user,
-                path: req.path,
-                method: req.method,
+                'exception': err.toString(),
+                'type': 'APPLICATION_ERROR',
+                'requestedBy': user,
+                'path': req.path,
+                'method': req.method,
+                'x-request-id': xRequestId,
             });
         }
     });
