@@ -999,6 +999,21 @@ describe("FormService", () => {
             expect(e instanceof ResourceValidationError).to.be.eq(true);
         }
     });
+
+    it('can find version by id', async() => {
+        const user = new User("id", "test", [role]);
+        basicForm.name = "newFormA";
+        basicForm.path = "newFormA";
+        basicForm.title = "newFormA";
+        const version = await formService.create(user, basicForm);
+
+        expect(version).to.be.not.null;
+        const versionLoaded = await formService.findForm(version, user);
+
+        const loaded = await formService.findByVersionId(versionLoaded.versionId, user);
+        expect(loaded).to.be.not.null;
+        expect(loaded.versionId).to.be.eq(versionLoaded.versionId);
+    });
 });
 
 

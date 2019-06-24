@@ -162,4 +162,31 @@ describe("FormController", () => {
 
     });
 
+    it('can find by version id', async() => {
+        const user = new User("id", "email");
+        Object.assign(FormVersion, {});
+        const version: FormVersion = Object.assign(FormVersion.prototype, {});
+        version.schema = {
+            display: 'form',
+            components: []
+        };
+        // @ts-ignore
+        formService.findByVersionId(Arg.any(), Arg.any()).returns(Promise.resolve(version));
+
+        // @ts-ignore
+        formResourceAssembler.toResource(Arg.any(), Arg.any()).returns({
+            display: 'form',
+            components: []
+        });
+
+        await formController.getByVersionId("id", mockRequest, mockResponse, user);
+
+        expect(JSON.stringify(mockResponse.getJsonData())).to.be.eq(JSON.stringify({
+            display: 'form',
+            components: []
+        }))
+
+
+    })
+
 });

@@ -498,6 +498,36 @@ export class FormService {
         });
     }
 
+    public async findByVersionId(id: string, user: User): Promise<FormVersion> {
+        const defaultRole = await Role.defaultRole();
+        const version = await this.formVersionRepository.findByPk(id, {
+            include: [{
+                model: Form, include: [{
+                    model: Role,
+                    as: 'roles',
+                    attributes: ['id', 'name'],
+                    through: {
+                        attributes: [],
+                    },
+                    where: {
+                        name: {
+                            [Op.or]: {
+                                [Op.in]: user.details.roles.map((role: Role) => {
+                                    return role.name;
+                                }),
+                                [Op.eq]: defaultRole.name,
+                            },
+                        },
+                    },
+                }],
+            }],
+        });
+        if (!version) {
+            throw new ResourceNotFoundError(`Version with id ${id} does not exist`);
+        }
+        return version;
+    }
+
     private async getForm(formId: string, user: User, includeComments: boolean = false) {
         const defaultRole = await Role.defaultRole();
 
