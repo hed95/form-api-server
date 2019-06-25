@@ -10,5 +10,6 @@ module.exports = {
         host: process.env.DB_HOSTNAME,
         port: process.env.DB_PORT,
         dialect: 'postgres',
+        native: false,
     },
 };

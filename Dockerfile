@@ -1,12 +1,23 @@
+FROM digitalpatterns/node:latest AS build
+
+COPY . /src
+WORKDIR /src
+
+
+RUN npm install
+RUN npm run build-ts
+
+RUN npm prune --production
+
 FROM digitalpatterns/node:latest
 
 WORKDIR /app
-
 RUN mkdir -p /app
 
-ADD . /app/
 
-RUN npm ci && npm run build-ts
+COPY --from=build /src/node_modules node_modules
+COPY --from=build /src/dist dist
+
 
 RUN chown -R node:node /app
 
@@ -16,5 +27,5 @@ USER 1000
 
 EXPOSE 8080
 
-ENTRYPOINT npm run dbmigrate && exec node dist/bootstrap.js
+ENTRYPOINT node_modules/.bin/sequelize db:migrate --config dist/config/dbconfig.js --migrations-path dist/migrations && exec node dist/bootstrap.js
 

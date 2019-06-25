@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 const DataType = require("sequelize");
 
@@ -9,36 +9,36 @@ module.exports = {
                 type: DataType.UUID,
                 primaryKey: true,
                 allowNull: false,
-                defaultValue: DataType.UUIDV4
+                defaultValue: DataType.UUIDV4,
             },
             formId: {
                 type: DataType.UUID,
                 allowNull: false,
                 references: {
-                    model: 'FORM',
-                    key: 'id'
-                }
+                    model: "FORM",
+                    key: "id",
+                },
             },
             roleId: {
                 type: DataType.UUID,
                 allowNull: false,
                 references: {
-                    model: 'ROLE',
-                    key: 'id'
-                }
+                    model: "ROLE",
+                    key: "id",
+                },
             },
             createdAt: {
                 type: DataType.DATE,
-                allowNull: false
+                allowNull: false,
             },
             updatedAt: {
                 type: DataType.STRING,
-                allowNull: false
-            }
+                allowNull: false,
+            },
         });
     },
 
     down: (queryInterface, Sequelize) => {
-        return queryInterface.dropTable('FORMROLES');
-    }
+        return queryInterface.dropTable("FORMROLES");
+    },
 };
