@@ -19,7 +19,7 @@ export class User implements interfaces.Principal {
 
     public isInRole(roleId: string): Promise<boolean> {
         const found = _.find(this.details.roles, (role: Role) => role.id === roleId);
-        return Promise.resolve(_.isNull(found));
+        return Promise.resolve(!_.isNull(found) && !_.isUndefined(found));
     }
 
     public isResourceOwner(resourceId: string): Promise<boolean> {
