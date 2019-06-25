@@ -1,4 +1,6 @@
-module.exports = {
+import DBConfig from "../interfaces/DBConfig";
+
+const dbConfig: DBConfig = {
     test: {
         dialect: 'sqlite',
         storage: ':memory:',
@@ -13,3 +15,5 @@ module.exports = {
         native: false,
     },
 };
+
+export default dbConfig;

@@ -3,7 +3,7 @@
         "module": "commonjs",
         "esModuleInterop": true,
         "target": "es6",
-        "types": ["reflect-metadata", "mocha"],
+        "types": ["reflect-metadata", "mocha", "node"],
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "noImplicitAny": true,

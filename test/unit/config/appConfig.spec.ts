@@ -1,12 +1,9 @@
 import 'reflect-metadata';
 import {expect} from "chai";
+import config from "../../../src/config/DefaultAppConfig";
 
 describe('appConfig', () => {
    it('can get app config', () =>{
-
-       // @ts-ignore
-       const config = require('../../../src/config/appConfig');
-
        expect(config).to.be.not.null;
        expect(config.keycloak).to.be.not.null;
        expect(config.keycloak.url).to.be.eq('http://keycloak.lodev.xyz/auth');

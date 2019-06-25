@@ -1,12 +1,9 @@
 import 'reflect-metadata';
 import {expect} from "chai";
+import config from '../../../src/config/DefaultDBConfig';
 
 describe('dbConfig', () => {
     it('can get db config', () => {
-
-        // @ts-ignore
-        const config = require('../../../src/config/dbconfig');
-
         expect(config).to.be.not.null;
         expect(config.test).to.be.not.null;
         expect(config.test.dialect).to.be.eq('sqlite');

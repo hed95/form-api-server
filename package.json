@@ -11,12 +11,16 @@
     "watch-node": "nodemon dist/bootstrap.js",
     "watch-ts": "tsc -w",
     "test": "npm run test:all",
-    "clean-coverage": "rm -rf ./coverage",
     "tslint": "tslint --project tsconfig.json",
     "tslint:fix": "tslint --project tsconfig.json --fix",
-    "test:int": "nyc --report-dir=./coverage/int mocha --file ./test/integration/setup-test.ts -r ts-node/register test/integration/**/*.spec.ts ",
-    "test:unit": "nyc --report-dir=./coverage/unit mocha -r ts-node/register test/unit/**/*.spec.ts",
-    "test:all": "npm run clean-coverage && npm run test:unit && npm run test:int"
+    "test:int": "mocha --file ./test/integration/setup-test.ts -r ts-node/register test/integration/**/*.spec.ts ",
+    "test:unit": "mocha -r ts-node/register test/unit/**/*.spec.ts",
+    "test:all": "npm run test:unit && npm run test:int",
+    "cover:unit": "nyc --silent npm run test:unit",
+    "cover:int": "nyc --silent --no-clean npm run test:int",
+    "cover:report": "nyc report --reporter=lcov --reporter=text --reporter=text-summary",
+    "cover": "npm run cover:unit && npm run cover:int && npm run cover:report",
+    "cover:merge": "npm run cover:unit && npm run cover:int && nyc merge .nyc_output coverage.json"
   },
   "contributors": [
     {
@@ -30,7 +34,7 @@
   ],
   "husky": {
     "hooks": {
-      "pre-commit": "tsc --noEmit && npm run tslint:fix && npm run test"
+      "pre-commit": "tsc --noEmit && npm run tslint:fix && npm run cover"
     }
   },
   "nyc": {
@@ -38,11 +42,9 @@
       "html",
       "lcov",
       "text",
-      "text-summary"
+      ""
     ],
-    "temp-directory": "./coverage/.nyc_output",
     "all": true,
-    "exclude": "typings",
     "extension": [
       ".ts"
     ],
@@ -50,6 +52,14 @@
     "instrument": true,
     "include": [
       "src/**/*.ts"
+    ],
+    "exclude": [
+      "typings",
+      "src/*.ts",
+      "src/types/*.ts",
+      "src/interfaces/*.ts",
+      "src/constant/*.ts",
+      "src/error/*.ts"
     ]
   },
   "repository": {

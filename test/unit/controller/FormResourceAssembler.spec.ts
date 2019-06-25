@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import {expect} from "chai";
 import {FormResourceAssembler} from "../../../src/controller/FormResourceAssembler";
-import {ResourceAssembler} from "../../../src/controller/ResourceAssembler";
+import {ResourceAssembler} from "../../../src/interfaces/ResourceAssembler";
 import {FormVersion} from "../../../src/model/FormVersion";
 import {Role} from "../../../src/model/Role";
 import {Form} from "../../../src/model/Form";

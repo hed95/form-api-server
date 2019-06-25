@@ -1,5 +1,5 @@
 import {FormVersion} from '../model/FormVersion';
-import {ResourceAssembler} from './ResourceAssembler';
+import {ResourceAssembler} from '../interfaces/ResourceAssembler';
 import _ from 'lodash';
 import {provide} from 'inversify-binding-decorators';
 import TYPE from '../constant/TYPE';

@@ -20,6 +20,7 @@ import httpContext from 'express-http-context';
 import uuid from 'uuid';
 import HttpStatus from 'http-status-codes';
 import UnauthorizedError from './error/UnauthorizedError';
+import appConfig from './config/DefaultAppConfig';
 
 const defaultPort: number = 3000;
 
@@ -108,9 +109,14 @@ server.setConfig((app: express.Application) => {
     app.use(bodyParser.urlencoded({
         extended: true,
     }));
-    app.use(cors({
-        optionsSuccessStatus: 200,
-    }));
+
+    if (appConfig.cors.origin) {
+        logger.info('CORS origin configured');
+        app.use(cors({
+            origin: appConfig.cors.origin,
+            optionsSuccessStatus: 200,
+        }));
+    }
     app.use(bodyParser.json());
 
 }).setErrorConfig((app: express.Application) => {
@@ -148,7 +154,7 @@ server.setConfig((app: express.Application) => {
                 'method': req.method,
                 'x-request-id': xRequestId,
             });
-        } else if ( err instanceof UnauthorizedError) {
+        } else if (err instanceof UnauthorizedError) {
             res.status(HttpStatus.UNAUTHORIZED);
             res.json({
                 'type': 'UNAUTHORIZED',
@@ -156,7 +162,7 @@ server.setConfig((app: express.Application) => {
                 'path': req.path,
                 'method': req.method,
                 'x-request-id': xRequestId,
-                'message' : 'You are not authorized to perform the operation',
+                'message': 'You are not authorized to perform the operation',
             });
         } else {
             res.status(HttpStatus.INTERNAL_SERVER_ERROR);
