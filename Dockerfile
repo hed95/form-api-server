@@ -1,6 +1,7 @@
 FROM digitalpatterns/node:latest AS build
 
 COPY . /src
+
 WORKDIR /src
 
 
@@ -17,7 +18,9 @@ RUN mkdir -p /app
 
 COPY --from=build /src/node_modules node_modules
 COPY --from=build /src/dist dist
+COPY --from=build /src/swagger swagger
 
+RUN ls /app
 
 RUN chown -R node:node /app
 

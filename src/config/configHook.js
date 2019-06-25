@@ -1,1 +1,1 @@
-module.exports = require('./defaultDBConfig').default;
+module.exports = require("./defaultDBConfig").default;

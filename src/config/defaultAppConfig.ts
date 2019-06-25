@@ -18,4 +18,3 @@ const defaultAppConfig: AppConfig = {
 };
 
 export default defaultAppConfig;
-

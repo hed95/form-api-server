@@ -20,7 +20,7 @@ export class KeycloakAuthProvider implements interfaces.AuthProvider {
         res: express.Response,
         next: express.NextFunction,
     ): Promise<interfaces.Principal> {
-        if (!req.path.endsWith('healthz') &&  !req.path.endsWith('readiness')) {
+        if (!req.path.endsWith('healthz') && !req.path.endsWith('readiness') && !req.path.startsWith("/api-docs")) {
             const instance: Keycloak = this.keycloakService.keycloakInstance();
             try {
                 const grant: Keycloak.Grant = await instance.getGrant(req, res);
