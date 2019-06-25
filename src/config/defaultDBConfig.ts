@@ -1,6 +1,6 @@
-import DBConfig from "../interfaces/DBConfig";
+import DBConfig from '../interfaces/DBConfig';
 
-const dbConfig: DBConfig = {
+const defaultDBConfig: DBConfig = {
     test: {
         dialect: 'sqlite',
         storage: ':memory:',
@@ -16,4 +16,4 @@ const dbConfig: DBConfig = {
     },
 };
 
-export default dbConfig;
+export default defaultDBConfig;

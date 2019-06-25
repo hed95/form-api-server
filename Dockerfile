@@ -27,5 +27,5 @@ USER 1000
 
 EXPOSE 8080
 
-ENTRYPOINT node_modules/.bin/sequelize db:migrate --config dist/config/dbconfig.js --migrations-path dist/migrations && exec node dist/bootstrap.js
+ENTRYPOINT node_modules/.bin/sequelize db:migrate --env production --config dist/config/configHook.js --debug --migrations-path dist/migrations && exec node dist/bootstrap.js
 

@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import {expect} from "chai";
-import config from "../../../src/config/DefaultAppConfig";
+import config from "../../../src/config/defaultAppConfig";
 
 describe('appConfig', () => {
    it('can get app config', () =>{

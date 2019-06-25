@@ -4,7 +4,7 @@ import TYPE from '../constant/TYPE';
 import * as express from 'express';
 import UnauthorizedError from '../error/UnauthorizedError';
 import _ from 'lodash';
-import appConfig from '../config/DefaultAppConfig';
+import defaultAppConfig from '../config/defaultAppConfig';
 
 @provide(TYPE.AdminProtectMiddleware)
 export class AdminProtectMiddleware extends BaseMiddleware {
@@ -13,7 +13,7 @@ export class AdminProtectMiddleware extends BaseMiddleware {
 
     constructor() {
         super();
-        this.adminRoles = appConfig.admin.roles;
+        this.adminRoles = defaultAppConfig.admin.roles;
     }
 
     public handler(req: express.Request, res: express.Response, next: express.NextFunction): void {

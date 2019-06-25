@@ -2,7 +2,7 @@ import {RequestHandler} from 'express';
 import {provide} from 'inversify-binding-decorators';
 import Keycloak from 'keycloak-connect';
 import TYPE from '../constant/TYPE';
-import appConfig from '../config/DefaultAppConfig';
+import defaultAppConfig from '../config/defaultAppConfig';
 
 @provide(TYPE.KeycloakService)
 export class KeycloakService {
@@ -13,7 +13,7 @@ export class KeycloakService {
     private readonly keycloak: Keycloak;
 
     constructor() {
-        const keycloakConfig = appConfig.keycloak;
+        const keycloakConfig = defaultAppConfig.keycloak;
         this.authUrl = keycloakConfig.url;
         this.authResource = keycloakConfig.resource;
         this.authBearerOnly = keycloakConfig.bearerOnly;

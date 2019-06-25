@@ -10,7 +10,7 @@ import {FormCommentary} from './FormCommentary';
 import {FormRoles} from './FormRoles';
 import {FormVersion} from './FormVersion';
 import {Role} from './Role';
-import dbConfig from '../config/DefaultDBConfig';
+import defaultDBConfig from '../config/defaultDBConfig';
 
 const namespace = cls.createNamespace('sequelize-transaction');
 Sequelize.useCLS(namespace);
@@ -44,7 +44,7 @@ export class SequelizeProvider {
     constructor() {
         const env = process.env.NODE_ENV || 'test';
         // @ts-ignore
-        const config = dbConfig[env];
+        const config = defaultDBConfig[env];
         this.sequelize = new Sequelize(config);
         this.sequelize.options.logging = env === 'test' ? true : logger.debug.bind(logger);
         this.sequelize.addModels([FormRoles, Role, Form, FormVersion, FormCommentary, FormComment]);

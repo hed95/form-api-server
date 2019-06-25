@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import {expect} from "chai";
-import config from '../../../src/config/DefaultDBConfig';
+import config from '../../../src/config/defaultDBConfig';
 
 describe('dbConfig', () => {
     it('can get db config', () => {

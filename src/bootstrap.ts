@@ -20,7 +20,7 @@ import httpContext from 'express-http-context';
 import uuid from 'uuid';
 import HttpStatus from 'http-status-codes';
 import UnauthorizedError from './error/UnauthorizedError';
-import appConfig from './config/DefaultAppConfig';
+import appConfig from './config/defaultAppConfig';
 
 const defaultPort: number = 3000;
 

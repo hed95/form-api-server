@@ -5,3 +5,4 @@ node_modules
 .idea
 test
 .drone.yml
+.nyc_output

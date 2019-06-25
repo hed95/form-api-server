@@ -5,14 +5,14 @@ interface AppConfig {
         bearerOnly: string,
         realm: string,
         confidentialPort: number,
-        sslRequired: string
-    }
+        sslRequired: string,
+    };
     admin: {
-        roles: string[]
-    },
+        roles: string[],
+    };
     cors: {
-        origin: string[]
-    }
+        origin: string[],
+    };
 }
 
 export default AppConfig;
