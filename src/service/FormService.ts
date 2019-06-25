@@ -43,7 +43,7 @@ export class FormService {
             return Promise.reject(new ResourceValidationError('Failed to validate form',
                 validationResult.error.details));
         }
-        logger.info('No validation errors');
+        logger.info('Structure of the form looks ok...checking if this form already exists');
         // @ts-ignore
         const title: string = payload.title;
         // @ts-ignore
