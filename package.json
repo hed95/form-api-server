@@ -6,7 +6,6 @@
   "scripts": {
     "build-ts": "tsc",
     "start": "npm run serve",
-    "dbmigrate": "npx sequelize db:migrate",
     "serve": "node dist/bootstrap.js",
     "watch-node": "nodemon dist/bootstrap.js",
     "watch-ts": "tsc -w",

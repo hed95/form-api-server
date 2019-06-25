@@ -342,6 +342,18 @@ export class FormService {
             order: [['validFrom', 'ASC']],
             offset,
             limit,
+            include: [{
+                model: Form,
+                attributes: ['id'],
+                include: [{
+                    model: Role,
+                    as: 'roles',
+                    attributes: ['id', 'name'],
+                    through: {
+                        attributes: [],
+                    },
+                }],
+            }],
         });
         try {
             return Promise.resolve(

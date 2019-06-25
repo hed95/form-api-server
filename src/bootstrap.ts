@@ -126,7 +126,7 @@ server.setConfig((app: express.Application) => {
              next: express.NextFunction) => {
         if (err) {
             logger.error('An exception occurred', {
-                exception: err,
+                exception: err.stack,
             });
         }
         // @ts-ignore
