@@ -1043,8 +1043,67 @@ describe("FormService", () => {
         const result = await formService.allForms();
 
         expect(result.total).to.be.gte(3);
+    });
 
+    it('throws error if uuid not valid', async () => {
+        try {
+            await formService.findForm('xxx', null);
+        } catch (e) {
+            expect(e instanceof ResourceValidationError).to.be.eq(true);
+        }
+    });
 
+    it('throws validation error if form update does not have valid data', async () => {
+        try {
+
+            const user = new User("id", "test", [role]);
+
+            basicForm.name = "newForm123A";
+            basicForm.path = "newForm123A";
+            basicForm.title = "newForm123A";
+
+            const versionId = await formService.create(user, basicForm);
+            delete basicForm.title;
+
+            await formService.update(versionId, basicForm, user);
+        } catch (e) {
+            expect(e instanceof ResourceValidationError).to.be.eq(true);
+        }
+    });
+
+    it('throws exception if form does not exist on delete', async() => {
+        try {
+
+            const user = new User("id", "test", [role]);
+            await formService.delete('xxxx', user);
+        } catch (e) {
+            expect(e instanceof ResourceNotFoundError).to.be.eq(true);
+        }
+    });
+
+    it('throws exception if form does not exist on create comment', async() => {
+        try {
+            const user = new User("id", "test", [role]);
+            await formService.createComment('random', user, null);
+        }catch (e) {
+            expect(e instanceof ResourceNotFoundError).to.be.eq(true);
+        }
+    });
+    it('throws exception if form does not exist on update roles', async() => {
+        try {
+            const user = new User("id", "test", [role]);
+            await formService.updateRoles('random', [], user);
+        }catch (e) {
+            expect(e instanceof ResourceNotFoundError).to.be.eq(true);
+        }
+    });
+    it('throws exception if form does not exist on findByVesionId', async() => {
+        try {
+            const user = new User("id", "test", [role]);
+            await formService.findByVersionId('random', user);
+        }catch (e) {
+            expect(e instanceof ResourceNotFoundError).to.be.eq(true);
+        }
     });
 });
 

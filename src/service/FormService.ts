@@ -375,8 +375,8 @@ export class FormService {
         const validationResult: ValidationResult<object> = this.formSchemaValidator.validate(form);
         if (validationResult.error) {
             logger.error('Failed to update from', validationResult.error.details);
-            return Promise.reject(new ResourceValidationError('Failed to validate form',
-                validationResult.error.details));
+            throw new ResourceValidationError('Failed to validate form',
+                validationResult.error.details);
         }
 
         const currentDate = new Date();
