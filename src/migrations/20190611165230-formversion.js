@@ -11,11 +11,11 @@ module.exports = {
                 allowNull: false,
                 defaultValue: DataType.UUIDV4,
             },
-            createdAt: {
+            createdOn: {
                 type: DataType.DATE,
                 allowNull: false,
             },
-            updatedAt: {
+            updatedOn: {
                 type: DataType.STRING,
                 allowNull: false,
             },

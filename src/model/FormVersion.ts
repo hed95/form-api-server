@@ -1,4 +1,14 @@
-import {AllowNull, BelongsTo, Column, DataType, ForeignKey, Model, Table, UpdatedAt} from 'sequelize-typescript';
+import {
+    AllowNull,
+    BelongsTo,
+    Column,
+    CreatedAt,
+    DataType,
+    ForeignKey,
+    Model,
+    Table,
+    UpdatedAt
+} from 'sequelize-typescript';
 import {Form} from './Form';
 
 @Table
@@ -12,6 +22,9 @@ export class FormVersion extends Model<FormVersion> {
 
     @UpdatedAt
     public updatedOn: Date;
+
+    @CreatedAt
+    public createdOn: Date;
 
     @Column
     public createdBy: string;

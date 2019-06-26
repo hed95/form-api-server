@@ -27,8 +27,8 @@ describe('FormResourceAssembler', () => {
                 name: 'test'
             }],
             versionId: 'versionId',
+            createdOn: date,
             createdBy: 'test',
-            createdAt: date,
             id: 'formId',
             links: [
                 {
@@ -78,7 +78,7 @@ describe('FormResourceAssembler', () => {
             display: 'form',
             components: [],
         };
-        version.createdAt = date;
+        version.createdOn = date;
         version.createdBy = 'test';
         role.name = 'test';
         role.id = 'test';

@@ -18,8 +18,11 @@ export class FormResourceAssembler implements ResourceAssembler<FormVersion, obj
             };
         });
         resource.versionId = entity.versionId;
+        resource.createdOn = entity.createdOn;
         resource.createdBy = entity.createdBy;
-        resource.createdAt = entity.createdAt;
+        resource.updatedBy = entity.updatedBy;
+        resource.updatedOn = entity.updatedOn;
+
         const formId: string = entity.form.id;
         resource.id = formId;
         if (includeLinks) {
