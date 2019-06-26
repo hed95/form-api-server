@@ -7,7 +7,7 @@ import {
     ForeignKey,
     Model,
     Table,
-    UpdatedAt
+    UpdatedAt,
 } from 'sequelize-typescript';
 import {Form} from './Form';
 
