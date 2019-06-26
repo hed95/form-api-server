@@ -1071,7 +1071,7 @@ describe("FormService", () => {
         }
     });
 
-    it('throws exception if form does not exist on delete', async() => {
+    it('throws exception if form does not exist on delete', async () => {
         try {
 
             const user = new User("id", "test", [role]);
@@ -1081,29 +1081,44 @@ describe("FormService", () => {
         }
     });
 
-    it('throws exception if form does not exist on create comment', async() => {
+    it('throws exception if form does not exist on create comment', async () => {
         try {
             const user = new User("id", "test", [role]);
             await formService.createComment('random', user, null);
-        }catch (e) {
+        } catch (e) {
             expect(e instanceof ResourceNotFoundError).to.be.eq(true);
         }
     });
-    it('throws exception if form does not exist on update roles', async() => {
+    it('throws exception if form does not exist on update roles', async () => {
         try {
             const user = new User("id", "test", [role]);
             await formService.updateRoles('random', [], user);
-        }catch (e) {
+        } catch (e) {
             expect(e instanceof ResourceNotFoundError).to.be.eq(true);
         }
     });
-    it('throws exception if form does not exist on findByVesionId', async() => {
+    it('throws exception if form does not exist on findByVesionId', async () => {
         try {
             const user = new User("id", "test", [role]);
             await formService.findByVersionId('random', user);
-        }catch (e) {
+        } catch (e) {
             expect(e instanceof ResourceNotFoundError).to.be.eq(true);
         }
+    });
+
+    it('can get count only', async () => {
+        const user = new User("id", "test", [role]);
+
+        basicForm.name = "newForm123BX";
+        basicForm.path = "newForm123BX";
+        basicForm.title = "newForm123BX";
+
+        await formService.create(user, basicForm);
+
+        const result: { total: number, forms: FormVersion[] } = await formService.getAllForms(user, 20, 0, null, [], true);
+
+        expect(result.total).to.be.gte(1);
+        expect(result.forms.length).to.be.eq(0);
     });
 });
 

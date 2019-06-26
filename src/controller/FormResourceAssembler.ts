@@ -10,13 +10,16 @@ import * as express from 'express';
 export class FormResourceAssembler implements ResourceAssembler<FormVersion, object> {
 
     public toResource(entity: FormVersion, req: express.Request, includeLinks: boolean = true): object {
+        if (!entity.schema) {
+            return entity;
+        }
         const resource: any = _.cloneDeep(entity.schema);
-        resource.access = _.map((entity.form.roles), (role: Role) => {
+        resource.access = entity.form ? _.map((entity.form.roles), (role: Role) => {
             return {
                 id: role.id,
                 name: role.name,
             };
-        });
+        }) : null;
         resource.versionId = entity.versionId;
         resource.createdOn = entity.createdOn;
         resource.createdBy = entity.createdBy;

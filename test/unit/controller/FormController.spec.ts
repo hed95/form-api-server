@@ -149,13 +149,14 @@ describe("FormController", () => {
         };
         version.form = form;
         // @ts-ignore
-        formService.getAllForms(Arg.any(), Arg.any(), Arg.any(), Arg.any(), Arg.any()).returns(Promise.resolve({
+        formService.getAllForms(Arg.any(), Arg.any(), Arg.any(), Arg.any(), Arg.any(), Arg.any()).returns(Promise.resolve({
             total : 1,
             forms: [version]
         }));
 
         const result : {total: number, forms: object[]}
-            = await formController.getForms(20, 0, null, null, user, mockRequest, mockResponse);
+            = await formController.getForms(20, 0, null, null, false, user,
+            mockRequest, mockResponse);
 
         expect(result.total).to.be.eq(1);
         expect(result.forms.length).to.be.eq(1);

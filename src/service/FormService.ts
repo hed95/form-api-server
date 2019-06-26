@@ -146,7 +146,8 @@ export class FormService {
                              limit: number = 20,
                              offset: number = 0,
                              filterQuery: object = null,
-                             attributes: string[] = []):
+                             attributes: string[] = [],
+                             countOnly: boolean = false):
         Promise<{ total: number, forms: FormVersion[] }> {
 
         const profiler = logger.startTimer();
@@ -204,7 +205,17 @@ export class FormService {
             });
         }
 
-        const result: { rows: FormVersion[], count: number } = await this.formVersionRepository.findAndCountAll(query);
+        let result: { rows: FormVersion[], count: number } ;
+        if (countOnly) {
+            const count: number = await this.formVersionRepository.count(query);
+            result = {
+                rows: [],
+                count,
+            };
+        } else {
+            result =  await this.formVersionRepository.findAndCountAll(query);
+        }
+
         profiler.done({message: 'Completed getAllForms', user: user.details.email});
         return {
             total: result.count,

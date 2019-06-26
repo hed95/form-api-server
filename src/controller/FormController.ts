@@ -104,6 +104,7 @@ export class FormController extends BaseHttpController {
                           @queryParam('offset') offset: number = 0,
                           @queryParam('select') attributes: string = null,
                           @queryParam('filter') filter: string = null,
+                          @queryParam('countOnly') countOnly: boolean = false,
                           @principal() currentUser: User,
                           @request() req: express.Request,
                           @response() res: express.Response): Promise<{ total: number, forms: object[] }> {
@@ -118,7 +119,7 @@ export class FormController extends BaseHttpController {
                 limit,
                 offset,
                 filterQuery,
-                fieldAttributes);
+                fieldAttributes, countOnly);
         const forms: { total: number, forms: object[] } = {
             total: 0,
             forms: [],
