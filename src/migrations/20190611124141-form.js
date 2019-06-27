@@ -22,10 +22,13 @@ module.exports = {
         type: DataType.STRING,
         allowNull: false,
       },
+    }, {
+      schema: "formschema",
     });
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable("FORM");
+    return queryInterface.sequelize
+        .query('DROP TABLE formschema."FORM"');
   },
 };

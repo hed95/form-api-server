@@ -31,10 +31,13 @@ module.exports = {
                 type: DataType.BOOLEAN,
                 allowNull: false,
             },
+        }, {
+            schema: "formschema",
         });
     },
 
     down: (queryInterface, Sequelize) => {
-        return queryInterface.dropTable("ROLE");
+        return queryInterface.sequelize
+            .query('DROP TABLE formschema."ROLE"');
     },
 };

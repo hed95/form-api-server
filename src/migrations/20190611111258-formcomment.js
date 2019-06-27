@@ -28,10 +28,13 @@ module.exports = {
                 type: DataType.TEXT,
                 allowNull: false,
             },
+        }, {
+            schema: "formschema",
         });
     },
 
     down: (queryInterface, Sequelize) => {
-        return queryInterface.dropTable("FORMCOMMENT");
+        return queryInterface.sequelize
+            .query('DROP TABLE formschema."FORMCOMMENT"');
     },
 };

@@ -15,15 +15,22 @@ module.exports = {
                 type: DataType.UUID,
                 allowNull: false,
                 references: {
-                    model: "FORM",
+                    model: {
+                        schema: "formschema",
+                        tableName: "FORM",
+                    },
                     key: "id",
                 },
+
             },
             roleId: {
                 type: DataType.UUID,
                 allowNull: false,
                 references: {
-                    model: "ROLE",
+                    model: {
+                        schema: "formschema",
+                        tableName: "ROLE",
+                    },
                     key: "id",
                 },
             },
@@ -35,10 +42,13 @@ module.exports = {
                 type: DataType.STRING,
                 allowNull: false,
             },
+        }, {
+            schema: "formschema",
         });
     },
 
     down: (queryInterface, Sequelize) => {
-        return queryInterface.dropTable("FORMROLES");
+        return queryInterface.sequelize
+            .query('DROP TABLE formschema."FORMROLES"');
     },
 };

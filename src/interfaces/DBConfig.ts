@@ -11,6 +11,11 @@ interface DBConfig {
         port: string,
         dialect: string,
         native: boolean,
+        pool: {
+            max: number,
+            min: number,
+            idle: number,
+        },
     };
 }
 

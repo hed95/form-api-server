@@ -13,6 +13,11 @@ const defaultDBConfig: DBConfig = {
         port: process.env.DB_PORT,
         dialect: 'postgres',
         native: false,
+        pool: {
+            max: 10,
+            min: 0,
+            idle: 10000,
+        },
     },
 };
 

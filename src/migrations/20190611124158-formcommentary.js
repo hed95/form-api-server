@@ -16,14 +16,22 @@ module.exports = {
                 primaryKey: true,
                 allowNull: false,
                 references: {
-                    model: "FORM", key: "id",
+                    model: {
+                        tableName: "FORM",
+                        schema: "formschema",
+                    },
+                    key: "id",
                 },
             },
             commentId: {
                 type: DataType.UUID,
                 allowNull: false,
                 references: {
-                    model: "FORMCOMMENT", key: "id",
+                    model: {
+                        tableName: "FORMCOMMENT",
+                        schema: "formschema",
+                    },
+                    key: "id",
                 },
             },
             createdAt: {
@@ -34,10 +42,13 @@ module.exports = {
                 type: DataType.STRING,
                 allowNull: false,
             },
+        }, {
+            schema: "formschema",
         });
     },
 
     down: (queryInterface, Sequelize) => {
-        return queryInterface.dropTable("FORMCOMMENTARY");
+        return queryInterface.sequelize
+            .query('DROP TABLE formschema."FORMCOMMENTARY" CASCADE');
     },
 };

@@ -178,7 +178,15 @@ server.setConfig((app: express.Application) => {
     });
 });
 
+process.on('SIGTERM', async () => {
+    await sequelizeProvider.getSequelize().close();
+});
+process.on('SIGINT', async () => {
+    await sequelizeProvider.getSequelize().close();
+});
+
 const expressApplication = server.build();
+
 expressApplication.listen(port);
 logger.info('Server up and running on ' + port);
 

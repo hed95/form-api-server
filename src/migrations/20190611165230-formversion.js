@@ -42,7 +42,10 @@ module.exports = {
             formId: {
                 type: DataType.UUID,
                 references: {
-                    model: "FORM",
+                    model: {
+                        tableName: "FORM",
+                        schema: "formschema",
+                    },
                     key: "id",
                 },
             },
@@ -50,10 +53,13 @@ module.exports = {
                 type: DataType.BOOLEAN,
                 allowNull: false,
             },
+        }, {
+            schema: "formschema",
         });
     },
 
     down: (queryInterface, Sequelize) => {
-        return queryInterface.dropTable("FORMVERSION");
+        return queryInterface.sequelize
+            .query('DROP TABLE formschema."FORMVERSION"');
     },
 };
