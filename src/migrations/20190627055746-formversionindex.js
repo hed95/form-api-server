@@ -9,7 +9,7 @@ module.exports = {
             queryInterface
                 .sequelize
                 .query('CREATE INDEX form_version_schema_gin_jsonb ON "formschema"."FORMVERSION" ' +
-                    'USING gin (schema jsonb_path_ops)')
+                    "USING gin (schema jsonb_path_ops)")
                 .done();
             });
     },
