@@ -20,8 +20,69 @@ import Validator from 'validator';
 
 @provide(TYPE.FormService)
 export class FormService {
+
+    private static roleWhereClause(user: User, defaultRole: Role): WhereOptions {
+        return {
+            name: {
+                [Op.or]: {
+                    [Op.in]: user.details.roles.map((role: Role) => {
+                        return role.name;
+                    }),
+                    [Op.eq]: defaultRole.name,
+                },
+            },
+        };
+    }
+
+    private static handleDuplicateForm(loaded: FormVersion, title: string, path: string, name: string): void {
+        const validationErrors: ValidationErrorItem[] = [];
+        // @ts-ignore
+        if (loaded.schema.title === title) {
+            validationErrors.push(
+                {
+                    message: `${title} already exists`,
+                    path: ['title'],
+                    type: 'duplicate',
+                    context: {
+                        key: 'title',
+                        label: 'title',
+                    },
+                },
+            );
+        }
+        // @ts-ignore
+        if (loaded.schema.path === path) {
+            validationErrors.push(
+                {
+                    message: `${path} already exists`,
+                    path: ['path'],
+                    type: 'duplicate',
+                    context: {
+                        key: 'path',
+                        label: 'path',
+                    },
+                },
+            );
+        }
+        // @ts-ignore
+        if (loaded.schema.name === name) {
+            validationErrors.push(
+                {
+                    message: `${name} already exists`,
+                    path: ['name'],
+                    type: 'duplicate',
+                    context: {
+                        key: 'name',
+                        label: 'name',
+                    },
+                },
+            );
+        }
+        throw new ResourceValidationError(`Form already exists`, validationErrors);
+    }
     public readonly formRepository: FormRepository;
     public readonly formVersionRepository: FormVersionRepository;
+    private readonly roleAttributes: string[] = ['id', 'name', 'description'];
     private readonly formSchemaValidator: FormSchemaValidator;
     private readonly roleService: RoleService;
 
@@ -35,7 +96,7 @@ export class FormService {
         this.roleService = roleService;
     }
 
-    public async create(user: User, payload: object): Promise<string> {
+    public async create(user: User, payload: any): Promise<string> {
         const validationResult: ValidationResult<object> = this.formSchemaValidator.validate(payload);
         if (validationResult.error) {
             logger.error('Failed validation on create', validationResult.error.details);
@@ -43,18 +104,14 @@ export class FormService {
                 validationResult.error.details));
         }
         logger.info('Structure of the form looks ok...checking if this form already exists');
-        // @ts-ignore
         const title: string = payload.title;
-        // @ts-ignore
         const path: string = payload.path;
-        // @ts-ignore
         const name: string = payload.name;
-        // @ts-ignore
-        const accessRoles: string[] = payload.access;
+        const accessRoles: object[] = payload.access;
 
         return await this.formRepository.sequelize.transaction(async () => {
             const profiler = logger.startTimer();
-            const loaded = await this.formVersionRepository.findOne({
+            const loaded: FormVersion = await this.formVersionRepository.findOne({
                 where: {
                     [Op.or]: [{
                         'schema.title': {
@@ -73,54 +130,11 @@ export class FormService {
             });
 
             if (loaded) {
-                const validationErrors: ValidationErrorItem[] = [];
-                // @ts-ignore
-                if (loaded.schema.title === title) {
-                    validationErrors.push(
-                        {
-                            message: `${title} already exists`,
-                            path: ['title'],
-                            type: 'duplicate',
-                            context: {
-                                key: 'title',
-                                label: 'title',
-                            },
-                        },
-                    );
-                }
-                // @ts-ignore
-                if (loaded.schema.path === path) {
-                    validationErrors.push(
-                        {
-                            message: `${path} already exists`,
-                            path: ['path'],
-                            type: 'duplicate',
-                            context: {
-                                key: 'path',
-                                label: 'path',
-                            },
-                        },
-                    );
-                }
-                // @ts-ignore
-                if (loaded.schema.name === name) {
-                    validationErrors.push(
-                        {
-                            message: `${name} already exists`,
-                            path: ['name'],
-                            type: 'duplicate',
-                            context: {
-                                key: 'name',
-                                label: 'name',
-                            },
-                        },
-                    );
-                }
-                throw new ResourceValidationError(`Form already exists`, validationErrors);
+                FormService.handleDuplicateForm(loaded, title, path, name);
             }
             const defaultRole = await Role.defaultRole();
 
-            const roles = await this.roleService.findByIds(accessRoles);
+            const roles = await this.roleService.findOrCreate(accessRoles);
             const form = await this.formRepository.create({
                 createdBy: user.details.email,
             });
@@ -179,20 +193,11 @@ export class FormService {
                 include: [{
                     model: Role,
                     as: 'roles',
-                    attributes: ['id', 'name'],
+                    attributes: this.roleAttributes,
                     through: {
                         attributes: [],
                     },
-                    where: {
-                        name: {
-                            [Op.or]: {
-                                [Op.in]: user.details.roles.map((role: Role) => {
-                                    return role.name;
-                                }),
-                                [Op.eq]: defaultRole.name,
-                            },
-                        },
-                    },
+                    where: FormService.roleWhereClause(user, defaultRole),
                 }],
             }],
         };
@@ -227,17 +232,7 @@ export class FormService {
         return await this.formVersionRepository.sequelize.transaction(async (transaction) => {
             const date = new Date();
             const latestVersion = await this.formVersionRepository.findOne({
-                where: {
-                    formId: {
-                        [Op.eq]: formId,
-                    },
-                    latest: {
-                        [Op.eq]: true,
-                    },
-                    validTo: {
-                        [Op.eq]: null,
-                    },
-                },
+                where: this.latestFormClause(formId),
             });
 
             if (!latestVersion) {
@@ -292,37 +287,18 @@ export class FormService {
             return await this.formVersionRepository.findOne({
                 limit: 1,
                 offset: 0,
-                where: {
-                    formId: {
-                        [Op.eq]: formId,
-                    },
-                    latest: {
-                        [Op.eq]: true,
-                    },
-                    validTo: {
-                        [Op.eq]: null,
-                    },
-                },
+                where: this.latestFormClause(formId),
                 include: [{
                     model: Form,
                     attributes: ['id'],
                     include: [{
                         model: Role,
                         as: 'roles',
-                        attributes: ['id', 'name'],
+                        attributes: this.roleAttributes,
                         through: {
                             attributes: [],
                         },
-                        where: {
-                            name: {
-                                [Op.or]: {
-                                    [Op.in]: user.details.roles.map((role: Role) => {
-                                        return role.name;
-                                    }),
-                                    [Op.eq]: defaultRole.name,
-                                },
-                            },
-                        },
+                        where: FormService.roleWhereClause(user, defaultRole),
                     }],
                 }],
             });
@@ -358,7 +334,7 @@ export class FormService {
                 include: [{
                     model: Role,
                     as: 'roles',
-                    attributes: ['id', 'name'],
+                    attributes: this.roleAttributes,
                     through: {
                         attributes: [],
                     },
@@ -432,35 +408,16 @@ export class FormService {
         const version = await this.formVersionRepository.findOne({
             limit: 1,
             offset: 0,
-            where: {
-                formId: {
-                    [Op.eq]: id,
-                },
-                latest: {
-                    [Op.eq]: true,
-                },
-                validTo: {
-                    [Op.eq]: null,
-                },
-            },
+            where: this.latestFormClause(id),
             include: [{
                 model: Form, include: [{
                     model: Role,
                     as: 'roles',
-                    attributes: ['id', 'name'],
+                    attributes: this.roleAttributes,
                     through: {
                         attributes: [],
                     },
-                    where: {
-                        name: {
-                            [Op.or]: {
-                                [Op.in]: user.details.roles.map((role: Role) => {
-                                    return role.name;
-                                }),
-                                [Op.eq]: defaultRole.name,
-                            },
-                        },
-                    },
+                    where: FormService.roleWhereClause(user, defaultRole),
                 }],
             }],
         });
@@ -500,20 +457,11 @@ export class FormService {
                 model: Form, include: [{
                     model: Role,
                     as: 'roles',
-                    attributes: ['id', 'name'],
+                    attributes: this.roleAttributes,
                     through: {
                         attributes: [],
                     },
-                    where: {
-                        name: {
-                            [Op.or]: {
-                                [Op.in]: user.details.roles.map((role: Role) => {
-                                    return role.name;
-                                }),
-                                [Op.eq]: defaultRole.name,
-                            },
-                        },
-                    },
+                    where: FormService.roleWhereClause(user, defaultRole),
                 }],
             }],
         });
@@ -532,7 +480,7 @@ export class FormService {
                 model: Form, include: [{
                     model: Role,
                     as: 'roles',
-                    attributes: ['id', 'name'],
+                    attributes: this.roleAttributes,
                     through: {
                         attributes: [],
                     },
@@ -557,23 +505,28 @@ export class FormService {
                 {
                     model: Role,
                     as: 'roles',
-                    attributes: ['id', 'name'],
+                    attributes: this.roleAttributes,
                     through: {
                         attributes: [],
                     },
-                    where: {
-                        name: {
-                            [Op.or]: {
-                                [Op.in]: user.details.roles.map((role: Role) => {
-                                    return role.name;
-                                }),
-                                [Op.eq]: defaultRole.name,
-                            },
-                        },
-                    },
+                    where: FormService.roleWhereClause(user, defaultRole),
                 }],
 
         };
         return await this.formRepository.findOne(query);
+    }
+
+    private latestFormClause(formId: string): WhereOptions {
+        return {
+            formId: {
+                [Op.eq]: formId,
+            },
+            latest: {
+                [Op.eq]: true,
+            },
+            validTo: {
+                [Op.eq]: null,
+            },
+        };
     }
 }

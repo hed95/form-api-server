@@ -1,7 +1,3 @@
-// @ts-ignore
-
-
-
 import 'reflect-metadata';
 import {expect} from "chai";
 import {AdminController} from "../../../src/controller";
@@ -14,6 +10,7 @@ import {FormVersion} from "../../../src/model/FormVersion";
 import logger from "../../../src/util/logger";
 import AppConfig from "../../../src/interfaces/AppConfig";
 import defaultAppConfig from "../../../src/config/defaultAppConfig";
+import ResourceValidationError from "../../../src/error/ResourceValidationError";
 
 
 describe('AdminController', () => {
@@ -75,5 +72,25 @@ describe('AdminController', () => {
         appConfig.log.enabled = false;
         underTest.changeLogLevel({level: 'info'}, mockResponse);
         expect(mockResponse.getStatus()).to.be.eq(403);
+    });
+    it('throws exception if log level invalid', () => {
+        try {
+            underTest.changeLogLevel({level: 'xsdsd'}, mockResponse);
+        } catch (e) {
+            expect(e instanceof ResourceValidationError).to.be.eq(true);
+        }
+    });
+    it('does not apply timeout if -1', (done) => {
+        appConfig.log.timeout = -1;
+        const transportStream = logger.transports[0];
+        expect(transportStream.level).to.be.eq('info');
+
+        underTest.changeLogLevel({level: 'debug'}, mockResponse);
+        expect(transportStream.level).to.be.eq('debug');
+
+        setTimeout(() => {
+            expect(transportStream.level).to.be.eq('debug');
+            done();
+        }, 500);
     })
 });

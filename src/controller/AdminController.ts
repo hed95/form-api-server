@@ -16,6 +16,9 @@ import {FormVersion} from '../model/FormVersion';
 import logger from '../util/logger';
 import AppConfig from '../interfaces/AppConfig';
 import HttpStatus from 'http-status-codes';
+import * as Joi from '@hapi/joi';
+import {ValidationResult} from '@hapi/joi';
+import ResourceValidationError from '../error/ResourceValidationError';
 
 @controller('/admin')
 export class AdminController extends BaseHttpController {
@@ -41,14 +44,25 @@ export class AdminController extends BaseHttpController {
         } else {
             // @ts-ignore
             const level = logLevel.level;
+
+            const result: ValidationResult<object> = Joi.object().keys({
+                level: Joi.string().valid('info', 'debug', 'warn', 'error').required(),
+            }).validate(logLevel);
+
+            if (result.error) {
+                throw new ResourceValidationError('Invalid log', result.error.details);
+            }
             const transportStream = logger.transports[0];
             logger.warn(`Changing log level from ${transportStream.level} to ${level}.`);
             transportStream.level = level;
             res.sendStatus(HttpStatus.OK);
-            setTimeout(() => {
-                logger.warn(`Reverting log level back info`);
-                transportStream.level = 'info';
-            }, this.appConfig.log.timeout);
+
+            if (this.appConfig.log.timeout !== -1) {
+                setTimeout(() => {
+                    logger.warn(`Reverting log level back info`);
+                    transportStream.level = 'info';
+                }, this.appConfig.log.timeout);
+            }
         }
     }
 }

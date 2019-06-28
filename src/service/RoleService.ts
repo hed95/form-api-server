@@ -4,7 +4,6 @@ import {inject} from 'inversify';
 import {RoleRepository} from '../types/repository';
 import {Role} from '../model/Role';
 import _ from 'lodash';
-import {Op} from 'sequelize';
 import {User} from '../auth/User';
 import logger from '../util/logger';
 import * as Joi from '@hapi/joi';
@@ -62,21 +61,13 @@ export class RoleService {
                     name: role.name,
                 },
             });
-            return roleCreated[0];
+            let roleToReturn = roleCreated[0];
+            if (role.description) {
+                roleToReturn.description = role.description;
+                roleToReturn = await roleToReturn.update({});
+            }
+            return roleToReturn;
         }));
-    }
-
-    public async findByIds(ids: string[]): Promise<Role[]> {
-        if (!ids || ids.length === 0) {
-            return Promise.resolve([]);
-        }
-        return await this.roleRepository.findAll({
-            where: {
-                id: {
-                    [Op.in]: ids,
-                },
-            },
-        });
     }
 
     public async roles(limit: number = 20, offset: number = 0): Promise<{ rows: Role[], count: number }> {
