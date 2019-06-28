@@ -8,7 +8,6 @@ import InternalServerError from '../error/InternalServerError';
 import ResourceNotFoundError from '../error/ResourceNotFoundError';
 import ResourceValidationError from '../error/ResourceValidationError';
 import {Form} from '../model/Form';
-import {FormComment} from '../model/FormComment';
 import {FormSchemaValidator} from '../model/FormSchemaValidator';
 import {FormVersion} from '../model/FormVersion';
 import {Role} from '../model/Role';
@@ -205,7 +204,7 @@ export class FormService {
             });
         }
 
-        let result: { rows: FormVersion[], count: number } ;
+        let result: { rows: FormVersion[], count: number };
         if (countOnly) {
             const count: number = await this.formVersionRepository.count(query);
             result = {
@@ -213,7 +212,7 @@ export class FormService {
                 count,
             };
         } else {
-            result =  await this.formVersionRepository.findAndCountAll(query);
+            result = await this.formVersionRepository.findAndCountAll(query);
         }
 
         profiler.done({message: 'Completed getAllForms', user: user.details.email});
@@ -483,33 +482,6 @@ export class FormService {
         return true;
     }
 
-    public async createComment(id: string, user: User, comment: FormComment): Promise<FormComment> {
-        return await this.formRepository.sequelize.transaction(async () => {
-            const form = await this.getForm(id, user);
-            if (!form) {
-                throw new ResourceNotFoundError(`Form with id ${id} does not exist`);
-            }
-            const today = new Date();
-            if (!comment.createdOn) {
-                comment.set('createdOn', today);
-            }
-            if (!comment.createdBy) {
-                comment.set('createdBy', user.details.email);
-            }
-            const commentCreated = await comment.save({});
-            await form.$add('comments', [commentCreated]);
-            return commentCreated;
-        });
-    }
-
-    public async getComments(id: string, user: User): Promise<FormComment[]> {
-        const form = await this.getForm(id, user, true);
-        if (!form) {
-            throw new ResourceNotFoundError(`Form with id ${id} does not exist`);
-        }
-        return form.comments;
-    }
-
     public async updateRoles(formId: string, roles: Role[], user: User): Promise<void> {
         const form: Form = await this.getForm(formId, user);
         if (!form) {
@@ -573,9 +545,8 @@ export class FormService {
         };
     }
 
-    private async getForm(formId: string, user: User, includeComments: boolean = false) {
+    public async getForm(formId: string, user: User) {
         const defaultRole = await Role.defaultRole();
-
         const query: object = {
             where: {
                 id: {
@@ -603,17 +574,6 @@ export class FormService {
                 }],
 
         };
-        if (includeComments) {
-            // @ts-ignore
-            query.include.push({
-                model: FormComment,
-                as: 'comments',
-                attributes: ['id', 'createdBy', 'comment', 'createdOn'],
-                through: {
-                    attributes: [],
-                },
-            });
-        }
         return await this.formRepository.findOne(query);
     }
 }

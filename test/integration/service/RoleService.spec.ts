@@ -22,14 +22,10 @@ describe('RoleService', () => {
         expect(result.length).to.be.eq(4);
     });
 
-    it('can find by ids' , async() => {
-       const role = await new Role({
-           name: 'testRole1',
-           description: 'testRole1',
-           active: true
-       }).save();
-
-       const result = await roleService.findByIds([role.id]);
+    it('can create if role name does not exist' , async() => {
+       const result = await roleService.findOrCreate([{
+           name: 'roleThatDoesNotExist'
+       }]);
        expect(result.length).to.be.eq(1);
     });
 

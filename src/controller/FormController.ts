@@ -35,6 +35,7 @@ import _ from 'lodash';
 import {ValidationError} from '@hapi/joi';
 import InternalServerError from '../error/InternalServerError';
 import HttpStatus from 'http-status-codes';
+import {CommentService} from '../service/CommentService';
 
 @ApiPath({
     path: '/forms',
@@ -49,6 +50,7 @@ export class FormController extends BaseHttpController {
     constructor(@inject(TYPE.FormService) private readonly formService: FormService,
                 @inject(TYPE.ValidationService) private readonly validationService: ValidationService,
                 @inject(TYPE.FormResourceAssembler) private readonly formResourceAssembler: FormResourceAssembler,
+                @inject(TYPE.CommentService) private readonly commentService: CommentService,
     ) {
         super();
     }
@@ -243,9 +245,12 @@ export class FormController extends BaseHttpController {
     })
     @httpGet('/:id/comments', TYPE.ProtectMiddleware)
     public async comments(@requestParam('id') id: string,
+                          @queryParam('limit') limit: number = 20,
+                          @queryParam('offset') offset: number = 0,
                           @response() res: express.Response,
                           @principal() currentUser: User): Promise<void> {
-        const comments: FormComment[] = await this.formService.getComments(id, currentUser);
+        const comments: { total: number, comments: FormComment[] } =
+            await this.commentService.comments(id, currentUser, offset, limit);
         res.json(comments);
     }
 
@@ -278,7 +283,7 @@ export class FormController extends BaseHttpController {
                                @response() res: express.Response,
                                @principal() currentUser: User): Promise<void> {
 
-        await this.formService.createComment(id, currentUser, comment);
+        await this.commentService.createComment(id, currentUser, comment);
         res.sendStatus(HttpStatus.CREATED);
 
     }

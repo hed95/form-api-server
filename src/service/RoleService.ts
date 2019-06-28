@@ -51,6 +51,21 @@ export class RoleService {
 
     }
 
+    public async findOrCreate(roles: object[]): Promise<Role[]> {
+        if (!roles || roles.length === 0) {
+            return Promise.resolve([]);
+        }
+
+        return await Promise.all(_.map(roles, async (role: any) => {
+            const roleCreated: [Role, boolean] = await this.roleRepository.findOrCreate({
+                where: {
+                    name: role.name,
+                },
+            });
+            return roleCreated[0];
+        }));
+    }
+
     public async findByIds(ids: string[]): Promise<Role[]> {
         if (!ids || ids.length === 0) {
             return Promise.resolve([]);

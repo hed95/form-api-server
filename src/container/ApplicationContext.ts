@@ -15,6 +15,9 @@ import {RoleService} from '../service/RoleService';
 import {ValidationService} from '../service/ValidationService';
 import {FormResourceAssembler} from '../controller/FormResourceAssembler';
 import {AdminProtectMiddleware} from '../middleware/AdminProtectMiddleware';
+import {CommentService} from '../service/CommentService';
+import AppConfig from '../interfaces/AppConfig';
+import defaultAppConfig from '../config/defaultAppConfig';
 
 export class ApplicationContext {
     private readonly container: Container;
@@ -24,6 +27,7 @@ export class ApplicationContext {
             defaultScope: 'Singleton',
 
         });
+        this.container.bind<AppConfig>(TYPE.AppConfig).toConstantValue(defaultAppConfig);
         this.container.bind<KeycloakService>(TYPE.KeycloakService).to(KeycloakService);
         this.container.bind<ProtectMiddleware>(TYPE.ProtectMiddleware).to(ProtectMiddleware);
         this.container.bind<FormSchemaValidator>(TYPE.FormSchemaValidator).to(FormSchemaValidator);
@@ -37,7 +41,7 @@ export class ApplicationContext {
         this.container.bind<FormService>(TYPE.FormService).to(FormService);
         this.container.bind<FormResourceAssembler>(TYPE.FormResourceAssembler).to(FormResourceAssembler);
         this.container.bind<AdminProtectMiddleware>(TYPE.AdminProtectMiddleware).to(AdminProtectMiddleware);
-
+        this.container.bind<CommentService>(TYPE.CommentService).to(CommentService);
         logger.info('Application context initialised');
     }
 

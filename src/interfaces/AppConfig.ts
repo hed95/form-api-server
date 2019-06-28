@@ -13,6 +13,10 @@ interface AppConfig {
     cors: {
         origin: string[],
     };
+    log: {
+        enabled: boolean,
+        timeout: number,
+    };
 }
 
 export default AppConfig;

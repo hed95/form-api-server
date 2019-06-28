@@ -13,6 +13,7 @@ import {Role} from "../../../src/model/Role";
 import {MockRequest} from "../../MockRequest";
 import {ValidationService} from "../../../src/service/ValidationService";
 import {FormResourceAssembler} from "../../../src/controller/FormResourceAssembler";
+import {CommentService} from "../../../src/service/CommentService";
 
 describe("FormController", () => {
 
@@ -22,6 +23,7 @@ describe("FormController", () => {
     let formService: FormService;
     let validationService: ValidationService;
     let formResourceAssembler: FormResourceAssembler;
+    let commentService: CommentService;
 
     beforeEach(() => {
         mockResponse = new MockResponse();
@@ -29,7 +31,8 @@ describe("FormController", () => {
         formService = Substitute.for<FormService>();
         validationService = Substitute.for<ValidationService>();
         formResourceAssembler = Substitute.for<FormResourceAssembler>();
-        formController = new FormController(formService, validationService, formResourceAssembler);
+        commentService = Substitute.for<CommentService>();
+        formController = new FormController(formService, validationService, formResourceAssembler, commentService);
 
     });
 
@@ -122,7 +125,6 @@ describe("FormController", () => {
     });
 
 
-
     it('can update form roles', async () => {
         const user = new User("id", "email");
         const newRole: Role = Object.assign(Role.prototype, {});
@@ -136,7 +138,7 @@ describe("FormController", () => {
         expect(mockResponse.getStatus()).to.eq(200);
     });
 
-    it('can return forms', async() => {
+    it('can return forms', async () => {
         const user = new User("id", "email");
         Object.assign(FormVersion, {});
         Object.assign(Form, {});
@@ -150,11 +152,11 @@ describe("FormController", () => {
         version.form = form;
         // @ts-ignore
         formService.getAllForms(Arg.any(), Arg.any(), Arg.any(), Arg.any(), Arg.any(), Arg.any()).returns(Promise.resolve({
-            total : 1,
+            total: 1,
             forms: [version]
         }));
 
-        const result : {total: number, forms: object[]}
+        const result: { total: number, forms: object[] }
             = await formController.getForms(20, 0, null, null, false, user,
             mockRequest, mockResponse);
 
@@ -163,7 +165,7 @@ describe("FormController", () => {
 
     });
 
-    it('can find by version id', async() => {
+    it('can find by version id', async () => {
         const user = new User("id", "email");
         Object.assign(FormVersion, {});
         const version: FormVersion = Object.assign(FormVersion.prototype, {});

@@ -13,4 +13,6 @@ export default {
     RoleService: Symbol.for('RoleService'),
     FormResourceAssembler: Symbol.for('FormResourceAssembler'),
     AdminProtectMiddleware: Symbol.for('AdminProtectMiddleware'),
+    CommentService: Symbol.for('CommentService'),
+    AppConfig: Symbol.for('AppConfig'),
 };

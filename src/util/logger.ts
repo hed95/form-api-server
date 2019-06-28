@@ -27,7 +27,9 @@ const logger = createLogger({
     ),
     defaultMeta: { service: 'form-api-service'},
     transports: [
-        new transports.Console(),
+        new transports.Console({
+            level: 'info',
+        }),
     ],
     exitOnError: false,
 });

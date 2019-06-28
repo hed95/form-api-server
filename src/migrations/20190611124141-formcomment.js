@@ -28,6 +28,16 @@ module.exports = {
                 type: DataType.TEXT,
                 allowNull: false,
             },
+            formId: {
+                type: DataType.UUID,
+                references: {
+                    model: {
+                        tableName: "FORM",
+                        schema: "formschema",
+                    },
+                    key: "id",
+                },
+            },
         }, {
             schema: "formschema",
         });

@@ -1,3 +1,7 @@
+// @ts-ignore
+
+
+
 import 'reflect-metadata';
 import {expect} from "chai";
 import {AdminController} from "../../../src/controller";
@@ -6,28 +10,40 @@ import {FormResourceAssembler} from "../../../src/controller/FormResourceAssembl
 import {MockResponse} from "../../MockResponse";
 import {MockRequest} from "../../MockRequest";
 import {Arg, Substitute} from "@fluffy-spoon/substitute";
-import {User} from "../../../src/auth/User";
 import {FormVersion} from "../../../src/model/FormVersion";
+import logger from "../../../src/util/logger";
+import AppConfig from "../../../src/interfaces/AppConfig";
+import defaultAppConfig from "../../../src/config/defaultAppConfig";
+
 
 describe('AdminController', () => {
+
+    const env = Object.assign({}, process.env);
+
+    after(() => {
+        process.env = env;
+    });
 
     let mockResponse: any;
     let mockRequest: any;
     let underTest: AdminController;
     let formService: FormService;
     let formResourceAssembler: FormResourceAssembler;
+    let appConfig: AppConfig;
 
     beforeEach(() => {
         mockResponse = new MockResponse();
         mockRequest = new MockRequest("/forms", "/api/v1");
         formService = Substitute.for<FormService>();
         formResourceAssembler = Substitute.for<FormResourceAssembler>();
-        underTest = new AdminController(formService);
+        defaultAppConfig.log.enabled = true;
+        defaultAppConfig.log.timeout = 200;
+        appConfig = defaultAppConfig;
+        underTest = new AdminController(formService, appConfig);
 
     });
 
     it('can return forms', async () => {
-        const user = new User("id", "email");
         Object.assign(FormVersion, {});
         const version: FormVersion = Object.assign(FormVersion.prototype, {});
         version.schema = {
@@ -43,4 +59,21 @@ describe('AdminController', () => {
         expect(mockResponse.getJsonData().versions.length).to.be.eq(1);
 
     });
+
+    it('can change log level', (done) => {
+        const transportStream = logger.transports[0];
+        expect(transportStream.level).to.be.eq('info');
+        underTest.changeLogLevel({level: 'debug'}, mockResponse);
+        expect(transportStream.level).to.be.eq('debug');
+
+        setTimeout(() => {
+            expect(logger.transports[0].level).to.be.eq('info');
+            done();
+        }, 300);
+    });
+    it('cannot change log level', () => {
+        appConfig.log.enabled = false;
+        underTest.changeLogLevel({level: 'info'}, mockResponse);
+        expect(mockResponse.getStatus()).to.be.eq(403);
+    })
 });

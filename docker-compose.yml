@@ -41,6 +41,8 @@ services:
       - AUTH_URL=${AUTH_URL}
       - AUTH_BEARER_ONLY=true
       - AUTH_REALM=${AUTH_REALM}
+      - ADMIN_ROLES=platform
+      - ENABLE_LOG_CHANGE=false
       - AUTH_CLIENT_ID=${AUTH_CLIENT_ID}
     depends_on:
       - postgres_formapi

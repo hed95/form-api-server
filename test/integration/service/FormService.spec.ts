@@ -11,7 +11,6 @@ import {User} from "../../../src/auth/User";
 import ResourceNotFoundError from "../../../src/error/ResourceNotFoundError";
 import ResourceValidationError from "../../../src/error/ResourceValidationError";
 import {basicForm} from "../../form";
-import {FormComment} from "../../../src/model/FormComment";
 import {QueryParser} from "../../../src/util/QueryParser";
 import _ from 'lodash';
 import logger from "../../../src/util/logger";
@@ -498,78 +497,6 @@ describe("FormService", () => {
 
     });
 
-    it('can create comment', async () => {
-        const form = await formRepository.create({
-            createdBy: "test@test.com"
-        });
-
-        const defaultRole = await Role.defaultRole();
-
-        await form.$add("roles", [defaultRole]);
-
-        await new FormVersion({
-            name: "Test Form ABC 123",
-            title: "Test form title",
-            schema: {
-                components: [],
-                display: "wizard"
-            },
-            formId: form.id,
-            latest: true,
-            validFrom: new Date(),
-            validTo: null
-        }).save();
-
-        const user = new User("id", "test", [role]);
-        const formComment = new FormComment({
-            comment: "FormCommentary test"
-        });
-        const comment: FormComment = await formService.createComment(form.id, user, formComment);
-        console.log(comment.createdOn);
-        expect(comment).to.be.not.null;
-
-    });
-
-    it('can get comments', async () => {
-        const form = await formRepository.create({
-            createdBy: "test@test.com"
-        });
-
-        const defaultRole = await Role.defaultRole();
-
-        await form.$add("roles", [defaultRole]);
-
-        await new FormVersion({
-            name: "Test Form ABC 123",
-            title: "Test form title",
-            schema: {
-                components: [],
-                display: "wizard"
-            },
-            formId: form.id,
-            latest: true,
-            validFrom: new Date(),
-            validTo: null
-        }).save();
-
-        const user = new User("id", "test", [role]);
-        const formComment = new FormComment({
-            comment: "FormCommentary test"
-        });
-        await formService.createComment(form.id, user, formComment);
-        const comments: FormComment[] = await formService.getComments(form.id, user);
-        expect(comments.length).to.be.eq(1);
-        expect(comments[0].createdBy).to.be.eq("test");
-    });
-
-    it('throws error if form does not exist for get comments call', async () => {
-        try {
-            const user = new User("id", "test", [role]);
-            await formService.getComments("xx", user);
-        } catch (e) {
-            expect(e instanceof ResourceNotFoundError).to.be.eq(true);
-        }
-    });
 
     it('can update form roles', async () => {
         const form = await formRepository.create({
@@ -1081,14 +1008,7 @@ describe("FormService", () => {
         }
     });
 
-    it('throws exception if form does not exist on create comment', async () => {
-        try {
-            const user = new User("id", "test", [role]);
-            await formService.createComment('random', user, null);
-        } catch (e) {
-            expect(e instanceof ResourceNotFoundError).to.be.eq(true);
-        }
-    });
+
     it('throws exception if form does not exist on update roles', async () => {
         try {
             const user = new User("id", "test", [role]);

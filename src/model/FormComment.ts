@@ -1,5 +1,6 @@
-import {Column, CreatedAt, DataType, Model, Table} from 'sequelize-typescript';
+import {BelongsTo, Column, CreatedAt, DataType, ForeignKey, Model, Table} from 'sequelize-typescript';
 import {ApiModel, ApiModelProperty} from 'swagger-express-ts';
+import {Form} from './Form';
 
 @ApiModel({
     description: 'Comment associated with a form',
@@ -41,4 +42,13 @@ export class FormComment extends Model<FormComment> {
     })
     @Column
     public comment: string;
+
+    @ForeignKey(() => Form)
+    @Column({
+        type: DataType.UUID,
+    })
+    public formId: string;
+
+    @BelongsTo(() => Form)
+    public form: Form;
 }

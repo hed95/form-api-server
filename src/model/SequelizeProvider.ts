@@ -6,7 +6,6 @@ import TYPE from '../constant/TYPE';
 import logger from '../util/logger';
 import {Form} from './Form';
 import {FormComment} from './FormComment';
-import {FormCommentary} from './FormCommentary';
 import {FormRoles} from './FormRoles';
 import {FormVersion} from './FormVersion';
 import {Role} from './Role';
@@ -22,7 +21,7 @@ export class SequelizeProvider {
         const role = await Role.findOne({
             where: {
                 name: {
-                    [Op.eq] : roleName,
+                    [Op.eq]: roleName,
                 },
             },
         });
@@ -47,7 +46,7 @@ export class SequelizeProvider {
         const config = defaultDBConfig[env];
         this.sequelize = new Sequelize(config);
         this.sequelize.options.logging = env === 'test' ? true : logger.debug.bind(logger);
-        this.sequelize.addModels([FormRoles, Role, Form, FormVersion, FormCommentary, FormComment]);
+        this.sequelize.addModels([FormRoles, Role, Form, FormVersion, FormComment]);
     }
 
     public getSequelize(): Sequelize {
