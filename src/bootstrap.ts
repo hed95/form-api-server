@@ -20,7 +20,7 @@ import httpContext from 'express-http-context';
 import uuid from 'uuid';
 import HttpStatus from 'http-status-codes';
 import UnauthorizedError from './error/UnauthorizedError';
-import appConfig from './config/defaultAppConfig';
+import AppConfig from './interfaces/AppConfig';
 
 const defaultPort: number = 3000;
 
@@ -35,6 +35,15 @@ sequelizeProvider.getSequelize().sync({}).then(async () => {
     await SequelizeProvider.initDefaultRole(process.env.DEFAULT_ROLE);
     logger.info('DB initialised');
 });
+
+const appConfig: AppConfig = container.get(TYPE.AppConfig);
+
+if (appConfig.log.enabled) {
+    if (!appConfig.log.timeout) {
+        logger.error('No log revert timeout defined');
+        process.exit(1);
+    }
+}
 
 const version = 'v1';
 const basePath = `/api/${version}`;

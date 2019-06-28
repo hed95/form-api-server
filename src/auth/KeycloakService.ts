@@ -26,7 +26,7 @@ export class KeycloakService {
             'realm': authRealm,
             'resource': authResource,
             'sslRequired': sslRequired,
-            'confidentialPort': confidentialPort
+            'confidentialPort': confidentialPort,
         });
     }
 

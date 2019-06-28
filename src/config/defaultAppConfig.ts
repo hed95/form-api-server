@@ -1,7 +1,5 @@
 import AppConfig from '../interfaces/AppConfig';
 
-const DEFAULT_LOG_CHANGE_TIMEOUT: number = 300000;
-
 const defaultAppConfig: AppConfig = {
     keycloak: {
         url: process.env.AUTH_URL || 'http://keycloak.lodev.xyz/auth',
@@ -18,9 +16,8 @@ const defaultAppConfig: AppConfig = {
         origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split('|') : null,
     },
     log: {
-        enabled: process.env.ENABLE_LOG_CHANGE ? process.env.ENABLE_LOG_CHANGE === 'true' : false,
-        timeout: process.env.LOG_CHANGE_TIMEOUT ? Number(process.env.LOG_CHANGE_TIMEOUT)
-            : DEFAULT_LOG_CHANGE_TIMEOUT,
+        enabled: process.env.ENABLE_LOG_CHANGE ? process.env.ENABLE_LOG_CHANGE === 'true' : true,
+        timeout: Number(process.env.LOG_CHANGE_TIMEOUT),
     },
 };
 
