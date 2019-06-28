@@ -36,6 +36,7 @@ import {ValidationError} from '@hapi/joi';
 import InternalServerError from '../error/InternalServerError';
 import HttpStatus from 'http-status-codes';
 import {CommentService} from '../service/CommentService';
+import ResourceNotFoundError from '../error/ResourceNotFoundError';
 
 @ApiPath({
     path: '/forms',
@@ -81,6 +82,9 @@ export class FormController extends BaseHttpController {
                      @response() res: express.Response,
                      @principal() currentUser: User): Promise<void> {
         const formVersion = await this.formService.findForm(id, currentUser);
+        if (!formVersion) {
+            throw new ResourceNotFoundError(`Form with id ${id} does not exist. Check id or access controls`);
+        }
         const form = this.formResourceAssembler.toResource(formVersion, req);
         res.json(form);
     }

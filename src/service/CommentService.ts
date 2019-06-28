@@ -51,13 +51,17 @@ export class CommentService {
         }
         const today = new Date();
         if (!comment.createdOn) {
-            comment.set('createdOn', today);
+            comment.createdOn = today;
         }
         if (!comment.createdBy) {
-            comment.set('createdBy', user.details.email);
+            comment.createdBy = user.details.email;
         }
         return await this.formCommentRepository.sequelize.transaction(async () => {
-            const created: FormComment = await comment.save();
+            const created: FormComment = await this.formCommentRepository.create({
+                comment: comment.comment,
+                createdOn: comment.createdOn,
+                createdBy: comment.createdBy,
+            }, {});
             await created.$set('form', form);
             return created;
         });

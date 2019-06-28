@@ -14,6 +14,7 @@ import {MockRequest} from "../../MockRequest";
 import {ValidationService} from "../../../src/service/ValidationService";
 import {FormResourceAssembler} from "../../../src/controller/FormResourceAssembler";
 import {CommentService} from "../../../src/service/CommentService";
+import ResourceNotFoundError from "../../../src/error/ResourceNotFoundError";
 
 describe("FormController", () => {
 
@@ -187,9 +188,18 @@ describe("FormController", () => {
         expect(JSON.stringify(mockResponse.getJsonData())).to.be.eq(JSON.stringify({
             display: 'form',
             components: []
-        }))
+        }));
 
-
-    })
+    });
+    it('throws error if form does not exist', async () => {
+        const user = new User("id", "email");
+        // @ts-ignore
+        formService.findForm(Arg.any(), Arg.any()).returns(Promise.resolve(null));
+        try {
+            await formController.get("id", mockRequest, mockResponse, user);
+        } catch (e) {
+            expect(e instanceof ResourceNotFoundError).to.be.eq(true);
+        }
+    });
 
 });
