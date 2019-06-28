@@ -90,7 +90,7 @@ export class FormController extends BaseHttpController {
                                     @requestBody() submission: object,
                                     @response() res: express.Response,
                                     @principal() currentUser: User): Promise<void> {
-        logger.info(`Initiating a submission for validation ${JSON.stringify(submission)}`);
+        logger.info(`Initiating a submission for validation`);
         const validationErrors: ValidationError[] = await this.validationService.validate(id,
             submission,
             currentUser);
