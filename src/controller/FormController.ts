@@ -289,12 +289,12 @@ export class FormController extends BaseHttpController {
     }
 
     @httpGet('/version/:versionId', TYPE.ProtectMiddleware)
-    public async getByVersionId(@requestParam('id') id: string,
+    public async getByVersionId(@requestParam('versionId') versionId: string,
                                 @request() req: express.Request,
                                 @response() res: express.Response,
                                 @principal() currentUser: User): Promise<void> {
 
-        const formVersion: FormVersion = await this.formService.findByVersionId(id, currentUser);
+        const formVersion: FormVersion = await this.formService.findByVersionId(versionId, currentUser);
         const toReturn = this.formResourceAssembler.toResource(formVersion, req);
         res.json(toReturn);
     }
