@@ -1,18 +1,11 @@
-import {
-    AllowNull,
-    BelongsTo,
-    Column,
-    CreatedAt,
-    DataType,
-    ForeignKey,
-    Model,
-    Table,
-    UpdatedAt,
-} from 'sequelize-typescript';
+import {AllowNull, BelongsTo, Column, DataType, ForeignKey, Model, Table} from 'sequelize-typescript';
 import {Form} from './Form';
 
-@Table
+@Table({
+    timestamps: false,
+})
 export class FormVersion extends Model<FormVersion> {
+
     @Column({
         type: DataType.UUID,
         defaultValue: DataType.UUIDV4,
@@ -20,10 +13,9 @@ export class FormVersion extends Model<FormVersion> {
     })
     public versionId: string;
 
-    @UpdatedAt
-    public updatedOn: Date;
-
-    @CreatedAt
+    @Column({
+        type: DataType.DATE,
+    })
     public createdOn: Date;
 
     @Column
@@ -36,7 +28,7 @@ export class FormVersion extends Model<FormVersion> {
     @Column({
         type: DataType.JSONB,
     })
-    public schema: object;
+    public schema: any;
 
     @Column({comment: ''})
     public validFrom: Date;

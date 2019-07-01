@@ -1,4 +1,4 @@
-import {BelongsTo, Column, CreatedAt, DataType, ForeignKey, Model, Table} from 'sequelize-typescript';
+import {BelongsTo, Column, DataType, ForeignKey, Model, Table} from 'sequelize-typescript';
 import {ApiModel, ApiModelProperty} from 'swagger-express-ts';
 import {Form} from './Form';
 
@@ -6,7 +6,9 @@ import {Form} from './Form';
     description: 'Comment associated with a form',
     name: 'FormComment',
 })
-@Table
+@Table({
+    timestamps: false,
+})
 export class FormComment extends Model<FormComment> {
 
     @ApiModelProperty({
@@ -27,12 +29,14 @@ export class FormComment extends Model<FormComment> {
         format: 'YYYY-MM-DDTHH:mm:ss.sssZ',
         required: false,
     })
-    @CreatedAt
+    @Column({
+        type: DataType.DATE,
+    })
     public createdOn: Date;
 
     @ApiModelProperty({
         description: 'Created by usually email address. If one is not provided then will use the caller\'s details',
-        example : ['someone@domain.com'],
+        example: ['someone@domain.com'],
     })
     @Column
     public createdBy: string;

@@ -169,7 +169,7 @@ describe("FormController", () => {
     it('can find by version id', async () => {
         const user = new User("id", "email");
         Object.assign(FormVersion, {});
-        const version: FormVersion = Object.assign(FormVersion.prototype, {});
+        const version: FormVersion = Object.assign({}, FormVersion.prototype);
         version.schema = {
             display: 'form',
             components: []
@@ -185,10 +185,7 @@ describe("FormController", () => {
 
         await formController.getByVersionId("id", mockRequest, mockResponse, user);
 
-        expect(JSON.stringify(mockResponse.getJsonData())).to.be.eq(JSON.stringify({
-            display: 'form',
-            components: []
-        }));
+        expect(mockResponse.getJsonData().schema).to.eq(version.schema);
 
     });
     it('throws error if form does not exist', async () => {

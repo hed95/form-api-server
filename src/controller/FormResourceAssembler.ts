@@ -11,7 +11,16 @@ export class FormResourceAssembler implements ResourceAssembler<FormVersion, obj
 
     public toResource(entity: FormVersion, req: express.Request, includeLinks: boolean = true): object {
         if (!entity.schema) {
-            return entity;
+            return _.cloneDeepWith(entity, (value) => {
+                const form = value.form;
+                value.createdBy = form.createdBy;
+                value.createdOn = form.createdOn;
+                value.updatedBy = form.updatedBy;
+                const toReturn = JSON.parse(JSON.stringify(value));
+                toReturn.updatedOn = form.updatedOn;
+                delete toReturn.form;
+                return toReturn;
+            });
         }
         const resource: any = _.cloneDeep(entity.schema);
         resource.access = entity.form ? _.map((entity.form.roles), (role: Role) => {
@@ -22,11 +31,10 @@ export class FormResourceAssembler implements ResourceAssembler<FormVersion, obj
             };
         }) : null;
         resource.versionId = entity.versionId;
-        resource.createdOn = entity.createdOn;
-        resource.createdBy = entity.createdBy;
-        resource.updatedBy = entity.updatedBy;
-        resource.updatedOn = entity.updatedOn;
-
+        resource.createdOn = entity.form.createdOn;
+        resource.createdBy = entity.form.createdBy;
+        resource.updatedBy = entity.form.updatedBy;
+        resource.updatedOn = entity.form.updatedOn;
         const formId: string = entity.form.id;
         resource.id = formId;
         if (includeLinks) {

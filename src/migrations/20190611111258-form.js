@@ -14,11 +14,15 @@ module.exports = {
         type: DataType.DATE,
         allowNull: false,
       },
-      updatedAt: {
+      updatedOn: {
         type: DataType.DATE,
         allowNull: false,
       },
       createdBy: {
+        type: DataType.STRING,
+        allowNull: false,
+      },
+      updatedBy: {
         type: DataType.STRING,
         allowNull: false,
       },

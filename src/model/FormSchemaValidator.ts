@@ -14,7 +14,7 @@ export class FormSchemaValidator {
 
     private schema(): object {
         return Joi.object().keys({
-            _id: Joi.string(),
+            id: Joi.string(),
             name: Joi.string().required(),
             title: Joi.string().required(),
             path: Joi.string().required(),
@@ -25,6 +25,11 @@ export class FormSchemaValidator {
             display: Joi.string().valid('form', 'wizard', 'pdf'),
             access: Joi.array().items(Joi.any()),
             submissionAccess: Joi.array().items(Joi.any()),
+            createdOn: Joi.date(),
+            updatedOn: Joi.date(),
+            createdBy: Joi.string(),
+            updatedBy: Joi.string(),
+            versionId: Joi.string(),
         });
     }
 }

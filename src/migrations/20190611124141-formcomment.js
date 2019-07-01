@@ -20,10 +20,6 @@ module.exports = {
                 type: DataType.STRING,
                 allowNull: false,
             },
-            updatedAt: {
-                type: DataType.DATE,
-                allowNull: false,
-            },
             comment: {
                 type: DataType.TEXT,
                 allowNull: false,

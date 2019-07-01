@@ -16,7 +16,7 @@ const defaultAppConfig: AppConfig = {
         origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split('|') : null,
     },
     log: {
-        enabled: process.env.ENABLE_LOG_CHANGE ? process.env.ENABLE_LOG_CHANGE === 'true' : true,
+        enabled: process.env.ENABLE_LOG_CHANGE ? process.env.ENABLE_LOG_CHANGE === 'true' : false,
         timeout: Number(process.env.LOG_CHANGE_TIMEOUT),
     },
 };

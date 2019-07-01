@@ -59,14 +59,11 @@ export class RoleService {
             const roleCreated: [Role, boolean] = await this.roleRepository.findOrCreate({
                 where: {
                     name: role.name,
+                    description: role.description,
+                    active: role.active,
                 },
             });
-            let roleToReturn = roleCreated[0];
-            if (role.description) {
-                roleToReturn.description = role.description;
-                roleToReturn = await roleToReturn.update({});
-            }
-            return roleToReturn;
+            return roleCreated[0];
         }));
     }
 

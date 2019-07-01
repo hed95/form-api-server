@@ -1,10 +1,9 @@
 import {ValidationErrorItem, ValidationResult} from '@hapi/joi';
 import {inject} from 'inversify';
 import {provide} from 'inversify-binding-decorators';
-import {FindAndCountOptions, Op, WhereOptions} from 'sequelize';
+import {FindAndCountOptions, Op, OptimisticLockError, WhereOptions} from 'sequelize';
 import {User} from '../auth/User';
 import TYPE from '../constant/TYPE';
-import InternalServerError from '../error/InternalServerError';
 import ResourceNotFoundError from '../error/ResourceNotFoundError';
 import ResourceValidationError from '../error/ResourceValidationError';
 import {Form} from '../model/Form';
@@ -80,6 +79,7 @@ export class FormService {
         }
         throw new ResourceValidationError(`Form already exists`, validationErrors);
     }
+
     public readonly formRepository: FormRepository;
     public readonly formVersionRepository: FormVersionRepository;
     private readonly roleAttributes: string[] = ['id', 'name', 'description'];
@@ -97,6 +97,7 @@ export class FormService {
     }
 
     public async create(user: User, payload: any): Promise<string> {
+        payload = this.sanitize(payload);
         const validationResult: ValidationResult<object> = this.formSchemaValidator.validate(payload);
         if (validationResult.error) {
             logger.error('Failed validation on create', validationResult.error.details);
@@ -133,23 +134,29 @@ export class FormService {
                 FormService.handleDuplicateForm(loaded, title, path, name);
             }
             const defaultRole = await Role.defaultRole();
+            const today = new Date();
 
             const roles = await this.roleService.findOrCreate(accessRoles);
             const form = await this.formRepository.create({
                 createdBy: user.details.email,
+                createdOn: today,
+                updatedOn: today,
+                updatedBy: user.details.email,
             });
             const rolesToApply: Role[] = roles.length === 0 ? [defaultRole] : roles;
             await form.$add('roles', rolesToApply);
-            const today = new Date();
+
+            payload.id = form.id;
+
             await this.formVersionRepository.create({
                 schema: payload,
                 formId: form.id,
                 validFrom: today,
                 validTo: null,
                 latest: true,
+                createdOn: today,
                 createdBy: user.details.email,
             });
-
             profiler.done({message: 'Created form', user: user.details.email});
             return form.id;
         });
@@ -174,6 +181,7 @@ export class FormService {
                 [Op.eq]: null,
             },
         };
+
         if (filterQuery) {
             const keys: string[] = Object.keys(filterQuery);
             if (keys.length > 0) {
@@ -188,9 +196,13 @@ export class FormService {
             limit,
             offset,
             where: baseQueryOptions,
+            distinct: true,
+            col: 'formId',
             include: [{
+                required: true,
                 model: Form,
                 include: [{
+                    required: true,
                     model: Role,
                     as: 'roles',
                     attributes: this.roleAttributes,
@@ -227,7 +239,7 @@ export class FormService {
         };
     }
 
-    public async restore(formId: string, formVersionId: string): Promise<FormVersion> {
+    public async restore(formId: string, formVersionId: string, currentUser: User): Promise<FormVersion> {
         const profiler = logger.startTimer();
         return await this.formVersionRepository.sequelize.transaction(async (transaction) => {
             const date = new Date();
@@ -249,18 +261,22 @@ export class FormService {
                 throw new ResourceNotFoundError(`Version ${formVersionId} does not exist`);
             }
 
+            const userId = currentUser.details.email;
             await latestVersion.update({
                 validTo: date,
                 latest: false,
+                updatedBy: userId,
             });
 
             await versionToRestore.update({
                 latest: true,
                 validFrom: date,
                 validTo: null,
+                updatedBy: userId,
             });
+            const reloaded = await this.findForm(formId, currentUser);
             profiler.done({message: `restored form id ${formId} to version ${versionToRestore.id}`});
-            return versionToRestore;
+            return reloaded;
         });
     }
 
@@ -290,7 +306,7 @@ export class FormService {
                 where: this.latestFormClause(formId),
                 include: [{
                     model: Form,
-                    attributes: ['id'],
+                    attributes: ['id', 'createdOn', 'updatedOn'],
                     include: [{
                         model: Role,
                         as: 'roles',
@@ -307,7 +323,7 @@ export class FormService {
         }
     }
 
-    public async findAllVersions(formId: string, offset: number, limit: number, user: User): Promise<{
+    public async findAllVersions(formId: string, user: User, offset: number = 0, limit: number = 20): Promise<{
         offset: number,
         limit: number,
         versions: FormVersion[],
@@ -330,8 +346,9 @@ export class FormService {
             limit,
             include: [{
                 model: Form,
-                attributes: ['id'],
+                required: true,
                 include: [{
+                    required: true,
                     model: Role,
                     as: 'roles',
                     attributes: this.roleAttributes,
@@ -356,19 +373,12 @@ export class FormService {
 
     }
 
-    public async update(id: string, form: object, currentUser: User) {
-        const oldVersion = await this.formVersionRepository.findOne({
-            where: {
-                formId: {
-                    [Op.eq]: id,
-                },
-            },
-            include: [{
-                model: Form,
-            }],
-        });
-        if (!oldVersion) {
-            throw new ResourceNotFoundError(`Form with ${id} does not exist for update`);
+    public async update(id: string, form: any, currentUser: User) {
+
+        const latestVersion = await this.findForm(id, currentUser);
+
+        if (!latestVersion) {
+            throw new ResourceNotFoundError(`FormVersion with ${id} does not exist for update`);
         }
         const validationResult: ValidationResult<object> = this.formSchemaValidator.validate(form);
         if (validationResult.error) {
@@ -376,35 +386,47 @@ export class FormService {
             throw new ResourceValidationError('Failed to validate form',
                 validationResult.error.details);
         }
-
-        const currentDate = new Date();
         return this.formVersionRepository.sequelize.transaction(async () => {
+            const currentDate = new Date();
             const userId = currentUser.details.email;
-            await oldVersion.update({
+            const formId = latestVersion.form.id;
+            const formReloaded: Form = await this.formRepository.findByPk(formId);
+
+            if (formReloaded.updatedOn.getTime() !== latestVersion.form.updatedOn.getTime()) {
+                throw new OptimisticLockError({
+                    message: `Form with ${formId} has already been updated`,
+                    modelName: 'Form',
+                });
+            }
+            await formReloaded.update({
+                updatedOn: currentDate,
+                updatedBy: userId,
+            });
+            await latestVersion.update({
                 validTo: currentDate,
                 latest: false,
                 updatedBy: userId,
             });
-            logger.info('Updated previous version to be invalid');
-
+            form.id = formId;
+            form = this.sanitize(form);
             const newVersion = await new FormVersion({
                 schema: form,
-                formId: oldVersion.form.id,
+                formId,
                 validFrom: currentDate,
-                createdBy: userId,
-                validaTo: null,
+                validTo: null,
                 latest: true,
+                createdOn: currentDate,
+                createdBy: userId,
             }).save({});
-            logger.info(`New version created. New version id ${newVersion.id} for form id ${oldVersion.form.id}`);
+            logger.info(`New version created. New version id ${newVersion.versionId} `
+                + `for form id ${formReloaded.id}`);
             return newVersion;
 
         });
     }
 
     public async delete(id: string, user: User): Promise<boolean> {
-
         const defaultRole = await Role.defaultRole();
-
         const version = await this.formVersionRepository.findOne({
             limit: 1,
             offset: 0,
@@ -425,17 +447,27 @@ export class FormService {
         if (!version) {
             throw new ResourceNotFoundError(`Form with id ${id} does not exist`);
         }
-        const today = new Date();
-        try {
-            await version.update({
-                updatedBy: user.details.email,
+        const formFromOldVersion = version.form;
+        await this.formVersionRepository.sequelize.transaction(async () => {
+            const today = new Date();
+            const reloaded: Form = await this.formRepository.findByPk(formFromOldVersion.id);
+            if (reloaded.updatedOn.getTime() !== formFromOldVersion.updatedOn.getTime()) {
+                throw new OptimisticLockError({
+                    modelName: 'Form',
+                    message: `Form with ${id} has been updated while trying to delete`,
+                });
+            }
+            const userId = user.details.email;
+            await formFromOldVersion.update({
+                updatedOn: today,
+                updatedBy: userId,
+            });
+            return await version.update({
+                updatedBy: userId,
                 validTo: today,
-                updatedAt: today,
                 latest: false,
             });
-        } catch (e) {
-            throw new InternalServerError(e.toString());
-        }
+        });
         return true;
     }
 
@@ -529,4 +561,8 @@ export class FormService {
             },
         };
     }
+    private sanitize(form: any): any {
+        return _.omit(form, ['createdOn', 'updatedOn', 'createdBy', 'updatedBy', 'versionId', 'links']);
+    }
+
 }

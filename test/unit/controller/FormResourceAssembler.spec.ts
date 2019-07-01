@@ -13,10 +13,44 @@ describe('FormResourceAssembler', () => {
 
     beforeEach(() => {
         mockRequest = new MockRequest("/forms", "/api/v1");
-
     });
     const underTest: ResourceAssembler<FormVersion, object> = new FormResourceAssembler();
 
+    it('returns form when no schema', () => {
+        const date = new Date();
+        const expectedResult: object = {
+            title: 'testTitle',
+            createdBy: 'test',
+            createdOn: date,
+            updatedBy: 'test',
+            updatedOn: date
+
+        };
+
+        const version: FormVersion = Object.assign({}, FormVersion.prototype);
+        const role: Role = Object.assign({}, Role.prototype);
+        const form: Form = Object.assign({}, Form.prototype);
+
+
+        role.name = 'test';
+        role.id = 'test';
+        role.description = 'test';
+        role.active = true;
+        form.roles = [role];
+        form.createdOn = date;
+        form.createdBy = 'test';
+        form.updatedOn = date;
+        form.updatedBy = 'test';
+        form.id = 'formId';
+        version.form = form;
+        version.schema = undefined;
+        // @ts-ignore
+        version.title = 'testTitle';
+
+        const result = underTest.toResource(version, mockRequest);
+
+        expect(JSON.stringify(result)).to.be.eq(JSON.stringify(expectedResult));
+    });
     it('can convert formversion into form', () => {
         const date = new Date();
         const expectedResult: object = {
@@ -30,6 +64,8 @@ describe('FormResourceAssembler', () => {
             versionId: 'versionId',
             createdOn: date,
             createdBy: 'test',
+            updatedBy: 'test',
+            updatedOn: date,
             id: 'formId',
             links: [
                 {
@@ -86,6 +122,10 @@ describe('FormResourceAssembler', () => {
         role.description = 'test';
         role.active = true;
         form.roles = [role];
+        form.createdOn = date;
+        form.createdBy = 'test';
+        form.updatedOn = date;
+        form.updatedBy = 'test';
         form.id = 'formId';
         version.form = form;
 
@@ -96,4 +136,6 @@ describe('FormResourceAssembler', () => {
         expect(JSON.stringify(result)).to.be.eq(JSON.stringify(expectedResult));
 
     });
+
+
 });

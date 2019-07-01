@@ -33,10 +33,10 @@ import {FormResourceAssembler} from './FormResourceAssembler';
 import logger from '../util/logger';
 import _ from 'lodash';
 import {ValidationError} from '@hapi/joi';
-import InternalServerError from '../error/InternalServerError';
 import HttpStatus from 'http-status-codes';
 import {CommentService} from '../service/CommentService';
 import ResourceNotFoundError from '../error/ResourceNotFoundError';
+import {RestoreData} from '../model/RestoreData';
 
 @ApiPath({
     path: '/forms',
@@ -137,7 +137,6 @@ export class FormController extends BaseHttpController {
             });
         }
         return forms;
-
     }
 
     @httpGet('/:id/versions', TYPE.ProtectMiddleware)
@@ -153,16 +152,8 @@ export class FormController extends BaseHttpController {
             limit: number,
             versions: FormVersion[],
             total: number,
-        } = await this.formService.findAllVersions(id, offset, limit, currentUser);
-
-        res.json({
-            offset: result.offset,
-            limit: result.limit,
-            total: result.total,
-            versions: _.map(result.versions, (version: FormVersion) => {
-                return this.formResourceAssembler.toResource(version, req, true);
-            }),
-        });
+        } = await this.formService.findAllVersions(id, currentUser, offset, limit);
+        res.json(result);
     }
 
     @httpPut('/:id', TYPE.ProtectMiddleware)
@@ -220,11 +211,8 @@ export class FormController extends BaseHttpController {
                         @response() res: express.Response,
                         @principal() currentUser: User): Promise<void> {
         logger.info(`Deleting form with id ${id}`);
-        const deleted = await this.formService.delete(id, currentUser);
-        if (deleted) {
-            res.status(HttpStatus.OK);
-        }
-        throw new InternalServerError(`Failed to delete form with id ${id}`);
+        await this.formService.delete(id, currentUser);
+        res.status(HttpStatus.OK);
     }
 
     @ApiOperationGet({
@@ -299,7 +287,17 @@ export class FormController extends BaseHttpController {
                                 @principal() currentUser: User): Promise<void> {
 
         const formVersion: FormVersion = await this.formService.findByVersionId(versionId, currentUser);
-        const toReturn = this.formResourceAssembler.toResource(formVersion, req);
-        res.json(toReturn);
+        res.json(formVersion);
+    }
+
+    @httpPost('/restore', TYPE.ProtectMiddleware)
+    public async restore(@requestBody() restoreData: RestoreData,
+                         @request() req: express.Request,
+                         @response() res: express.Response,
+                         @principal() currentUser: User): Promise<void> {
+        const versionId = restoreData.versionId;
+        const formId = restoreData.formId;
+        const version = await this.formService.restore(formId, versionId, currentUser);
+        res.json(this.formResourceAssembler.toResource(version, req));
     }
 }

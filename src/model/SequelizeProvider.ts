@@ -45,7 +45,7 @@ export class SequelizeProvider {
         // @ts-ignore
         const config = defaultDBConfig[env];
         this.sequelize = new Sequelize(config);
-        this.sequelize.options.logging = env === 'test' ? true : logger.debug.bind(logger);
+        this.sequelize.options.logging = true;
         this.sequelize.addModels([FormRoles, Role, Form, FormVersion, FormComment]);
     }
 

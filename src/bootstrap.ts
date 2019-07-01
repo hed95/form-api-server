@@ -21,6 +21,7 @@ import uuid from 'uuid';
 import HttpStatus from 'http-status-codes';
 import UnauthorizedError from './error/UnauthorizedError';
 import AppConfig from './interfaces/AppConfig';
+import {OptimisticLockError} from 'sequelize';
 
 const defaultPort: number = 3000;
 
@@ -172,6 +173,18 @@ server.setConfig((app: express.Application) => {
                 'method': req.method,
                 'x-request-id': xRequestId,
                 'message': 'You are not authorized to perform the operation',
+            });
+
+        } else if (err instanceof OptimisticLockError) {
+            const error = err as OptimisticLockError;
+            res.status(HttpStatus.CONFLICT);
+            res.json({
+                'type': 'OPTIMISTIC_LOCK',
+                'requestedBy': user,
+                'path': req.path,
+                'method': req.method,
+                'x-request-id': xRequestId,
+                'message': error.message,
             });
         } else {
             res.status(HttpStatus.INTERNAL_SERVER_ERROR);

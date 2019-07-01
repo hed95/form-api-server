@@ -25,7 +25,8 @@ describe('RoleService', () => {
     it('can create if role name does not exist' , async() => {
        const result = await roleService.findOrCreate([{
            name: 'roleThatDoesNotExist',
-           description: 'x'
+           description: 'x',
+           active: true
        }]);
        expect(result.length).to.be.eq(1);
     });

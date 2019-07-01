@@ -14,6 +14,9 @@ import {basicForm} from "../../form";
 import {QueryParser} from "../../../src/util/QueryParser";
 import _ from 'lodash';
 import logger from "../../../src/util/logger";
+import {FormRoles} from "../../../src/model/FormRoles";
+import {FormComment} from "../../../src/model/FormComment";
+import {Form} from "../../../src/model/Form";
 
 describe("FormService", () => {
 
@@ -64,7 +67,7 @@ describe("FormService", () => {
         })]);
 
         try {
-            await formService.findAllVersions(form.id, 0, 10, user);
+            await formService.findAllVersions(form.id, user, 0, 10);
         } catch (e) {
             expect(e instanceof ResourceNotFoundError).to.be.eq(true);
         }
@@ -90,7 +93,7 @@ describe("FormService", () => {
         const user = new User("id", "test", [role]);
 
         const result: { offset: number, limit: number, versions: FormVersion[], total: number }
-            = await formService.findAllVersions(form.id, 0, 10, user);
+            = await formService.findAllVersions(form.id, user, 0, 10);
 
         expect(result.total).to.eq(1);
         expect(result.offset).to.eq(0);
@@ -174,15 +177,15 @@ describe("FormService", () => {
             validFrom: new Date(),
             validTo: null
         }).save();
+        const user = new User("id", "test", [role]);
 
 
-        const latest: FormVersion = await formService.restore(form.id, oldVersion.versionId);
+        const latest: FormVersion = await formService.restore(form.id, oldVersion.versionId, user);
 
         expect(latest.versionId).to.eq(oldVersion.versionId);
         expect(latest.validTo).to.be.null;
         expect(latest.latest).to.be.eq(true);
 
-        const user = new User("id", "test", [role]);
         const loaded: FormVersion = await formService.findForm(form.id, user);
         expect(loaded.versionId).to.be.eq(latest.versionId);
 
@@ -262,13 +265,16 @@ describe("FormService", () => {
     it('expected to throw resource not found exception', async () => {
 
         try {
-            await formService.restore("randomId", "randomID")
+            const user = new User("id", "test", [role]);
+
+            await formService.restore("randomId", "randomID", user)
         } catch (e) {
             expect(e instanceof ResourceNotFoundError).to.eq(true);
         }
 
     });
     it('expected to throw resource not version does not exist', async () => {
+        const user = new User("id", "test", [role]);
 
         try {
             const form = await formRepository.create({
@@ -288,7 +294,7 @@ describe("FormService", () => {
                 validFrom: new Date(),
                 validTo: null
             }).save();
-            await formService.restore(form.id, "randomID")
+            await formService.restore(form.id, "randomID", user)
         } catch (e) {
             expect(e instanceof ResourceNotFoundError).to.eq(true);
         }
@@ -583,7 +589,7 @@ describe("FormService", () => {
             const formName = `Test Form ABC${index}${value}Y`;
             await new FormVersion({
                 schema: {
-                    _id: form.id,
+                    id: form.id,
                     name: formName,
                     title: "Test form title",
                     components: [],
@@ -597,7 +603,7 @@ describe("FormService", () => {
 
             await new FormVersion({
                 schema: {
-                    _id: form.id,
+                    id: form.id,
                     name: formName,
                     title: "Test form title",
                     components: [],
@@ -629,7 +635,7 @@ describe("FormService", () => {
             const formName = `Test Form ABC${index}${value}X`;
             await new FormVersion({
                 schema: {
-                    _id: form.id,
+                    id: form.id,
                     name: formName,
                     title: "Test form title",
                     components: [],
@@ -643,7 +649,7 @@ describe("FormService", () => {
 
             await new FormVersion({
                 schema: {
-                    _id: form.id,
+                    id: form.id,
                     name: formName,
                     title: "Test form title",
                     components: [],
@@ -655,13 +661,13 @@ describe("FormService", () => {
                 validTo: null
             }).save();
         });
-        const results: { total: number, forms: FormVersion[] } = await formService.getAllForms(new User("id", "test", [role]), 20, 0, null, ['title', '_id']);
+        const results: { total: number, forms: FormVersion[] } = await formService.getAllForms(new User("id", "test", [role]), 20, 0, null, ['title', 'id']);
         expect(results.total).to.be.gte(2);
 
         // @ts-ignore
         expect(results.forms[0].title).to.be.not.null;
         // @ts-ignore
-        expect(results.forms[0]._id).to.be.not.null;
+        expect(results.forms[0].id).to.be.not.null;
         expect(results.forms[0].schema).to.be.eq(undefined);
         expect(results.forms[0].latest).to.be.eq(undefined);
 
@@ -874,6 +880,7 @@ describe("FormService", () => {
         expect(loaded.schema.components.length).to.be.eq(2);
 
         const toUpdate = _.cloneDeep(basicForm);
+        toUpdate['versionId'] = loaded.versionId;
         toUpdate.components.push({
             "label": "Text Field A",
             "widget": {
@@ -894,13 +901,23 @@ describe("FormService", () => {
 
         loaded = await formService.findForm(version, user);
         // @ts-ignore
+        expect(loaded.schema.versionId).to.be.undefined;
         expect(loaded.schema.components.length).to.be.eq(3);
+
+        const result: {
+            offset: number,
+            limit: number,
+            versions: FormVersion[],
+            total: number
+        } = await formService.findAllVersions(version, user);
+
+        expect(result.total).to.be.eq(2);
     });
 
     it('throws exception if formid for update does not exist', async () => {
         try {
             const user = new User("id", "test", [role]);
-            await formService.update('xxxx', basicForm, user);
+            await formService.update('ee908d85-211b-4fd8-836e-05eaf86ea0a3', basicForm, user);
         } catch (e) {
             expect(e instanceof ResourceNotFoundError).to.be.eq(true);
         }
@@ -1039,6 +1056,50 @@ describe("FormService", () => {
 
         expect(result.total).to.be.gte(1);
         expect(result.forms.length).to.be.eq(0);
+    });
+
+    it('total should be zero if no access to forms', async () => {
+        await FormRoles.destroy({
+            where: {}
+        });
+        await FormComment.destroy({
+            where: {}
+        });
+        await FormVersion.destroy({
+            where: {}
+        });
+        await Form.destroy({
+            where: {}
+        });
+
+        const form = await formRepository.create({
+            createdBy: "test@test.com"
+        });
+        await form.$add("roles", [role]);
+
+        await new FormVersion({
+            name: "Test Form 123XXX",
+            title: "Test form XX3555",
+            schema: {
+                components: [],
+                display: "wizard"
+            },
+            formId: form.id,
+            latest: true
+        }).save();
+
+        const differentRole = new Role({
+            name: "RandomRole",
+            active: true
+        });
+        const user = new User("id", "test", [differentRole]);
+
+        const result: { total: number, forms: FormVersion[] } = await formService.getAllForms(user,
+            20, 0, null, [], false);
+
+        expect(result.total).to.be.eq(0);
+        expect(result.forms.length).to.be.eq(0);
+
     });
 });
 

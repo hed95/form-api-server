@@ -15,10 +15,6 @@ module.exports = {
                 type: DataType.DATE,
                 allowNull: false,
             },
-            updatedOn: {
-                type: DataType.STRING,
-                allowNull: false,
-            },
             createdBy: {
                 type: DataType.STRING,
                 allowNull: false,

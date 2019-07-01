@@ -1,4 +1,3 @@
-import {Sequelize} from "sequelize-typescript";
 import {Role} from "../../../src/model/Role";
 import {expect} from 'chai';
 
@@ -24,7 +23,7 @@ describe("Role", () => {
         expect(roles.length).to.greaterThan(1);
     });
 
-    it('can update role', async() => {
+    it('can update role', async () => {
         const role = new Role({
             name: "Test Role Y",
             description: "Test description",

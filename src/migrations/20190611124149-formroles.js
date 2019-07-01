@@ -34,14 +34,6 @@ module.exports = {
                     key: "id",
                 },
             },
-            createdAt: {
-                type: DataType.DATE,
-                allowNull: false,
-            },
-            updatedAt: {
-                type: DataType.STRING,
-                allowNull: false,
-            },
         }, {
             schema: "formschema",
         });
