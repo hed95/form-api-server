@@ -14,6 +14,6 @@ describe("FormSchemaValidator", () => {
 
         const result: ValidationResult<object> = validator.validate(payload);
         expect(result.error).to.be.not.null;
-        expect(result.error.details.length).to.be.eq(4);
+        expect(result.error.details.length).to.be.eq(3);
     })
 });

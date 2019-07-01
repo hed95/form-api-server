@@ -458,7 +458,7 @@ describe("FormService", () => {
         } catch (err) {
             expect(err instanceof ResourceValidationError).to.eq(true);
             const validationError = err as ResourceValidationError;
-            expect(validationError.get().length).to.be.eq(4);
+            expect(validationError.get().length).to.be.eq(3);
         }
     });
 

@@ -375,6 +375,8 @@ export class FormService {
 
     public async update(id: string, form: any, currentUser: User) {
 
+        form = this.sanitize(form);
+
         const latestVersion = await this.findForm(id, currentUser);
 
         if (!latestVersion) {
@@ -562,7 +564,7 @@ export class FormService {
         };
     }
     private sanitize(form: any): any {
-        return _.omit(form, ['createdOn', 'updatedOn', 'createdBy', 'updatedBy', 'versionId', 'links']);
+        return _.omit(form, ['createdOn', 'updatedOn', 'createdBy', 'updatedBy', 'versionId', 'links', 'machineName']);
     }
 
 }

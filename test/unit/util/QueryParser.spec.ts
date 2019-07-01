@@ -32,4 +32,9 @@ describe("Query Parser", () => {
            expect(error.message).to.be.eq("Potential SQL in value");
        }
    });
+   it('can parse encoded', () => {
+       const queries: string[] = ["title__eq__%kugnu%20besac%20tadom%"];
+       const result = queryParser.parse(queries);
+       expect(Object.keys(result).length).to.be.eq(1);
+   })
 });

@@ -52,7 +52,7 @@ export class QueryParser {
                     }]);
                 }
 
-                const value = matches[valueMatch];
+                const value = unescape(matches[valueMatch]);
                 if (paranoid.test(value)) {
                     throw new ResourceValidationError('Potential SQL in value', [{
                         message: `${matches[valueMatch]} invalid`,

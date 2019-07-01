@@ -19,7 +19,7 @@ export class FormSchemaValidator {
             title: Joi.string().required(),
             path: Joi.string().required(),
             components: Joi.any().allow(),
-            type: Joi.string().required(),
+            type: Joi.string(),
             tags: Joi.array().items(Joi.string()).allow(),
             owner: Joi.string().allow(),
             display: Joi.string().valid('form', 'wizard', 'pdf'),
