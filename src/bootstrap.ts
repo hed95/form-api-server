@@ -83,8 +83,8 @@ server.setConfig((app: express.Application) => {
     app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
         httpContext.ns.bindEmitter(req);
         httpContext.ns.bindEmitter(res);
-        const requestId = req.headers['x-request-id'] || uuid.v4();
-        httpContext.set('x-request-id', requestId);
+        const requestId = req.headers[appConfig.correlationIdRequestHeader] || uuid.v4();
+        httpContext.set(appConfig.correlationIdRequestHeader, requestId);
         next();
     });
 
@@ -104,8 +104,8 @@ server.setConfig((app: express.Application) => {
             // @ts-ignore
             return `${tokens['response-time'](request, response)} ms`;
         });
-        morgan.token('x-request-id', (request: express.Request, response: express.Response) => {
-            return httpContext.get('x-request-id');
+        morgan.token(appConfig.correlationIdRequestHeader, (request: express.Request, response: express.Response) => {
+            return httpContext.get(appConfig.correlationIdRequestHeader);
         });
         return JSON.stringify({
             method: tokens.method(req, res),
@@ -141,60 +141,60 @@ server.setConfig((app: express.Application) => {
         }
         // @ts-ignore
         const user: string = req.kauth.grant.access_token.content.email;
-        const xRequestId = httpContext.get('x-request-id');
+        const correlationId = httpContext.get(appConfig.correlationIdRequestHeader);
         if (err instanceof ResourceNotFoundError) {
             const resourceNotFoundError = err as ResourceNotFoundError;
             res.status(HttpStatus.NOT_FOUND);
             res.json({
-                'message': resourceNotFoundError.message,
-                'type': 'RESOURCE_NOT_FOUND',
-                'requestedBy': user,
-                'path': req.path,
-                'method': req.method,
-                'x-request-id': xRequestId,
+                message: resourceNotFoundError.message,
+                type: 'RESOURCE_NOT_FOUND',
+                requestedBy: user,
+                path: req.path,
+                method: req.method,
+                [appConfig.correlationIdRequestHeader]: correlationId,
             });
         } else if (err instanceof ResourceValidationError) {
             const validationError = err as ResourceValidationError;
             res.status(HttpStatus.BAD_REQUEST);
             res.json({
-                'validationErrors': validationError.get(),
-                'type': 'VALIDATION_FAILURE',
-                'requestedBy': user,
-                'path': req.path,
-                'method': req.method,
-                'x-request-id': xRequestId,
+                validationErrors: validationError.get(),
+                type: 'VALIDATION_FAILURE',
+                requestedBy: user,
+                path: req.path,
+                method: req.method,
+                [appConfig.correlationIdRequestHeader]: correlationId,
             });
         } else if (err instanceof UnauthorizedError) {
             res.status(HttpStatus.UNAUTHORIZED);
             res.json({
-                'type': 'UNAUTHORIZED',
-                'requestedBy': user,
-                'path': req.path,
-                'method': req.method,
-                'x-request-id': xRequestId,
-                'message': 'You are not authorized to perform the operation',
+                type: 'UNAUTHORIZED',
+                requestedBy: user,
+                path: req.path,
+                method: req.method,
+                [appConfig.correlationIdRequestHeader]: correlationId,
+                message: 'You are not authorized to perform the operation',
             });
 
         } else if (err instanceof OptimisticLockError) {
             const error = err as OptimisticLockError;
             res.status(HttpStatus.CONFLICT);
             res.json({
-                'type': 'OPTIMISTIC_LOCK',
-                'requestedBy': user,
-                'path': req.path,
-                'method': req.method,
-                'x-request-id': xRequestId,
-                'message': error.message,
+                type: 'OPTIMISTIC_LOCK',
+                requestedBy: user,
+                path: req.path,
+                method: req.method,
+                [appConfig.correlationIdRequestHeader]: correlationId,
+                message: error.message,
             });
         } else {
             res.status(HttpStatus.INTERNAL_SERVER_ERROR);
             res.json({
-                'exception': err.toString(),
-                'type': 'APPLICATION_ERROR',
-                'requestedBy': user,
-                'path': req.path,
-                'method': req.method,
-                'x-request-id': xRequestId,
+                exception: err.toString(),
+                type: 'APPLICATION_ERROR',
+                requestedBy: user,
+                path: req.path,
+                method: req.method,
+                [appConfig.correlationIdRequestHeader]: correlationId,
             });
         }
     });

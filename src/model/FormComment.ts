@@ -44,7 +44,9 @@ export class FormComment extends Model<FormComment> {
     @ApiModelProperty({
         description: 'Comment',
     })
-    @Column
+    @Column({
+        type: DataType.TEXT,
+    })
     public comment: string;
 
     @ForeignKey(() => Form)

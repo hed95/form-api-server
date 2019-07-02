@@ -17,6 +17,7 @@ interface AppConfig {
         enabled: boolean,
         timeout: number,
     };
+    correlationIdRequestHeader: string;
 }
 
 export default AppConfig;

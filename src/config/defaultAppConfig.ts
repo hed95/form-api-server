@@ -19,6 +19,7 @@ const defaultAppConfig: AppConfig = {
         enabled: process.env.ENABLE_LOG_CHANGE ? process.env.ENABLE_LOG_CHANGE === 'true' : false,
         timeout: Number(process.env.LOG_CHANGE_TIMEOUT),
     },
+    correlationIdRequestHeader: process.env.CORRELATION_ID_REQUEST_HEADER || 'x-request-id',
 };
 
 export default defaultAppConfig;

@@ -44,6 +44,8 @@ services:
       - ADMIN_ROLES=platform
       - ENABLE_LOG_CHANGE=false
       - AUTH_CLIENT_ID=${AUTH_CLIENT_ID}
+      - CORS_ORIGIN=http://localhost:3000
+      - CORRELATION_ID_REQUEST_HEADER=correlationId
     depends_on:
       - postgres_formapi
     networks:

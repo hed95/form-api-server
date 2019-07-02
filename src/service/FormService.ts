@@ -341,7 +341,7 @@ export class FormService {
                     [Op.eq]: formId,
                 },
             },
-            order: [['validFrom', 'ASC']],
+            order: [['validFrom', 'DESC']],
             offset,
             limit,
             include: [{
