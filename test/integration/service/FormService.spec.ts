@@ -17,6 +17,7 @@ import logger from "../../../src/util/logger";
 import {FormRoles} from "../../../src/model/FormRoles";
 import {FormComment} from "../../../src/model/FormComment";
 import {Form} from "../../../src/model/Form";
+import {CommentService} from "../../../src/service/CommentService";
 
 describe("FormService", () => {
 
@@ -1058,6 +1059,46 @@ describe("FormService", () => {
         expect(result.forms.length).to.be.eq(0);
     });
 
+    it('can purge form', async() => {
+        const user = new User("id", "test", [role]);
+
+        basicForm.name = "formToPurge";
+        basicForm.path = "formToPurge";
+        basicForm.title = "formToPurge";
+
+        const version : string = await formService.create(user, basicForm);
+
+        //create another version
+        let loaded = await formService.findForm(version, user);
+        const toUpdate = _.cloneDeep(loaded.schema);
+        toUpdate.components.push({
+            "label": "Text Field A",
+            "widget": {
+                "type": "input"
+            },
+            "tableView": true,
+            "inputFormat": "plain",
+            "validate": {
+                "required": true
+            },
+            "key": "textFieldABC",
+            "type": "textfield",
+            "input": true
+        });
+        await formService.update(version, toUpdate, user);
+        const commentService: CommentService = applicationContext.get(TYPE.CommentService)
+        const formComment = new FormComment({
+            comment: "FormCommentary test"
+        });
+
+        await commentService.createComment(version, user, formComment);
+
+        const result: boolean = await formService.purge(version, user);
+
+        expect(result).to.be.eq(true);
+
+    });
+
     it('total should be zero if no access to forms', async () => {
         await FormRoles.destroy({
             where: {}
@@ -1101,6 +1142,8 @@ describe("FormService", () => {
         expect(result.forms.length).to.be.eq(0);
 
     });
+
+
 });
 
 

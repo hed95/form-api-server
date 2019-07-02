@@ -3,11 +3,14 @@ import {inject} from 'inversify';
 import {
     BaseHttpController,
     controller,
+    httpDelete,
     httpGet,
     httpPost,
+    principal,
     queryParam,
     request,
     requestBody,
+    requestParam,
     response,
 } from 'inversify-express-utils';
 import TYPE from '../constant/TYPE';
@@ -19,6 +22,7 @@ import HttpStatus from 'http-status-codes';
 import * as Joi from '@hapi/joi';
 import {ValidationResult} from '@hapi/joi';
 import ResourceValidationError from '../error/ResourceValidationError';
+import {User} from '../auth/User';
 
 @controller('/admin')
 export class AdminController extends BaseHttpController {
@@ -64,5 +68,14 @@ export class AdminController extends BaseHttpController {
                 }, this.appConfig.log.timeout);
             }
         }
+    }
+
+    @httpDelete('/forms/:id', TYPE.ProtectMiddleware, TYPE.AdminProtectMiddleware)
+    public async hardDelete(@requestParam('id') id: string,
+                            @response() res: express.Response,
+                            @principal() currentUser: User): Promise<void> {
+
+        await this.formService.purge(id, currentUser);
+        res.sendStatus(HttpStatus.OK);
     }
 }

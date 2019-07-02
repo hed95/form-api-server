@@ -550,6 +550,51 @@ export class FormService {
         return await this.formRepository.findOne(query);
     }
 
+    public async purge(id: string, user: User): Promise<boolean> {
+        const formVersion: FormVersion = await this.findForm(id, user);
+        if (!formVersion) {
+            throw new ResourceNotFoundError(`Form with id ${id} does not exist`);
+        }
+        logger.warn(`Form with id ${id} is being purged by ${user.details.email}`);
+        const form: Form = formVersion.form;
+        await this.formRepository.sequelize.transaction(async () => {
+
+            await this.formRepository.sequelize.model('FormRoles').destroy({
+                where: {
+                    formId: {
+                        [Op.eq]: form.id,
+                    },
+                },
+            });
+
+            await this.formRepository.sequelize.model('FormComment').destroy({
+                where: {
+                    formId: {
+                        [Op.eq]: form.id,
+                    },
+                },
+            });
+
+            await this.formVersionRepository.destroy({
+                where: {
+                    formId: {
+                        [Op.eq]: form.id,
+                    },
+                },
+            });
+
+            await this.formRepository.destroy({
+                where: {
+                    id: {
+                        [Op.eq]: form.id,
+                    },
+                },
+            });
+            logger.info(`Form with id ${id} purged by ${user.details.email}`);
+        });
+        return true;
+    }
+
     private latestFormClause(formId: string): WhereOptions {
         return {
             formId: {
@@ -563,6 +608,7 @@ export class FormService {
             },
         };
     }
+
     private sanitize(form: any): any {
         return _.omit(form, ['createdOn', 'updatedOn', 'createdBy', 'updatedBy', 'versionId', 'links', 'machineName']);
     }
