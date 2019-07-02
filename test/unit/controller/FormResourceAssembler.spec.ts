@@ -59,7 +59,8 @@ describe('FormResourceAssembler', () => {
             access: [{
                 id: 'test',
                 name: 'test',
-                description: 'test'
+                description: 'test',
+                active: true
             }],
             versionId: 'versionId',
             createdOn: date,

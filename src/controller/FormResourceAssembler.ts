@@ -28,6 +28,7 @@ export class FormResourceAssembler implements ResourceAssembler<FormVersion, obj
                 id: role.id,
                 name: role.name,
                 description: role.description,
+                active: role.active,
             };
         }) : null;
         resource.versionId = entity.versionId;

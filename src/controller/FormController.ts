@@ -275,8 +275,8 @@ export class FormController extends BaseHttpController {
                                @response() res: express.Response,
                                @principal() currentUser: User): Promise<void> {
 
-        await this.commentService.createComment(id, currentUser, comment);
-        res.sendStatus(HttpStatus.CREATED);
+        const formCreated: FormComment = await this.commentService.createComment(id, currentUser, comment);
+        res.json(formCreated).status(HttpStatus.CREATED);
 
     }
 

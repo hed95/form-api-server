@@ -30,6 +30,7 @@ export class CommentService {
                 return await this.formCommentRepository.findAndCountAll({
                     limit,
                     offset,
+                    order: [['createdOn', 'DESC']],
                     where: {
                         formId: {
                             [Op.eq]: formId,

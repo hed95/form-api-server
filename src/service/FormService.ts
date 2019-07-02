@@ -82,7 +82,7 @@ export class FormService {
 
     public readonly formRepository: FormRepository;
     public readonly formVersionRepository: FormVersionRepository;
-    private readonly roleAttributes: string[] = ['id', 'name', 'description'];
+    private readonly roleAttributes: string[] = ['id', 'name', 'description', 'active'];
     private readonly formSchemaValidator: FormSchemaValidator;
     private readonly roleService: RoleService;
 
