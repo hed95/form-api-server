@@ -60,7 +60,6 @@ describe('CommentService', () => {
             comment: "FormCommentary test"
         });
         const comment: FormComment = await commentService.createComment(form.id, user, formComment);
-        console.log(comment.createdOn);
         expect(comment).to.be.not.null;
 
     });

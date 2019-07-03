@@ -2,6 +2,7 @@ import * as winston from 'winston';
 import {createLogger, format, transports} from 'winston';
 import httpContext from 'express-http-context';
 import defaultAppConfig from '../config/defaultAppConfig';
+import {ApplicationConstants} from './ApplicationConstants';
 
 const {combine, json, splat} = format;
 
@@ -11,7 +12,7 @@ const addXRequestId = winston.format((info) => {
 });
 
 const addUserId = winston.format((info) => {
-    info.user = httpContext.get('x-user-id');
+    info.user = httpContext.get(ApplicationConstants.USER_ID);
     return info;
 });
 
@@ -26,7 +27,7 @@ const logger = createLogger({
         splat(),
         json(),
     ),
-    defaultMeta: {service: 'form-api-service'},
+    defaultMeta: {service: ApplicationConstants.SERVICE_NAME},
     transports: [
         new transports.Console({
             level: 'info',

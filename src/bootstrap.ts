@@ -22,6 +22,8 @@ import HttpStatus from 'http-status-codes';
 import UnauthorizedError from './error/UnauthorizedError';
 import AppConfig from './interfaces/AppConfig';
 import {OptimisticLockError} from 'sequelize';
+import {ApplicationConstants} from './util/ApplicationConstants';
+import * as Joi from '@hapi/joi';
 
 const defaultPort: number = 3000;
 
@@ -38,6 +40,37 @@ sequelizeProvider.getSequelize().sync({}).then(async () => {
 });
 
 const appConfig: AppConfig = container.get(TYPE.AppConfig);
+const schema = Joi.object().keys({
+    keycloak: Joi.object({
+        url: Joi.string().required(),
+        resource: Joi.string().required(),
+        realm: Joi.string().required(),
+        bearerOnly: Joi.string(),
+        sslRequired: Joi.string(),
+        confidentialPort: Joi.number(),
+        admin: Joi.object().keys({
+            username: Joi.string().required(),
+            password: Joi.string().required(),
+            clientId: Joi.string(),
+        }),
+    }),
+    admin: Joi.object().keys({
+        roles: Joi.array().items(Joi.string()),
+    }),
+    cors: Joi.object().keys({
+        origin: Joi.array().items(Joi.string()),
+    }),
+    log: Joi.object().keys({
+        enabled: Joi.boolean(),
+        timeout: Joi.any().optional(),
+    }),
+    correlationIdRequestHeader: Joi.string(),
+});
+const result = Joi.validate(appConfig, schema, {abortEarly: false});
+if (result.error) {
+    logger.error('Config failed validation', result.error.details);
+    process.exit(1);
+}
 
 if (appConfig.log.enabled) {
     if (!appConfig.log.timeout) {
@@ -56,8 +89,8 @@ const server = new InversifyExpressServer(container,
     KeycloakAuthProvider);
 
 server.setConfig((app: express.Application) => {
+    app.use(httpContext.middleware);
     const keycloakService: KeycloakService = container.get(TYPE.KeycloakService);
-
     app.use('/api-docs/swagger', express.static('swagger'));
     app.use('/api-docs/swagger/assets', express.static('node_modules/swagger-ui-dist'));
     app.use(swagger.express(
@@ -79,7 +112,6 @@ server.setConfig((app: express.Application) => {
         },
     ));
 
-    app.use(httpContext.middleware);
     app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
         httpContext.ns.bindEmitter(req);
         httpContext.ns.bindEmitter(res);
@@ -90,12 +122,20 @@ server.setConfig((app: express.Application) => {
 
     app.use(keycloakService.middleware());
 
-    app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+    app.use(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
         httpContext.ns.bindEmitter(req);
         httpContext.ns.bindEmitter(res);
-        // @ts-ignore
-        const user = req.kauth && req.kauth.grant ? req.kauth.grant.access_token.content.email : 'anonymous';
-        httpContext.set('x-user-id', user);
+        let userId;
+        const userEmailFromHeader = req.get(ApplicationConstants.USER_ID);
+        if (userEmailFromHeader) {
+            const user = await keycloakService.getUser(userEmailFromHeader);
+            userId = user.details.email;
+        } else {
+            // @ts-ignore
+            userId = req.kauth && req.kauth.grant ? req.kauth.grant.access_token.content.email :
+                ApplicationConstants.ANONYMOUS;
+        }
+        httpContext.set(ApplicationConstants.USER_ID, userId);
         next();
     });
 
@@ -104,7 +144,8 @@ server.setConfig((app: express.Application) => {
             // @ts-ignore
             return `${tokens['response-time'](request, response)} ms`;
         });
-        morgan.token(appConfig.correlationIdRequestHeader, (request: express.Request, response: express.Response) => {
+        morgan.token(appConfig.correlationIdRequestHeader,
+            (request: express.Request, response: express.Response) => {
             return httpContext.get(appConfig.correlationIdRequestHeader);
         });
         return JSON.stringify({

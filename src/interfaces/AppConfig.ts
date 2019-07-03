@@ -6,6 +6,11 @@ interface AppConfig {
         realm: string,
         confidentialPort: number,
         sslRequired: string,
+        admin: {
+            username: string,
+            password: string,
+            clientId: string,
+        },
     };
     admin: {
         roles: string[],
