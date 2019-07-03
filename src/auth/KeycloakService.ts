@@ -56,32 +56,38 @@ export class KeycloakService {
     }
 
     public async getUser(email: string): Promise<User> {
-        const result = await this.kcAdminClient.users.find({
-            email,
-            max: 1,
-        });
-        if (result && result.length === 1) {
-            const data = result[0];
-            const realmRoles = await this.kcAdminClient.users.listRealmRoleMappings(
-                {
-                    id: data.id,
-                    realm: this.appConfig.keycloak.realm,
-                },
-            );
-            const roles = realmRoles.map((realmRole) => {
-                return new Role({
-                    name: realmRole.name,
-                    description: realmRole.description,
-                    active: true,
-                });
+        try {
+            const result = await this.kcAdminClient.users.find({
+                email,
+                max: 1,
             });
+            if (result && result.length === 1) {
+                const data = result[0];
+                const realmRoles = await this.kcAdminClient.users.listRealmRoleMappings(
+                    {
+                        id: data.id,
+                        realm: this.appConfig.keycloak.realm,
+                    },
+                );
+                const roles = realmRoles.map((realmRole) => {
+                    return new Role({
+                        name: realmRole.name,
+                        description: realmRole.description,
+                        active: true,
+                    });
+                });
 
-            if (roles.length !== 0) {
-                return Promise.resolve(new User(data.email, data.email, roles));
+                if (roles.length !== 0) {
+                    return Promise.resolve(new User(data.email, data.email, roles));
+                }
+                return Promise.resolve(null);
             }
             return Promise.resolve(null);
+        } catch (e) {
+            logger.error('Failed to get user details', e);
+            return Promise.resolve(null);
         }
-        return Promise.resolve(null);
+
     }
 
 }

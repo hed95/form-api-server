@@ -24,7 +24,7 @@ export class KeycloakAuthProvider implements interfaces.AuthProvider {
         if (!req.path.endsWith('healthz') && !req.path.endsWith('readiness') && !req.path.startsWith('/api-docs')) {
             const userId = req.get(ApplicationConstants.USER_ID);
             if (userId) {
-                logger.info('x-user-email detected. Checking if this user exists', {
+                logger.debug('x-user-email detected. Checking if this user exists', {
                     email: userId,
                 });
                 const user: User = await this.keycloakService.getUser(userId);

@@ -129,7 +129,11 @@ server.setConfig((app: express.Application) => {
         const userEmailFromHeader = req.get(ApplicationConstants.USER_ID);
         if (userEmailFromHeader) {
             const user = await keycloakService.getUser(userEmailFromHeader);
-            userId = user.details.email;
+            if (user) {
+                userId = user.details.email;
+            } else {
+               next(new UnauthorizedError(`User ${userEmailFromHeader} not authorized`));
+            }
         } else {
             // @ts-ignore
             userId = req.kauth && req.kauth.grant ? req.kauth.grant.access_token.content.email :
@@ -180,8 +184,10 @@ server.setConfig((app: express.Application) => {
                 exception: err.stack,
             });
         }
+        const userEmailFromHeader = req.get(ApplicationConstants.USER_ID);
         // @ts-ignore
-        const user: string = req.kauth.grant.access_token.content.email;
+        const user: string = userEmailFromHeader ? userEmailFromHeader : req.kauth.grant.access_token.content.email;
+
         const correlationId = httpContext.get(appConfig.correlationIdRequestHeader);
         if (err instanceof ResourceNotFoundError) {
             const resourceNotFoundError = err as ResourceNotFoundError;
