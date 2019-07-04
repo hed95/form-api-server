@@ -346,9 +346,10 @@ export class FormService {
             limit,
             include: [{
                 model: Form,
-                required: true,
+                required: false,
+                attributes: ['id'],
                 include: [{
-                    required: true,
+                    required: false,
                     model: Role,
                     as: 'roles',
                     attributes: this.roleAttributes,
