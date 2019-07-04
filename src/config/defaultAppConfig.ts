@@ -1,5 +1,6 @@
 import AppConfig from '../interfaces/AppConfig';
 import {ApplicationConstants} from '../util/ApplicationConstants';
+const TWO_MINUTES = '120000';
 
 const defaultAppConfig: AppConfig = {
     keycloak: {
@@ -9,6 +10,7 @@ const defaultAppConfig: AppConfig = {
         realm: process.env.AUTH_REALM,
         confidentialPort: 0,
         sslRequired: 'external',
+        tokenRefreshInterval: process.env.AUTH_TOKEN_REFRESH_INTERVAL || TWO_MINUTES,
         admin: {
             username: process.env.AUTH_ADMIN_USERNAME,
             password: process.env.AUTH_ADMIN_PASSWORD,

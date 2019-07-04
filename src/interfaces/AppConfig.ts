@@ -6,6 +6,7 @@ interface AppConfig {
         realm: string,
         confidentialPort: number,
         sslRequired: string,
+        tokenRefreshInterval: string
         admin: {
             username: string,
             password: string,

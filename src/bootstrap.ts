@@ -48,6 +48,7 @@ const schema = Joi.object().keys({
         bearerOnly: Joi.string(),
         sslRequired: Joi.string(),
         confidentialPort: Joi.number(),
+        tokenRefreshInterval: Joi.string(),
         admin: Joi.object().keys({
             username: Joi.string().required(),
             password: Joi.string().required(),

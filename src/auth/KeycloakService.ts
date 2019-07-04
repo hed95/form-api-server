@@ -8,6 +8,7 @@ import KcAdminClient from 'keycloak-admin';
 import logger from '../util/logger';
 import {User} from './User';
 import {Role} from '../model/Role';
+import {getToken} from 'keycloak-admin/lib/utils/auth';
 
 @provide(TYPE.KeycloakService)
 export class KeycloakService {
@@ -31,13 +32,24 @@ export class KeycloakService {
             realmName: keycloak.realm,
         });
         const admin: { clientId: string, username: string, password: string } = keycloak.admin;
-        this.kcAdminClient.auth({
+        const credentials = {
             username: admin.username,
             password: admin.password,
             grantType: 'password',
             clientId: admin.clientId,
-        }).then(() => {
+        };
+        this.kcAdminClient.auth(credentials).then(() => {
             logger.info('kcAdminClient successfully initialised');
+            setInterval(async () => {
+                getToken({
+                    baseUrl : keycloak.url,
+                    realmName: keycloak.realm,
+                    credentials,
+                }).then((token: any) => {
+                   this.kcAdminClient.setAccessToken(token.accessToken);
+                });
+            }, +keycloak.tokenRefreshInterval);
+
         }).catch((err) => {
             logger.error('Failed to initialise kcAdminClient', err);
         });

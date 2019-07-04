@@ -21,6 +21,9 @@ export class KeycloakAuthProvider implements interfaces.AuthProvider {
         res: express.Response,
         next: express.NextFunction,
     ): Promise<interfaces.Principal> {
+        if (req.method === 'OPTIONS') {
+            return Promise.resolve(null);
+        }
         if (!req.path.endsWith('healthz') && !req.path.endsWith('readiness') && !req.path.startsWith('/api-docs')) {
             const userId = req.get(ApplicationConstants.USER_ID);
             if (userId) {
@@ -44,6 +47,7 @@ export class KeycloakAuthProvider implements interfaces.AuthProvider {
                     logger.warn('Failed to get user details', {
                         error: err.toString(),
                         url: req.url,
+                        method: req.method,
                     });
                     return Promise.resolve(null);
                 }
