@@ -54,6 +54,7 @@ export class KeycloakService {
                     credentials,
                 }).then((token: any) => {
                     this.kcAdminClient.setAccessToken(token.accessToken);
+                    logger.debug(`Pruning user cache for stale objects`);
                     this.userCache.prune();
                 });
             }, +keycloak.tokenRefreshInterval);

@@ -8,20 +8,24 @@ import logger from '../util/logger';
 import {KeycloakService} from './KeycloakService';
 import {User} from './User';
 import {ApplicationConstants} from '../util/ApplicationConstants';
+import AppConfig from "../interfaces/AppConfig";
 
 const keycloakService = inject(TYPE.KeycloakService);
+const appConfig = inject(TYPE.AppConfig);
 
 @injectable()
 export class KeycloakAuthProvider implements interfaces.AuthProvider {
 
     @keycloakService private readonly keycloakService: KeycloakService;
+    @appConfig private readonly appConfig: AppConfig;
 
     public async getUser(
         req: express.Request,
         res: express.Response,
         next: express.NextFunction,
     ): Promise<interfaces.Principal> {
-        if (req.method === 'OPTIONS') {
+
+        if ((this.appConfig.cors.origin && this.appConfig.cors.origin.length !== 0) && req.method === 'OPTIONS') {
             return Promise.resolve(null);
         }
         if (!req.path.endsWith('healthz') && !req.path.endsWith('readiness') && !req.path.startsWith('/api-docs')) {
@@ -33,9 +37,8 @@ export class KeycloakAuthProvider implements interfaces.AuthProvider {
                 const user: User = await this.keycloakService.getUser(userId);
                 return Promise.resolve(user);
             } else {
-                const instance: Keycloak = this.keycloakService.keycloakInstance();
                 try {
-                    const grant: Keycloak.Grant = await instance.getGrant(req, res);
+                    const grant: Keycloak.Grant = await this.keycloakService.keycloakInstance().getGrant(req, res);
                     // @ts-ignore
                     const email = grant.access_token.content.email;
                     const roles = grant.access_token.content.realm_access.roles.map((role: string) => {
