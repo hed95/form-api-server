@@ -11,6 +11,8 @@ import logger from "../../../src/util/logger";
 import AppConfig from "../../../src/interfaces/AppConfig";
 import defaultAppConfig from "../../../src/config/defaultAppConfig";
 import ResourceValidationError from "../../../src/error/ResourceValidationError";
+import {KeycloakService} from "../../../src/auth/KeycloakService";
+import {User} from "../../../src/auth/User";
 
 
 describe('AdminController', () => {
@@ -26,6 +28,7 @@ describe('AdminController', () => {
     let underTest: AdminController;
     let formService: FormService;
     let formResourceAssembler: FormResourceAssembler;
+    let keycloakService: KeycloakService;
     let appConfig: AppConfig;
 
     beforeEach(() => {
@@ -33,10 +36,11 @@ describe('AdminController', () => {
         mockRequest = new MockRequest("/forms", "/api/v1");
         formService = Substitute.for<FormService>();
         formResourceAssembler = Substitute.for<FormResourceAssembler>();
+        keycloakService = Substitute.for<KeycloakService>();
         defaultAppConfig.log.enabled = true;
         defaultAppConfig.log.timeout = 200;
         appConfig = defaultAppConfig;
-        underTest = new AdminController(formService, appConfig);
+        underTest = new AdminController(formService,keycloakService,appConfig);
 
     });
 
@@ -92,5 +96,11 @@ describe('AdminController', () => {
             expect(transportStream.level).to.be.eq('debug');
             done();
         }, 500);
-    })
+    });
+    it('can delete cache', () => {
+       const user: User = new User("email", "email", []);
+       underTest.clearUserCache(user);
+       // @ts-ignore
+        keycloakService.received().clearUserCache(user);
+    });
 });

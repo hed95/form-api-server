@@ -23,6 +23,12 @@ interface AppConfig {
         enabled: boolean,
         timeout: number,
     };
+    cache: {
+        user: {
+            maxAge: number,
+            maxEntries: number,
+        },
+    };
     correlationIdRequestHeader: string;
 }
 

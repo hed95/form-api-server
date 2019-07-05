@@ -23,11 +23,13 @@ import * as Joi from '@hapi/joi';
 import {ValidationResult} from '@hapi/joi';
 import ResourceValidationError from '../error/ResourceValidationError';
 import {User} from '../auth/User';
+import {KeycloakService} from '../auth/KeycloakService';
 
 @controller('/admin')
 export class AdminController extends BaseHttpController {
 
     constructor(@inject(TYPE.FormService) private readonly formService: FormService,
+                @inject(TYPE.KeycloakService) private readonly keycloakService: KeycloakService,
                 @inject(TYPE.AppConfig) private readonly appConfig: AppConfig) {
         super();
     }
@@ -68,6 +70,11 @@ export class AdminController extends BaseHttpController {
                 }, this.appConfig.log.timeout);
             }
         }
+    }
+
+    @httpDelete('/cache/user', TYPE.ProtectMiddleware, TYPE.AdminProtectMiddleware)
+    public clearUserCache( @principal() currentUser: User): void {
+        this.keycloakService.clearUserCache(currentUser);
     }
 
     @httpDelete('/forms/:id', TYPE.ProtectMiddleware, TYPE.AdminProtectMiddleware)

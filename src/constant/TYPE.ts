@@ -15,4 +15,5 @@ export default {
     AdminProtectMiddleware: Symbol.for('AdminProtectMiddleware'),
     CommentService: Symbol.for('CommentService'),
     AppConfig: Symbol.for('AppConfig'),
+    CacheManager: Symbol.for('CacheManager'),
 };

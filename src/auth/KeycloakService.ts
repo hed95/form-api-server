@@ -9,12 +9,15 @@ import logger from '../util/logger';
 import {User} from './User';
 import {Role} from '../model/Role';
 import {getToken} from 'keycloak-admin/lib/utils/auth';
+import LRUCache = require('lru-cache');
 
 @provide(TYPE.KeycloakService)
 export class KeycloakService {
 
     private readonly keycloak: Keycloak;
     private readonly kcAdminClient: KcAdminClient;
+
+    private readonly userCache: LRUCache<string, User>;
 
     constructor(@inject(TYPE.AppConfig) private readonly appConfig: AppConfig) {
         const keycloak: any = appConfig.keycloak;
@@ -38,21 +41,27 @@ export class KeycloakService {
             grantType: 'password',
             clientId: admin.clientId,
         };
+        this.userCache = new LRUCache({
+            max: appConfig.cache.user.maxEntries,
+            maxAge: appConfig.cache.user.maxAge,
+        });
         this.kcAdminClient.auth(credentials).then(() => {
             logger.info('kcAdminClient successfully initialised');
             setInterval(async () => {
                 getToken({
-                    baseUrl : keycloak.url,
+                    baseUrl: keycloak.url,
                     realmName: keycloak.realm,
                     credentials,
                 }).then((token: any) => {
-                   this.kcAdminClient.setAccessToken(token.accessToken);
+                    this.kcAdminClient.setAccessToken(token.accessToken);
+                    this.userCache.prune();
                 });
             }, +keycloak.tokenRefreshInterval);
 
         }).catch((err) => {
             logger.error('Failed to initialise kcAdminClient', err);
         });
+
     }
 
     public middleware(): RequestHandler {
@@ -67,13 +76,39 @@ export class KeycloakService {
         return this.keycloak;
     }
 
+    public clearUserCache(user: User): void {
+        logger.info(`${user.details.email} is deleting user cache entries`);
+        this.userCache.reset();
+        logger.info(`${user.details.email} deleted all user cache entries`);
+    }
+
     public async getUser(email: string): Promise<User> {
+        let user: User = this.userCache.get(email);
+        if (!user) {
+            logger.info(`Cache miss for user: ${email}`);
+            user = await this.loadUser(email);
+            if (user) {
+                logger.debug(`Found user ${email}...setting into local cache`);
+                this.userCache.set(user.details.email, user, this.appConfig.cache.user.maxAge);
+                logger.debug(`${email} added to cache`);
+                return Promise.resolve(user);
+            } else {
+                logger.warn(`User ${email} was not found so not storing in cache`);
+                return Promise.resolve(null);
+            }
+        }
+        logger.info(`Cache hit for user: ${email}`);
+        return Promise.resolve(user);
+    }
+
+    private async loadUser(email: string): Promise<User> {
         try {
             const result = await this.kcAdminClient.users.find({
                 email,
                 max: 1,
             });
             if (result && result.length === 1) {
+                logger.debug(`Found user ${email}...now looking for roles`);
                 const data = result[0];
                 const realmRoles = await this.kcAdminClient.users.listRealmRoleMappings(
                     {
@@ -88,12 +123,13 @@ export class KeycloakService {
                         active: true,
                     });
                 });
-
                 if (roles.length !== 0) {
+                    logger.debug(`Found roles for user ${email}`);
                     return Promise.resolve(new User(data.email, data.email, roles));
                 }
                 return Promise.resolve(null);
             }
+            logger.warn(`Failed to find user details for ${email}`);
             return Promise.resolve(null);
         } catch (e) {
             logger.error('Failed to get user details', e);

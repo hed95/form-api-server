@@ -23,7 +23,7 @@ import UnauthorizedError from './error/UnauthorizedError';
 import AppConfig from './interfaces/AppConfig';
 import {OptimisticLockError} from 'sequelize';
 import {ApplicationConstants} from './util/ApplicationConstants';
-import * as Joi from '@hapi/joi';
+import {ConfigValidator} from './util/ConfigValidator';
 
 const defaultPort: number = 3000;
 
@@ -40,34 +40,8 @@ sequelizeProvider.getSequelize().sync({}).then(async () => {
 });
 
 const appConfig: AppConfig = container.get(TYPE.AppConfig);
-const schema = Joi.object().keys({
-    keycloak: Joi.object({
-        url: Joi.string().required(),
-        resource: Joi.string().required(),
-        realm: Joi.string().required(),
-        bearerOnly: Joi.string(),
-        sslRequired: Joi.string(),
-        confidentialPort: Joi.number(),
-        tokenRefreshInterval: Joi.string(),
-        admin: Joi.object().keys({
-            username: Joi.string().required(),
-            password: Joi.string().required(),
-            clientId: Joi.string(),
-        }),
-    }),
-    admin: Joi.object().keys({
-        roles: Joi.array().items(Joi.string()),
-    }),
-    cors: Joi.object().keys({
-        origin: Joi.array().items(Joi.string()),
-    }),
-    log: Joi.object().keys({
-        enabled: Joi.boolean(),
-        timeout: Joi.any().optional(),
-    }),
-    correlationIdRequestHeader: Joi.string(),
-});
-const result = Joi.validate(appConfig, schema, {abortEarly: false});
+const configValidator = new ConfigValidator();
+const result = configValidator.validate(appConfig);
 if (result.error) {
     logger.error('Config failed validation', result.error.details);
     process.exit(1);
@@ -133,7 +107,7 @@ server.setConfig((app: express.Application) => {
             if (user) {
                 userId = user.details.email;
             } else {
-               next(new UnauthorizedError(`User ${userEmailFromHeader} not authorized`));
+                next(new UnauthorizedError(`User ${userEmailFromHeader} not authorized`));
             }
         } else {
             // @ts-ignore
@@ -151,8 +125,8 @@ server.setConfig((app: express.Application) => {
         });
         morgan.token(appConfig.correlationIdRequestHeader,
             (request: express.Request, response: express.Response) => {
-            return httpContext.get(appConfig.correlationIdRequestHeader);
-        });
+                return httpContext.get(appConfig.correlationIdRequestHeader);
+            });
         return JSON.stringify({
             method: tokens.method(req, res),
             url: tokens.url(req, res),
