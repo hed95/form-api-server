@@ -9,7 +9,7 @@ import logger from '../util/logger';
 import {User} from './User';
 import {Role} from '../model/Role';
 import {getToken} from 'keycloak-admin/lib/utils/auth';
-import LRUCache = require('lru-cache');
+import LRUCache from 'lru-cache';
 
 @provide(TYPE.KeycloakService)
 export class KeycloakService {

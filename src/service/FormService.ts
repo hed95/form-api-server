@@ -458,6 +458,7 @@ export class FormService {
         });
     }
 
+    @CacheClear({cacheKey: FormService.setCacheKey})
     public async delete(id: string, user: User): Promise<boolean> {
         const defaultRole = await Role.defaultRole();
         const version = await this.formVersionRepository.findOne({
@@ -582,6 +583,7 @@ export class FormService {
         return await this.formRepository.findOne(query);
     }
 
+    @CacheClear({cacheKey: FormService.setCacheKey})
     public async purge(id: string, user: User): Promise<boolean> {
         const formVersion: FormVersion = await this.findForm(id, user);
         if (!formVersion) {
