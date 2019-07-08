@@ -1,6 +1,6 @@
 import AppConfig from '../interfaces/AppConfig';
 import {ApplicationConstants} from '../util/ApplicationConstants';
-const TWO_MINUTES = '120000';
+export const TWO_MINUTES = '120000';
 const MAX_ENTRIES = 100;
 
 const defaultAppConfig: AppConfig = {

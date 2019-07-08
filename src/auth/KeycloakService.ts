@@ -18,6 +18,7 @@ export class KeycloakService {
     private readonly kcAdminClient: KcAdminClient;
 
     private readonly userCache: LRUCache<string, User>;
+    private intervalId: any;
 
     constructor(@inject(TYPE.AppConfig) private readonly appConfig: AppConfig) {
         const keycloak: any = appConfig.keycloak;
@@ -47,7 +48,7 @@ export class KeycloakService {
         });
         this.kcAdminClient.auth(credentials).then(() => {
             logger.info('kcAdminClient successfully initialised');
-            setInterval(async () => {
+            this.intervalId = setInterval(async () => {
                 getToken({
                     baseUrl: keycloak.url,
                     realmName: keycloak.realm,
@@ -102,6 +103,13 @@ export class KeycloakService {
         return Promise.resolve(user);
     }
 
+    public clearTimer() {
+        if (this.intervalId) {
+            logger.info('Clearing user cache');
+            clearInterval(this.intervalId);
+        }
+    }
+
     private async loadUser(email: string): Promise<User> {
         try {
             const result = await this.kcAdminClient.users.find({
@@ -138,5 +146,4 @@ export class KeycloakService {
         }
 
     }
-
 }

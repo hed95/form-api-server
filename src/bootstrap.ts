@@ -24,6 +24,7 @@ import AppConfig from './interfaces/AppConfig';
 import {OptimisticLockError} from 'sequelize';
 import {ApplicationConstants} from './util/ApplicationConstants';
 import {ConfigValidator} from './util/ConfigValidator';
+import {LRUCacheClient} from './service/LRUCacheClient';
 
 const defaultPort: number = 3000;
 
@@ -222,11 +223,24 @@ server.setConfig((app: express.Application) => {
     });
 });
 
-process.on('SIGTERM', async () => {
+const clearUp = async () => {
+    const keycloakService: KeycloakService = applicationContext.get(TYPE.KeycloakService);
+    keycloakService.clearTimer();
+
+    const lruCacheClient: LRUCacheClient = applicationContext.get(TYPE.LRUCacheClient);
+    lruCacheClient.clearTimer();
     await sequelizeProvider.getSequelize().close();
+};
+
+process.on('SIGTERM', async () => {
+    clearUp().then(() => {
+        logger.info('all cleaned and finished');
+    });
 });
 process.on('SIGINT', async () => {
-    await sequelizeProvider.getSequelize().close();
+    clearUp().then(() => {
+        logger.info('all cleaned and finished');
+    });
 });
 
 const expressApplication = server.build();

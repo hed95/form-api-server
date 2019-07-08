@@ -24,12 +24,14 @@ import {ValidationResult} from '@hapi/joi';
 import ResourceValidationError from '../error/ResourceValidationError';
 import {User} from '../auth/User';
 import {KeycloakService} from '../auth/KeycloakService';
+import {LRUCacheClient} from '../service/LRUCacheClient';
 
 @controller('/admin')
 export class AdminController extends BaseHttpController {
 
     constructor(@inject(TYPE.FormService) private readonly formService: FormService,
                 @inject(TYPE.KeycloakService) private readonly keycloakService: KeycloakService,
+                @inject(TYPE.LRUCacheClient) private readonly lruCacheClient: LRUCacheClient,
                 @inject(TYPE.AppConfig) private readonly appConfig: AppConfig) {
         super();
     }
@@ -73,8 +75,13 @@ export class AdminController extends BaseHttpController {
     }
 
     @httpDelete('/cache/user', TYPE.ProtectMiddleware, TYPE.AdminProtectMiddleware)
-    public clearUserCache( @principal() currentUser: User): void {
+    public clearUserCache(@principal() currentUser: User): void {
         this.keycloakService.clearUserCache(currentUser);
+    }
+
+    @httpDelete('/cache/form', TYPE.ProtectMiddleware, TYPE.AdminProtectMiddleware)
+    public clearFormCache(@principal() currentUser: User): void {
+        (this.lruCacheClient as LRUCacheClient).clearAll(currentUser);
     }
 
     @httpDelete('/forms/:id', TYPE.ProtectMiddleware, TYPE.AdminProtectMiddleware)
