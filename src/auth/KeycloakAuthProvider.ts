@@ -8,7 +8,7 @@ import logger from '../util/logger';
 import {KeycloakService} from './KeycloakService';
 import {User} from './User';
 import {ApplicationConstants} from '../util/ApplicationConstants';
-import AppConfig from "../interfaces/AppConfig";
+import AppConfig from '../interfaces/AppConfig';
 
 const keycloakService = inject(TYPE.KeycloakService);
 const appConfig = inject(TYPE.AppConfig);

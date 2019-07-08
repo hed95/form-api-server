@@ -24,6 +24,10 @@ interface AppConfig {
         timeout: number,
     };
     cache: {
+        form: {
+            maxAge: number,
+            maxEntries: number,
+        },
         user: {
             maxAge: number,
             maxEntries: number,

@@ -86,7 +86,7 @@ export class KeycloakService {
     public async getUser(email: string): Promise<User> {
         let user: User = this.userCache.get(email);
         if (!user) {
-            logger.info(`Cache miss for user: ${email}`);
+            logger.debug(`Cache miss for user: ${email}`);
             user = await this.loadUser(email);
             if (user) {
                 logger.debug(`Found user ${email}...setting into local cache`);
@@ -98,7 +98,7 @@ export class KeycloakService {
                 return Promise.resolve(null);
             }
         }
-        logger.info(`Cache hit for user: ${email}`);
+        logger.debug(`Cache hit for user: ${email}`);
         return Promise.resolve(user);
     }
 

@@ -18,16 +18,19 @@ import {AdminProtectMiddleware} from '../middleware/AdminProtectMiddleware';
 import {CommentService} from '../service/CommentService';
 import AppConfig from '../interfaces/AppConfig';
 import defaultAppConfig from '../config/defaultAppConfig';
+import {EventEmitter} from 'events';
+import {LRUCacheClient} from '../service/LRUCacheClient';
 
 export class ApplicationContext {
     private readonly container: Container;
-
     constructor() {
         this.container = new Container({
             defaultScope: 'Singleton',
 
         });
+        this.container.bind<EventEmitter>(TYPE.EventEmitter).toConstantValue(new EventEmitter());
         this.container.bind<AppConfig>(TYPE.AppConfig).toConstantValue(defaultAppConfig);
+        this.container.bind<LRUCacheClient>(TYPE.LRUCacheClient).to(LRUCacheClient);
         this.container.bind<KeycloakService>(TYPE.KeycloakService).to(KeycloakService);
         this.container.bind<ProtectMiddleware>(TYPE.ProtectMiddleware).to(ProtectMiddleware);
         this.container.bind<FormSchemaValidator>(TYPE.FormSchemaValidator).to(FormSchemaValidator);
@@ -42,6 +45,7 @@ export class ApplicationContext {
         this.container.bind<FormResourceAssembler>(TYPE.FormResourceAssembler).to(FormResourceAssembler);
         this.container.bind<AdminProtectMiddleware>(TYPE.AdminProtectMiddleware).to(AdminProtectMiddleware);
         this.container.bind<CommentService>(TYPE.CommentService).to(CommentService);
+
         logger.info('Application context initialised');
     }
 

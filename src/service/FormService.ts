@@ -16,9 +16,14 @@ import _ from 'lodash';
 import {Sequelize} from 'sequelize-typescript';
 import {RoleService} from './RoleService';
 import Validator from 'validator';
+import {Cacheable, CacheClear} from 'type-cacheable';
+import {LRUCacheClient} from './LRUCacheClient';
+import cacheManager from 'type-cacheable';
 
 @provide(TYPE.FormService)
 export class FormService {
+
+    private static setCacheKey = (args: any[]) => args[0];
 
     private static roleWhereClause(user: User, defaultRole: Role): WhereOptions {
         return {
@@ -80,24 +85,47 @@ export class FormService {
         throw new ResourceValidationError(`Form already exists`, validationErrors);
     }
 
+    private static latestFormClause(formId: string): WhereOptions {
+        return {
+            formId: {
+                [Op.eq]: formId,
+            },
+            latest: {
+                [Op.eq]: true,
+            },
+            validTo: {
+                [Op.eq]: null,
+            },
+        };
+    }
+
+    private static sanitize(form: any): any {
+        return _.omit(form, ['createdOn', 'updatedOn', 'createdBy', 'updatedBy', 'versionId', 'links', 'machineName']);
+    }
+
     public readonly formRepository: FormRepository;
     public readonly formVersionRepository: FormVersionRepository;
     private readonly roleAttributes: string[] = ['id', 'name', 'description', 'active'];
     private readonly formSchemaValidator: FormSchemaValidator;
     private readonly roleService: RoleService;
+    private readonly lruCacheClient: LRUCacheClient;
 
     constructor(@inject(TYPE.FormRepository) formRepository: FormRepository,
                 @inject(TYPE.FormVersionRepository) formVersionRepository: FormVersionRepository,
                 @inject(TYPE.FormSchemaValidator) formSchemaValidator: FormSchemaValidator,
-                @inject(TYPE.RoleService) roleService: RoleService) {
+                @inject(TYPE.RoleService) roleService: RoleService,
+                @inject(TYPE.LRUCacheClient) lruCacheClient: LRUCacheClient) {
         this.formRepository = formRepository;
         this.formVersionRepository = formVersionRepository;
         this.formSchemaValidator = formSchemaValidator;
         this.roleService = roleService;
+        this.lruCacheClient = lruCacheClient;
+        // @ts-ignore
+        cacheManager.setClient(this.lruCacheClient);
     }
 
     public async create(user: User, payload: any): Promise<string> {
-        payload = this.sanitize(payload);
+        payload = FormService.sanitize(payload);
         const validationResult: ValidationResult<object> = this.formSchemaValidator.validate(payload);
         if (validationResult.error) {
             logger.error('Failed validation on create', validationResult.error.details);
@@ -239,12 +267,13 @@ export class FormService {
         };
     }
 
+    @CacheClear({cacheKey: FormService.setCacheKey})
     public async restore(formId: string, formVersionId: string, currentUser: User): Promise<FormVersion> {
         const profiler = logger.startTimer();
         return await this.formVersionRepository.sequelize.transaction(async (transaction) => {
             const date = new Date();
             const latestVersion = await this.formVersionRepository.findOne({
-                where: this.latestFormClause(formId),
+                where: FormService.latestFormClause(formId),
             });
 
             if (!latestVersion) {
@@ -280,6 +309,7 @@ export class FormService {
         });
     }
 
+    @Cacheable({cacheKey: FormService.setCacheKey})
     public async findForm(formId: string, user: User): Promise<FormVersion> {
         const isUUID: boolean = Validator.isUUID(formId);
         if (!isUUID) {
@@ -299,11 +329,10 @@ export class FormService {
         const profiler = logger.startTimer();
         try {
             const defaultRole = await Role.defaultRole();
-
             return await this.formVersionRepository.findOne({
                 limit: 1,
                 offset: 0,
-                where: this.latestFormClause(formId),
+                where: FormService.latestFormClause(formId),
                 include: [{
                     model: Form,
                     attributes: ['id', 'createdOn', 'updatedOn'],
@@ -374,9 +403,10 @@ export class FormService {
 
     }
 
+    @CacheClear({cacheKey: FormService.setCacheKey})
     public async update(id: string, form: any, currentUser: User) {
 
-        form = this.sanitize(form);
+        form = FormService.sanitize(form);
 
         const latestVersion = await this.findForm(id, currentUser);
 
@@ -411,7 +441,7 @@ export class FormService {
                 updatedBy: userId,
             });
             form.id = formId;
-            form = this.sanitize(form);
+            form = FormService.sanitize(form);
             const newVersion = await new FormVersion({
                 schema: form,
                 formId,
@@ -433,7 +463,7 @@ export class FormService {
         const version = await this.formVersionRepository.findOne({
             limit: 1,
             offset: 0,
-            where: this.latestFormClause(id),
+            where: FormService.latestFormClause(id),
             include: [{
                 model: Form, include: [{
                     model: Role,
@@ -500,6 +530,7 @@ export class FormService {
                 }],
             }],
         });
+
         if (!version) {
             throw new ResourceNotFoundError(`Version with id ${id} does not exist`);
         }
@@ -594,24 +625,6 @@ export class FormService {
             logger.info(`Form with id ${id} purged by ${user.details.email}`);
         });
         return true;
-    }
-
-    private latestFormClause(formId: string): WhereOptions {
-        return {
-            formId: {
-                [Op.eq]: formId,
-            },
-            latest: {
-                [Op.eq]: true,
-            },
-            validTo: {
-                [Op.eq]: null,
-            },
-        };
-    }
-
-    private sanitize(form: any): any {
-        return _.omit(form, ['createdOn', 'updatedOn', 'createdBy', 'updatedBy', 'versionId', 'links', 'machineName']);
     }
 
 }

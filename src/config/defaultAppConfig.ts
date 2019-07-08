@@ -1,7 +1,7 @@
 import AppConfig from '../interfaces/AppConfig';
 import {ApplicationConstants} from '../util/ApplicationConstants';
 const TWO_MINUTES = '120000';
-const MAX_USER_ENTRIES = 100;
+const MAX_ENTRIES = 100;
 
 const defaultAppConfig: AppConfig = {
     keycloak: {
@@ -29,9 +29,13 @@ const defaultAppConfig: AppConfig = {
         timeout: Number(process.env.LOG_CHANGE_TIMEOUT),
     },
     cache: {
+        form: {
+            maxAge: process.env.CACHE_FORM_MAX_AGE ? +process.env.CACHE_FORM_MAX_AGE : +TWO_MINUTES,
+            maxEntries: process.env.CACHE_FORM_MAX_ENTRIES ? +process.env.CACHE_USER_FORM_ENTRIES : MAX_ENTRIES,
+        },
         user: {
             maxAge: process.env.CACHE_USER_MAX_AGE ? +process.env.CACHE_USER_MAX_AGE : +TWO_MINUTES,
-            maxEntries: process.env.CACHE_USER_MAX_ENTRIES ? +process.env.CACHE_USER_MAX_ENTRIES : MAX_USER_ENTRIES,
+            maxEntries: process.env.CACHE_USER_MAX_ENTRIES ? +process.env.CACHE_USER_MAX_ENTRIES : MAX_ENTRIES,
         },
     },
     correlationIdRequestHeader: process.env.CORRELATION_ID_REQUEST_HEADER

@@ -32,6 +32,10 @@ export class ConfigValidator {
                 timeout: Joi.any().optional(),
             }),
             cache: Joi.object().keys({
+                form: Joi.object().keys({
+                    maxAge: Joi.number(),
+                    maxEntries: Joi.number(),
+                }),
                 user: Joi.object().keys({
                     maxAge: Joi.number(),
                     maxEntries: Joi.number(),
