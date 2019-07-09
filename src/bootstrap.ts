@@ -24,7 +24,7 @@ import AppConfig from './interfaces/AppConfig';
 import {OptimisticLockError} from 'sequelize';
 import {ApplicationConstants} from './util/ApplicationConstants';
 import {ConfigValidator} from './util/ConfigValidator';
-import {LRUCacheClient} from './service/LRUCacheClient';
+import {EventEmitter} from 'events';
 
 const defaultPort: number = 3000;
 
@@ -32,6 +32,8 @@ const port = process.env.PORT || defaultPort;
 const applicationContext: ApplicationContext = new ApplicationContext();
 
 const container = applicationContext.iocContainer();
+
+const eventEmitter: EventEmitter = container.get(TYPE.EventEmitter);
 
 const sequelizeProvider: SequelizeProvider = applicationContext.get(TYPE.SequelizeProvider);
 
@@ -223,13 +225,15 @@ server.setConfig((app: express.Application) => {
     });
 });
 
-const clearUp = async () => {
-    const keycloakService: KeycloakService = applicationContext.get(TYPE.KeycloakService);
-    keycloakService.clearTimer();
+const expressApplication = server.build();
 
-    const lruCacheClient: LRUCacheClient = applicationContext.get(TYPE.LRUCacheClient);
-    lruCacheClient.clearTimer();
+expressApplication.listen(port);
+logger.info('Server up and running on ' + port);
+
+const clearUp = async () => {
+    eventEmitter.emit(ApplicationConstants.SHUTDOWN_EVENT);
     await sequelizeProvider.getSequelize().close();
+    process.exit(1);
 };
 
 process.on('SIGTERM', async () => {
@@ -242,10 +246,5 @@ process.on('SIGINT', async () => {
         logger.info('all cleaned and finished');
     });
 });
-
-const expressApplication = server.build();
-
-expressApplication.listen(port);
-logger.info('Server up and running on ' + port);
 
 exports = module.exports = expressApplication;

@@ -8,13 +8,16 @@ import logger from '../util/logger';
 import {User} from '../auth/User';
 import {TWO_MINUTES} from '../config/defaultAppConfig';
 import LRUCache = require('lru-cache');
+import {EventEmitter} from 'events';
+import {ApplicationConstants} from '../util/ApplicationConstants';
 
 @provide(TYPE.LRUCacheClient)
 export class LRUCacheClient implements CacheClient {
     private readonly formCache: LRUCache<string, FormVersion>;
     private readonly intervalId: any;
 
-    constructor(@inject(TYPE.AppConfig) private readonly appConfig: AppConfig) {
+    constructor(@inject(TYPE.AppConfig) private readonly appConfig: AppConfig,
+                @inject(TYPE.EventEmitter) private readonly eventEmitter: EventEmitter) {
         this.formCache = new LRUCache<string, FormVersion>({
             maxAge: appConfig.cache.form.maxAge,
             max: appConfig.cache.form.maxEntries,
@@ -24,6 +27,11 @@ export class LRUCacheClient implements CacheClient {
             this.formCache.prune();
             logger.debug(`Pruned cache items: ${this.formCache.itemCount}`);
         }, +TWO_MINUTES);
+
+        this.eventEmitter.on(ApplicationConstants.SHUTDOWN_EVENT, () => {
+            this.formCache.reset();
+            this.clearTimer();
+        });
     }
 
     public del(cacheKey: string): Promise<any> {
@@ -57,7 +65,7 @@ export class LRUCacheClient implements CacheClient {
 
     public clearTimer(): void {
         if (this.intervalId) {
-            logger.info('Clearing form cache');
+            logger.info('Clearing form cache interval');
             clearInterval(this.intervalId);
         }
     }

@@ -25,15 +25,25 @@ import ResourceValidationError from '../error/ResourceValidationError';
 import {User} from '../auth/User';
 import {KeycloakService} from '../auth/KeycloakService';
 import {LRUCacheClient} from '../service/LRUCacheClient';
+import {EventEmitter} from 'events';
+import {ApplicationConstants} from '../util/ApplicationConstants';
 
 @controller('/admin')
 export class AdminController extends BaseHttpController {
 
+    private timeoutId: any;
+
     constructor(@inject(TYPE.FormService) private readonly formService: FormService,
                 @inject(TYPE.KeycloakService) private readonly keycloakService: KeycloakService,
                 @inject(TYPE.LRUCacheClient) private readonly lruCacheClient: LRUCacheClient,
+                @inject(TYPE.EventEmitter) private readonly eventEmitter: EventEmitter,
                 @inject(TYPE.AppConfig) private readonly appConfig: AppConfig) {
         super();
+
+        this.eventEmitter.on(ApplicationConstants.SHUTDOWN_EVENT, () => {
+            logger.info('Clearing timeout in Admin controller');
+            this.clearTimeout();
+        });
     }
 
     @httpGet('/forms', TYPE.ProtectMiddleware, TYPE.AdminProtectMiddleware)
@@ -66,10 +76,12 @@ export class AdminController extends BaseHttpController {
             res.sendStatus(HttpStatus.OK);
 
             if (this.appConfig.log.timeout !== -1) {
-                setTimeout(() => {
+                this.timeoutId = setTimeout(() => {
                     logger.warn(`Reverting log level back info`);
                     transportStream.level = 'info';
                 }, this.appConfig.log.timeout);
+            } else {
+                logger.warn('Log level will not be changed back automatically');
             }
         }
     }
@@ -80,8 +92,10 @@ export class AdminController extends BaseHttpController {
     }
 
     @httpDelete('/cache/form', TYPE.ProtectMiddleware, TYPE.AdminProtectMiddleware)
-    public clearFormCache(@principal() currentUser: User): void {
+    public clearFormCache(@principal() currentUser: User,
+                          @response() res: express.Response): void {
         (this.lruCacheClient as LRUCacheClient).clearAll(currentUser);
+        res.sendStatus(HttpStatus.OK);
     }
 
     @httpDelete('/forms/:id', TYPE.ProtectMiddleware, TYPE.AdminProtectMiddleware)
@@ -91,5 +105,11 @@ export class AdminController extends BaseHttpController {
 
         await this.formService.purge(id, currentUser);
         res.sendStatus(HttpStatus.OK);
+    }
+
+    public clearTimeout(): void {
+        if (this.timeoutId) {
+            clearTimeout(this.timeoutId);
+        }
     }
 }

@@ -20,6 +20,7 @@ import AppConfig from '../interfaces/AppConfig';
 import defaultAppConfig from '../config/defaultAppConfig';
 import {EventEmitter} from 'events';
 import {LRUCacheClient} from '../service/LRUCacheClient';
+import {ApplicationConstants} from '../util/ApplicationConstants';
 
 export class ApplicationContext {
     private readonly container: Container;
@@ -28,7 +29,8 @@ export class ApplicationContext {
             defaultScope: 'Singleton',
 
         });
-        this.container.bind<EventEmitter>(TYPE.EventEmitter).toConstantValue(new EventEmitter());
+        const eventEmitter = new EventEmitter();
+        this.container.bind<EventEmitter>(TYPE.EventEmitter).toConstantValue(eventEmitter);
         this.container.bind<AppConfig>(TYPE.AppConfig).toConstantValue(defaultAppConfig);
         this.container.bind<LRUCacheClient>(TYPE.LRUCacheClient).to(LRUCacheClient);
         this.container.bind<KeycloakService>(TYPE.KeycloakService).to(KeycloakService);
@@ -47,6 +49,11 @@ export class ApplicationContext {
         this.container.bind<CommentService>(TYPE.CommentService).to(CommentService);
 
         logger.info('Application context initialised');
+
+        eventEmitter.on(ApplicationConstants.SHUTDOWN_EVENT, () => {
+            this.container.unbindAll();
+            logger.info('Container unbindAll activated');
+        });
     }
 
     public get<T>(serviceIdentifier: string | symbol): T {

@@ -14,6 +14,7 @@ import ResourceValidationError from "../../../src/error/ResourceValidationError"
 import {KeycloakService} from "../../../src/auth/KeycloakService";
 import {User} from "../../../src/auth/User";
 import {LRUCacheClient} from "../../../src/service/LRUCacheClient";
+import {EventEmitter} from "events";
 
 
 describe('AdminController', () => {
@@ -32,6 +33,7 @@ describe('AdminController', () => {
     let keycloakService: KeycloakService;
     let appConfig: AppConfig;
     let lruCacheClient: LRUCacheClient;
+    let eventEmitter: EventEmitter;
 
     beforeEach(() => {
         mockResponse = new MockResponse();
@@ -40,10 +42,11 @@ describe('AdminController', () => {
         formResourceAssembler = Substitute.for<FormResourceAssembler>();
         keycloakService = Substitute.for<KeycloakService>();
         lruCacheClient = Substitute.for<LRUCacheClient>();
+        eventEmitter = Substitute.for<EventEmitter>();
         defaultAppConfig.log.enabled = true;
         defaultAppConfig.log.timeout = 200;
         appConfig = defaultAppConfig;
-        underTest = new AdminController(formService,keycloakService, lruCacheClient, appConfig);
+        underTest = new AdminController(formService,keycloakService, lruCacheClient, eventEmitter, appConfig);
 
     });
 
@@ -109,7 +112,7 @@ describe('AdminController', () => {
 
     it('can delete form cache', () => {
         const user: User = new User("email", "email", []);
-        underTest.clearFormCache(user);
+        underTest.clearFormCache(user, mockResponse);
         // @ts-ignore
         lruCacheClient.received().clearAll(user);
     })

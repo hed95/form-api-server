@@ -10,6 +10,8 @@ import {User} from './User';
 import {Role} from '../model/Role';
 import {getToken} from 'keycloak-admin/lib/utils/auth';
 import LRUCache from 'lru-cache';
+import {EventEmitter} from 'events';
+import {ApplicationConstants} from '../util/ApplicationConstants';
 
 @provide(TYPE.KeycloakService)
 export class KeycloakService {
@@ -20,7 +22,8 @@ export class KeycloakService {
     private readonly userCache: LRUCache<string, User>;
     private intervalId: any;
 
-    constructor(@inject(TYPE.AppConfig) private readonly appConfig: AppConfig) {
+    constructor(@inject(TYPE.AppConfig) private readonly appConfig: AppConfig,
+                @inject(TYPE.EventEmitter) private readonly eventEmitter: EventEmitter) {
         const keycloak: any = appConfig.keycloak;
         this.keycloak = new Keycloak({}, {
             'auth-server-url': keycloak.url,
@@ -64,6 +67,10 @@ export class KeycloakService {
             logger.error('Failed to initialise kcAdminClient', err);
         });
 
+        this.eventEmitter.on(ApplicationConstants.SHUTDOWN_EVENT, () => {
+            this.userCache.reset();
+            this.clearTimer();
+        });
     }
 
     public middleware(): RequestHandler {
@@ -105,7 +112,7 @@ export class KeycloakService {
 
     public clearTimer() {
         if (this.intervalId) {
-            logger.info('Clearing user cache');
+            logger.info('Clearing user cache interval timer');
             clearInterval(this.intervalId);
         }
     }

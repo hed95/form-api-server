@@ -2,10 +2,11 @@ import 'reflect-metadata';
 import {KeycloakService} from "../../../src/auth/KeycloakService";
 import {expect} from "chai";
 import defaultAppConfig from "../../../src/config/defaultAppConfig";
+import {EventEmitter} from "events";
 
 describe('Keycloak Service', () => {
 
-    const keycloakService: KeycloakService = new KeycloakService(defaultAppConfig);
+    const keycloakService: KeycloakService = new KeycloakService(defaultAppConfig, new EventEmitter());
 
     it('can get middleware', () => {
         expect(keycloakService.middleware()).to.be.not.undefined

@@ -4,9 +4,10 @@ import {FormVersion} from "../../../src/model/FormVersion";
 import {LRUCacheClient} from "../../../src/service/LRUCacheClient";
 import defaultAppConfig from "../../../src/config/defaultAppConfig";
 import {User} from "../../../src/auth/User";
+import {EventEmitter} from "events";
 
 describe('LRUCacheClient', () => {
-    const lruCacheClient = new LRUCacheClient(defaultAppConfig);
+    const lruCacheClient = new LRUCacheClient(defaultAppConfig, new EventEmitter());
     afterEach(() => {
         lruCacheClient.clearTimer();
     });
