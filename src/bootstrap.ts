@@ -58,7 +58,7 @@ if (appConfig.log.enabled) {
 }
 
 const version = 'v1';
-const basePath = `/api/${version}`;
+const basePath = ``;
 
 const server = new InversifyExpressServer(container,
     null,

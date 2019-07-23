@@ -39,11 +39,11 @@ import ResourceNotFoundError from '../error/ResourceNotFoundError';
 import {RestoreData} from '../model/RestoreData';
 
 @ApiPath({
-    path: '/forms',
+    path: '/form',
     name: 'Forms',
     security: {bearerAuth: []},
 })
-@controller('/forms')
+@controller('/form')
 export class FormController extends BaseHttpController {
 
     private readonly queryParser: QueryParser = new QueryParser();
@@ -89,7 +89,7 @@ export class FormController extends BaseHttpController {
         res.json(form);
     }
 
-    @httpPost('/:id/validate', TYPE.ProtectMiddleware)
+    @httpPost('/:id/submission', TYPE.ProtectMiddleware)
     public async validateSubmission(@requestParam('id') id: string,
                                     @requestBody() submission: object,
                                     @response() res: express.Response,
