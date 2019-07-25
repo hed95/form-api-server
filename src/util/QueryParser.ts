@@ -61,10 +61,18 @@ export class QueryParser {
                         context: {},
                     }]);
                 }
-                // @ts-ignore
-                convertedFilter[field] = {
-                    [operator]: value,
-                };
+
+                if (operator === Op.in) {
+                    // @ts-ignore
+                    convertedFilter[field] = {
+                        [operator]: value.split('|'),
+                    };
+                } else {
+                    // @ts-ignore
+                    convertedFilter[field] = {
+                        [operator]: value,
+                    };
+                }
             }
         });
         return convertedFilter;

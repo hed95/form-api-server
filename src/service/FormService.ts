@@ -142,19 +142,25 @@ export class FormService {
             const profiler = logger.startTimer();
             const loaded: FormVersion = await this.formVersionRepository.findOne({
                 where: {
-                    [Op.or]: [{
-                        'schema.title': {
-                            [Op.eq]: title,
+                    [Op.and] : {
+                        [Op.or]: [{
+                            'schema.title': {
+                                [Op.eq]: title,
+                            },
+                        }, {
+                            'schema.name': {
+                                [Op.eq]: name,
+                            },
+                        }, {
+                            'schema.path': {
+                                [Op.eq]: path,
+                            },
+                        }],
+                        validFrom : {
+                            [Op.eq] : null,
                         },
-                    }, {
-                        'schema.name': {
-                            [Op.eq]: name,
-                        },
-                    }, {
-                        'schema.path': {
-                            [Op.eq]: path,
-                        },
-                    }],
+                    },
+
                 },
             });
 
