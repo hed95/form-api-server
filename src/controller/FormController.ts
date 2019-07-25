@@ -287,7 +287,7 @@ export class FormController extends BaseHttpController {
                                 @principal() currentUser: User): Promise<void> {
 
         const formVersion: FormVersion = await this.formService.findByVersionId(versionId, currentUser);
-        const updated = this.formResourceAssembler.toResource(formVersion, req);
+        const updated = this.formResourceAssembler.toResource(formVersion, req, false);
         res.json(updated);
     }
 

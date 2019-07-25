@@ -16,9 +16,8 @@ import _ from 'lodash';
 import {Sequelize} from 'sequelize-typescript';
 import {RoleService} from './RoleService';
 import Validator from 'validator';
-import {Cacheable, CacheClear} from 'type-cacheable';
+import cacheManager, {Cacheable, CacheClear} from 'type-cacheable';
 import {LRUCacheClient} from './LRUCacheClient';
-import cacheManager from 'type-cacheable';
 
 @provide(TYPE.FormService)
 export class FormService {
@@ -100,7 +99,16 @@ export class FormService {
     }
 
     private static sanitize(form: any): any {
-        return _.omit(form, ['createdOn', 'updatedOn', 'createdBy', 'updatedBy', 'versionId', 'links', 'machineName']);
+        return _.omit(form, [
+            'createdOn',
+            'updatedOn',
+            'createdBy',
+            'updatedBy',
+            'versionId',
+            'links',
+            'machineName',
+            'owner',
+        ]);
     }
 
     public readonly formRepository: FormRepository;
@@ -142,7 +150,7 @@ export class FormService {
             const profiler = logger.startTimer();
             const loaded: FormVersion = await this.formVersionRepository.findOne({
                 where: {
-                    [Op.and] : {
+                    [Op.and]: {
                         [Op.or]: [{
                             'schema.title': {
                                 [Op.eq]: title,
@@ -156,8 +164,8 @@ export class FormService {
                                 [Op.eq]: path,
                             },
                         }],
-                        validFrom : {
-                            [Op.eq] : null,
+                        validFrom: {
+                            [Op.eq]: null,
                         },
                     },
 
