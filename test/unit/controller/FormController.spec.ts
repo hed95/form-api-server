@@ -28,7 +28,7 @@ describe("FormController", () => {
 
     beforeEach(() => {
         mockResponse = new MockResponse();
-        mockRequest = new MockRequest("/forms", "/api/v1");
+        mockRequest = new MockRequest("/form", "");
         formService = Substitute.for<FormService>();
         validationService = Substitute.for<ValidationService>();
         formResourceAssembler = Substitute.for<FormResourceAssembler>();
@@ -106,7 +106,7 @@ describe("FormController", () => {
         await formController.create({}, mockRequest, mockResponse, user);
 
         expect(mockResponse.getStatus()).to.eq(201);
-        expect(mockResponse.getLocation()).to.eq("/api/v1/forms/formId");
+        expect(mockResponse.getLocation()).to.eq("/form/formId");
 
     });
 
@@ -185,7 +185,7 @@ describe("FormController", () => {
 
         await formController.getByVersionId("id", mockRequest, mockResponse, user);
 
-        expect(mockResponse.getJsonData().schema).to.eq(version.schema);
+        expect(JSON.stringify(mockResponse.getJsonData())).to.eq(JSON.stringify(version.schema));
 
     });
     it('throws error if form does not exist', async () => {

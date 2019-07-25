@@ -522,6 +522,7 @@ export class FormService {
         });
     }
 
+    @Cacheable({cacheKey: FormService.setCacheKey})
     public async findByVersionId(id: string, user: User): Promise<FormVersion> {
         const defaultRole = await Role.defaultRole();
         const version = await this.formVersionRepository.findByPk(id, {
