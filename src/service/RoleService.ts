@@ -9,11 +9,41 @@ import logger from '../util/logger';
 import * as Joi from '@hapi/joi';
 import {ValidationResult} from '@hapi/joi';
 import ResourceValidationError from '../error/ResourceValidationError';
+import LRUCache from 'lru-cache';
+import AppConfig from '../interfaces/AppConfig';
+import {Op} from 'sequelize';
 
 @provide(TYPE.RoleService)
 export class RoleService {
 
-    constructor(@inject(TYPE.RoleRepository) private readonly roleRepository: RoleRepository) {
+    private readonly roleCache: LRUCache<string, Role>;
+
+    constructor(@inject(TYPE.RoleRepository) private readonly roleRepository: RoleRepository,
+                @inject(TYPE.AppConfig) private readonly appConfig: AppConfig) {
+        this.roleCache = new LRUCache({
+            max: this.appConfig.cache.role.maxEntries,
+            maxAge: this.appConfig.cache.role.maxAge,
+        });
+    }
+
+    public async getDefaultRole() {
+        const defaultRoleName = process.env.DEFAULT_ROLE || 'anonymous';
+        const role = this.roleCache.get(defaultRoleName);
+        if (!role) {
+            logger.debug('Cache miss for default role');
+            const defaultRole = await Role.findOne({
+                where: {
+                    name: {
+                        [Op.eq]: defaultRoleName,
+                    },
+                },
+            });
+            this.roleCache.set(defaultRoleName, defaultRole);
+            return Promise.resolve(defaultRole);
+        }
+        logger.debug('Cache hit for default role');
+        return Promise.resolve(role);
+
     }
 
     public async createRoles(roles: Array<{ name: string, description: string }>, user: User): Promise<Role[]> {

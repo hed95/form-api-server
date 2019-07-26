@@ -8,11 +8,13 @@ import {FormRepository} from "../../../src/types/repository";
 import {applicationContext} from "../setup-test";
 import TYPE from "../../../src/constant/TYPE";
 import {CommentService} from "../../../src/service/CommentService";
+import {RoleService} from "../../../src/service/RoleService";
 
 describe('CommentService', () => {
 
     const formRepository: FormRepository = applicationContext.get(TYPE.FormRepository);
     const commentService: CommentService = applicationContext.get(TYPE.CommentService);
+    const roleService: RoleService = applicationContext.get(TYPE.RoleService);
 
     let role: Role;
     before(async () => {
@@ -38,7 +40,7 @@ describe('CommentService', () => {
             createdBy: "test@test.com"
         });
 
-        const defaultRole = await Role.defaultRole();
+        const defaultRole = await roleService.getDefaultRole();
 
         await form.$add("roles", [defaultRole]);
 
@@ -69,7 +71,7 @@ describe('CommentService', () => {
             createdBy: "test@test.com"
         });
 
-        const defaultRole = await Role.defaultRole();
+        const defaultRole = await roleService.getDefaultRole();
 
         await form.$add("roles", [defaultRole]);
 

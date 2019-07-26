@@ -1,5 +1,6 @@
 import AppConfig from '../interfaces/AppConfig';
 import {ApplicationConstants} from '../util/ApplicationConstants';
+
 export const TWO_MINUTES = '120000';
 const MAX_ENTRIES = 100;
 
@@ -29,6 +30,10 @@ const defaultAppConfig: AppConfig = {
         timeout: Number(process.env.LOG_CHANGE_TIMEOUT),
     },
     cache: {
+        role: {
+            maxAge: process.env.CACHE_ROLE_MAX_AGE ? +process.env.CACHE_ROLE_MAX_AGE : +TWO_MINUTES,
+            maxEntries: process.env.CACHE_ROLE_MAX_ENTRIES ? +process.env.CACHE_USER_ROLE_ENTRIES : MAX_ENTRIES,
+        },
         form: {
             maxAge: process.env.CACHE_FORM_MAX_AGE ? +process.env.CACHE_FORM_MAX_AGE : +TWO_MINUTES,
             maxEntries: process.env.CACHE_FORM_MAX_ENTRIES ? +process.env.CACHE_USER_FORM_ENTRIES : MAX_ENTRIES,
@@ -36,6 +41,11 @@ const defaultAppConfig: AppConfig = {
         user: {
             maxAge: process.env.CACHE_USER_MAX_AGE ? +process.env.CACHE_USER_MAX_AGE : +TWO_MINUTES,
             maxEntries: process.env.CACHE_USER_MAX_ENTRIES ? +process.env.CACHE_USER_MAX_ENTRIES : MAX_ENTRIES,
+        },
+    },
+    query: {
+        log: {
+            enabled: process.env.ENABLE_LOG_QUERY ? (process.env.ENABLE_LOG_QUERY === 'true') : false,
         },
     },
     correlationIdRequestHeader: process.env.CORRELATION_ID_REQUEST_HEADER

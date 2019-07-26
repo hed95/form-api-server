@@ -18,11 +18,13 @@ import {FormRoles} from "../../../src/model/FormRoles";
 import {FormComment} from "../../../src/model/FormComment";
 import {Form} from "../../../src/model/Form";
 import {CommentService} from "../../../src/service/CommentService";
+import {RoleService} from "../../../src/service/RoleService";
 
 describe("FormService", () => {
 
     const formRepository: FormRepository = applicationContext.get(TYPE.FormRepository);
     const formService: FormService = applicationContext.get(TYPE.FormService);
+    const roleService: RoleService = applicationContext.get(TYPE.RoleService);
 
     let role: Role;
     before(async () => {
@@ -241,7 +243,8 @@ describe("FormService", () => {
             createdBy: "test@test.com"
         });
 
-        const defaultRole = await Role.defaultRole();
+        const defaultRole = await roleService.getDefaultRole();
+
 
         await form.$add("roles", [defaultRole]);
 
@@ -515,7 +518,8 @@ describe("FormService", () => {
             createdBy: "test@test.com"
         });
 
-        const defaultRole = await Role.defaultRole();
+        const defaultRole = await roleService.getDefaultRole();
+
 
         await form.$add("roles", [defaultRole]);
 

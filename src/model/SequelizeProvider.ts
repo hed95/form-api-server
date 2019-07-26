@@ -10,6 +10,7 @@ import {FormRoles} from './FormRoles';
 import {FormVersion} from './FormVersion';
 import {Role} from './Role';
 import defaultDBConfig from '../config/defaultDBConfig';
+import defaultAppConfig from '../config/defaultAppConfig';
 
 const namespace = cls.createNamespace('sequelize-transaction');
 Sequelize.useCLS(namespace);
@@ -45,7 +46,8 @@ export class SequelizeProvider {
         // @ts-ignore
         const config = defaultDBConfig[env];
         this.sequelize = new Sequelize(config);
-        this.sequelize.options.logging = env === 'test' ? true : logger.debug.bind(logger);
+        this.sequelize.options.logging = env === 'test' ? true :
+            defaultAppConfig.query.log.enabled ? logger.debug.bind(logger) : false;
         this.sequelize.addModels([FormRoles, Role, Form, FormVersion, FormComment]);
     }
 

@@ -32,6 +32,10 @@ export class ConfigValidator {
                 timeout: Joi.any().optional(),
             }),
             cache: Joi.object().keys({
+                role: Joi.object().keys({
+                    maxAge: Joi.number(),
+                    maxEntries: Joi.number(),
+                }),
                 form: Joi.object().keys({
                     maxAge: Joi.number(),
                     maxEntries: Joi.number(),
@@ -39,6 +43,11 @@ export class ConfigValidator {
                 user: Joi.object().keys({
                     maxAge: Joi.number(),
                     maxEntries: Joi.number(),
+                }),
+            }),
+            query: Joi.object().keys({
+                log: Joi.object().keys({
+                    enabled: Joi.boolean(),
                 }),
             }),
             correlationIdRequestHeader: Joi.string(),

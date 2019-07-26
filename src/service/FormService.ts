@@ -175,7 +175,7 @@ export class FormService {
             if (loaded) {
                 FormService.handleDuplicateForm(loaded, title, path, name);
             }
-            const defaultRole = await Role.defaultRole();
+            const defaultRole = await this.roleService.getDefaultRole();
             const today = new Date();
 
             const roles = await this.roleService.findOrCreate(accessRoles);
@@ -213,7 +213,7 @@ export class FormService {
         Promise<{ total: number, forms: FormVersion[] }> {
 
         const profiler = logger.startTimer();
-        const defaultRole = await Role.defaultRole();
+        const defaultRole = await this.roleService.getDefaultRole();
 
         const baseQueryOptions: WhereOptions = {
             latest: {
@@ -342,7 +342,7 @@ export class FormService {
 
         const profiler = logger.startTimer();
         try {
-            const defaultRole = await Role.defaultRole();
+            const defaultRole = await this.roleService.getDefaultRole();
             return await this.formVersionRepository.findOne({
                 limit: 1,
                 offset: 0,
@@ -474,7 +474,7 @@ export class FormService {
 
     @CacheClear({cacheKey: FormService.setCacheKey})
     public async delete(id: string, user: User): Promise<boolean> {
-        const defaultRole = await Role.defaultRole();
+        const defaultRole = await this.roleService.getDefaultRole();
         const version = await this.formVersionRepository.findOne({
             limit: 1,
             offset: 0,
@@ -532,7 +532,7 @@ export class FormService {
 
     @Cacheable({cacheKey: FormService.setCacheKey})
     public async findByVersionId(id: string, user: User): Promise<FormVersion> {
-        const defaultRole = await Role.defaultRole();
+        const defaultRole = await this.roleService.getDefaultRole();
         const version = await this.formVersionRepository.findByPk(id, {
             include: [{
                 model: Form, include: [{
@@ -576,7 +576,7 @@ export class FormService {
     }
 
     public async getForm(formId: string, user: User) {
-        const defaultRole = await Role.defaultRole();
+        const defaultRole = await this.roleService.getDefaultRole();
         const query: object = {
             where: {
                 id: {

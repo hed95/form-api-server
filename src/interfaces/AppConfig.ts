@@ -24,6 +24,10 @@ interface AppConfig {
         timeout: number,
     };
     cache: {
+        role: {
+            maxAge: number,
+            maxEntries: number,
+        }
         form: {
             maxAge: number,
             maxEntries: number,
@@ -31,6 +35,11 @@ interface AppConfig {
         user: {
             maxAge: number,
             maxEntries: number,
+        },
+    };
+    query: {
+        log: {
+            enabled: boolean,
         },
     };
     correlationIdRequestHeader: string;

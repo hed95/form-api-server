@@ -15,6 +15,7 @@ import {KeycloakService} from "../../../src/auth/KeycloakService";
 import {User} from "../../../src/auth/User";
 import {LRUCacheClient} from "../../../src/service/LRUCacheClient";
 import {EventEmitter} from "events";
+import {SequelizeProvider} from "../../../src/model/SequelizeProvider";
 
 
 describe('AdminController', () => {
@@ -34,7 +35,7 @@ describe('AdminController', () => {
     let appConfig: AppConfig;
     let lruCacheClient: LRUCacheClient;
     let eventEmitter: EventEmitter;
-
+    let sequelizeProvider: SequelizeProvider;
     beforeEach(() => {
         mockResponse = new MockResponse();
         mockRequest = new MockRequest("/forms", "/api/v1");
@@ -43,10 +44,13 @@ describe('AdminController', () => {
         keycloakService = Substitute.for<KeycloakService>();
         lruCacheClient = Substitute.for<LRUCacheClient>();
         eventEmitter = Substitute.for<EventEmitter>();
+        sequelizeProvider = Substitute.for<SequelizeProvider>();
         defaultAppConfig.log.enabled = true;
         defaultAppConfig.log.timeout = 200;
         appConfig = defaultAppConfig;
-        underTest = new AdminController(formService,keycloakService, lruCacheClient, eventEmitter, appConfig);
+        underTest = new AdminController(formService, keycloakService, lruCacheClient, eventEmitter,
+            sequelizeProvider,
+            appConfig);
 
     });
 
@@ -104,9 +108,9 @@ describe('AdminController', () => {
         }, 500);
     });
     it('can delete cache', () => {
-       const user: User = new User("email", "email", []);
-       underTest.clearUserCache(user);
-       // @ts-ignore
+        const user: User = new User("email", "email", []);
+        underTest.clearUserCache(mockResponse, user);
+        // @ts-ignore
         keycloakService.received().clearUserCache(user);
     });
 
@@ -115,5 +119,14 @@ describe('AdminController', () => {
         underTest.clearFormCache(user, mockResponse);
         // @ts-ignore
         lruCacheClient.received().clearAll(user);
-    })
+    });
+    it('can change query log level', () => {
+        const user: User = new User("email", "email", []);
+        underTest.enableQueryLogging(mockResponse, user);
+    });
+
+    it('can delete query log level', () => {
+        const user: User = new User("email", "email", []);
+        underTest.disableQueryLogging(mockResponse, user);
+    });
 });

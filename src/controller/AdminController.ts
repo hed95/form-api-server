@@ -27,6 +27,7 @@ import {KeycloakService} from '../auth/KeycloakService';
 import {LRUCacheClient} from '../service/LRUCacheClient';
 import {EventEmitter} from 'events';
 import {ApplicationConstants} from '../util/ApplicationConstants';
+import {SequelizeProvider} from '../model/SequelizeProvider';
 
 @controller('/admin')
 export class AdminController extends BaseHttpController {
@@ -37,6 +38,7 @@ export class AdminController extends BaseHttpController {
                 @inject(TYPE.KeycloakService) private readonly keycloakService: KeycloakService,
                 @inject(TYPE.LRUCacheClient) private readonly lruCacheClient: LRUCacheClient,
                 @inject(TYPE.EventEmitter) private readonly eventEmitter: EventEmitter,
+                @inject(TYPE.SequelizeProvider) private readonly sequlizeProvider: SequelizeProvider,
                 @inject(TYPE.AppConfig) private readonly appConfig: AppConfig) {
         super();
 
@@ -86,9 +88,23 @@ export class AdminController extends BaseHttpController {
         }
     }
 
+    @httpPost('/query-log', TYPE.ProtectMiddleware, TYPE.AdminProtectMiddleware)
+    public enableQueryLogging(@response() res: express.Response, @principal() currentUser: User): void {
+        logger.warn(`${currentUser.details.email} is enabling query logging. This slows down API calls`);
+        this.sequlizeProvider.getSequelize().options.logging = logger.info.bind(logger);
+    }
+
+    @httpDelete('/query-log', TYPE.ProtectMiddleware, TYPE.AdminProtectMiddleware)
+    public disableQueryLogging(@response() res: express.Response, @principal() currentUser: User): void {
+        logger.info(`${currentUser.details.email} is disabling query logging`);
+        this.sequlizeProvider.getSequelize().options.logging = false;
+        res.sendStatus(HttpStatus.OK);
+    }
+
     @httpDelete('/cache/user', TYPE.ProtectMiddleware, TYPE.AdminProtectMiddleware)
-    public clearUserCache(@principal() currentUser: User): void {
+    public clearUserCache(@response() res: express.Response , @principal() currentUser: User): void {
         this.keycloakService.clearUserCache(currentUser);
+        res.sendStatus(HttpStatus.OK);
     }
 
     @httpDelete('/cache/form', TYPE.ProtectMiddleware, TYPE.AdminProtectMiddleware)
