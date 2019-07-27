@@ -17,4 +17,15 @@ describe('Keycloak Service', () => {
     it('can get underlying keycloak', () => {
         expect(keycloakService.keycloakInstance()).to.be.not.undefined
     });
+    it('can clear userCache', () => {
+
+    });
+
+    it('can get user from cache', () => {
+
+    });
+
+    it('can load user', () => {
+
+    });
 });

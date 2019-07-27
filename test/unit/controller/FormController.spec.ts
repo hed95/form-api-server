@@ -15,6 +15,7 @@ import {ValidationService} from "../../../src/service/ValidationService";
 import {FormResourceAssembler} from "../../../src/controller/FormResourceAssembler";
 import {CommentService} from "../../../src/service/CommentService";
 import ResourceNotFoundError from "../../../src/error/ResourceNotFoundError";
+import {RestoreData} from "../../../src/model/RestoreData";
 
 describe("FormController", () => {
 
@@ -198,5 +199,58 @@ describe("FormController", () => {
             expect(e instanceof ResourceNotFoundError).to.be.eq(true);
         }
     });
+
+    it('can perform restore', async () => {
+        const user = new User("id", "email");
+        const restoreData = new RestoreData("formId", "formVersionId");
+
+
+        Object.assign(FormVersion, {});
+        const version: FormVersion = Object.assign({}, FormVersion.prototype);
+        version.schema = {
+            display: 'form',
+            components: []
+        };
+        // @ts-ignore
+        formService.restore("formId", "formVersionId", user).returns(Promise.resolve(version));
+
+        // @ts-ignore
+        formResourceAssembler.toResource(version, mockRequest).returns({
+            display: 'form',
+            components: []
+        });
+
+        await formController.restore(restoreData, mockRequest, mockResponse, user);
+
+        expect(JSON.stringify(mockResponse.getJsonData())).to.eq(JSON.stringify(version.schema))
+
+    });
+
+    it('can get comments', async () => {
+        const user = new User("id", "email");
+
+
+        // @ts-ignore
+        commentService.comments("formId", user, 0, 20).returns(Promise.resolve({
+            total: 10,
+            comments: []
+        }));
+
+        await formController.comments("formId", 20, 0, mockResponse, user);
+        expect(mockResponse.getJsonData().total).to.be.eq(10);
+    });
+
+    it('can perform delete', async () => {
+        const user = new User("id", "email");
+
+        // @ts-ignore
+        formService.delete("formId", user).returns(Promise.resolve(true));
+
+        await formController.delete("id", mockResponse, user);
+
+        expect(mockResponse.getStatus()).to.be.eq(200);
+    });
+
+
 
 });

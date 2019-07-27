@@ -16,6 +16,7 @@ import {User} from "../../../src/auth/User";
 import {LRUCacheClient} from "../../../src/service/LRUCacheClient";
 import {EventEmitter} from "events";
 import {SequelizeProvider} from "../../../src/model/SequelizeProvider";
+import {ApplicationConstants} from "../../../src/util/ApplicationConstants";
 
 
 describe('AdminController', () => {
@@ -43,7 +44,7 @@ describe('AdminController', () => {
         formResourceAssembler = Substitute.for<FormResourceAssembler>();
         keycloakService = Substitute.for<KeycloakService>();
         lruCacheClient = Substitute.for<LRUCacheClient>();
-        eventEmitter = Substitute.for<EventEmitter>();
+        eventEmitter = new EventEmitter();
         sequelizeProvider = Substitute.for<SequelizeProvider>();
         defaultAppConfig.log.enabled = true;
         defaultAppConfig.log.timeout = 200;
@@ -129,4 +130,30 @@ describe('AdminController', () => {
         const user: User = new User("email", "email", []);
         underTest.disableQueryLogging(mockResponse, user);
     });
+
+    it('can perform hard delete', async () => {
+        const user: User = new User("email", "email", []);
+        await underTest.hardDelete("id", mockResponse, user);
+        // @ts-ignore
+        formService.received().purge("id", user);
+        expect(mockResponse.getStatus()).to.be.eq(200);
+    });
+
+    it('can perform clearTimeout', () => {
+        underTest.changeLogLevel({level: 'debug'}, mockResponse);
+        expect(underTest.timeoutId._destroyed).to.be.eq(false);
+
+        underTest.clearTimeout();
+        expect(underTest.timeoutId._destroyed).to.be.eq(true);
+
+    });
+    it('can handle application shutdown', () => {
+        underTest.changeLogLevel({level: 'debug'}, mockResponse);
+        expect(underTest.timeoutId._destroyed).to.be.eq(false);
+
+        eventEmitter.emit(ApplicationConstants.SHUTDOWN_EVENT);
+
+        expect(underTest.timeoutId._destroyed).to.be.eq(true);
+
+    })
 });

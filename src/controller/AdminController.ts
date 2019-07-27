@@ -32,7 +32,7 @@ import {SequelizeProvider} from '../model/SequelizeProvider';
 @controller('/admin')
 export class AdminController extends BaseHttpController {
 
-    private timeoutId: any;
+    public timeoutId: any;
 
     constructor(@inject(TYPE.FormService) private readonly formService: FormService,
                 @inject(TYPE.KeycloakService) private readonly keycloakService: KeycloakService,
