@@ -7,6 +7,9 @@ config:
     headers:
       Authorization: 'Bearer {{ $processEnvironment.BEARER_TOKEN }}'
 scenarios:
-  - flow:
+  - name: 'Get form by id'
+    flow:
+      - post:
+          - url:
       - get:
-          url: "/form"
+          url: "/form/122383f4-95e5-4954-a9e1-f0a55377ebee"

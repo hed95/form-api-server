@@ -153,4 +153,8 @@ export class KeycloakService {
         }
 
     }
+
+    public getUserCache(): LRUCache<string,User> {
+        return this.userCache;
+    }
 }
