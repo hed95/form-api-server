@@ -117,6 +117,10 @@ export class KeycloakService {
         }
     }
 
+    public getUserCache(): LRUCache<string, User> {
+        return this.userCache;
+    }
+
     private async loadUser(email: string): Promise<User> {
         try {
             const result = await this.kcAdminClient.users.find({
@@ -152,9 +156,5 @@ export class KeycloakService {
             return Promise.resolve(null);
         }
 
-    }
-
-    public getUserCache(): LRUCache<string,User> {
-        return this.userCache;
     }
 }

@@ -225,11 +225,6 @@ server.setConfig((app: express.Application) => {
     });
 });
 
-const expressApplication = server.build();
-
-expressApplication.listen(port);
-logger.info('Server up and running on ' + port);
-
 const clearUp = async () => {
     eventEmitter.emit(ApplicationConstants.SHUTDOWN_EVENT);
     await sequelizeProvider.getSequelize().close();
@@ -246,5 +241,18 @@ process.on('SIGINT', async () => {
         logger.info('all cleaned and finished');
     });
 });
+
+process.on('unhandledRejection', (reason: Error, promise: Promise<any>) => {
+    logger.error('unhandledRejection', reason.stack || reason);
+});
+
+process.on('uncaughtException', (error) => {
+    logger.error('uncaughtException', error);
+});
+
+const expressApplication = server.build();
+
+expressApplication.listen(port);
+logger.info('Server up and running on ' + port);
 
 exports = module.exports = expressApplication;
