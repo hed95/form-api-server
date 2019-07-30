@@ -90,6 +90,33 @@ export class FormController extends BaseHttpController {
         res.json(form);
     }
 
+    @ApiOperationPost({
+        path: '/{id}/submission',
+        description: 'Perform a validation of a submission for given form id',
+        summary: 'Perform a validation of a submission for given form id',
+        parameters: {
+            path: {
+                id: {
+                    name: 'id',
+                    description: 'Form id',
+                    format: 'string',
+                    required: true,
+                },
+            },
+            body: {
+                required: true,
+                description: 'Submission data',
+                type: SwaggerDefinitionConstant.Parameter.Type.OBJECT,
+                allowEmptyValue: false
+            }
+        },
+        responses: {
+            403: {description: 'Access denied'},
+            200: {description: 'Success'},
+            400: {description: 'Submission failed validation'},
+            404: {description: 'Form does not exist'},
+        },
+    })
     @httpPost('/:id/submission', TYPE.ProtectMiddleware)
     public async validateSubmission(@requestParam('id') id: string,
                                     @requestBody() submission: object,
@@ -106,6 +133,67 @@ export class FormController extends BaseHttpController {
         }
     }
 
+    @ApiOperationGet({
+        path: '/',
+        description: 'Get forms',
+        summary: 'Get forms.',
+        produces: ['application/json'],
+        parameters: {
+            query: {
+                'limit': {
+                    type: SwaggerDefinitionConstant.Parameter.Type.NUMBER,
+                    default: 20,
+                    description: 'Limit the number of forms returned in response',
+                    required: false,
+                    name: 'limit'
+                },
+                'offset': {
+                    type: SwaggerDefinitionConstant.Parameter.Type.NUMBER,
+                    default: 0,
+                    description: 'Page number',
+                    required: false,
+                    name: 'offset'
+                },
+                'select': {
+                    type: SwaggerDefinitionConstant.Parameter.Type.ARRAY,
+                    description: 'Specify fields of form schema to be returned. For example \'name\' or \'path\'',
+                    required: false,
+                    name: 'select'
+                },
+                'filter': {
+                    type: SwaggerDefinitionConstant.Parameter.Type.ARRAY,
+                    description: 'Comma separated filter. For example \'filter=?name__eq__myForm\'. ',
+                    required: false,
+                    name: 'filter'
+                },
+                'countOnly': {
+                    type: SwaggerDefinitionConstant.Parameter.Type.BOOLEAN,
+                    description: 'Use to return count only',
+                    required: false,
+                    name: 'countOnly'
+                },
+                'name': {
+                    type: SwaggerDefinitionConstant.Parameter.Type.STRING,
+                    description: 'Find forms by name',
+                    required: false,
+                    name: 'name'
+                },
+                'full' : {
+                    type: SwaggerDefinitionConstant.Parameter.Type.BOOLEAN,
+                    description: 'Load full form schema and any nested forms',
+                    required: false,
+                    name: 'full',
+                }
+            }
+        },
+
+        responses: {
+            403: {description: 'Access denied'},
+            200: {description: 'Success', type: SwaggerDefinitionConstant.Response.Type.OBJECT},
+            400: {description: 'Submission failed validation'},
+            404: {description: 'Form does not exist'},
+        },
+    })
     @httpGet('/', TYPE.ProtectMiddleware)
     public async getForms(@queryParam('limit') limit: number = 20,
                           @queryParam('offset') offset: number = 0,

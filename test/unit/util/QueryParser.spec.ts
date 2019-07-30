@@ -36,5 +36,10 @@ describe("Query Parser", () => {
        const queries: string[] = ["title__eq__%kugnu%20besac%20tadom%"];
        const result = queryParser.parse(queries);
        expect(Object.keys(result).length).to.be.eq(1);
-   })
+   });
+   it('can handle in clause', () => {
+       const queries: string[] = ['title__in__a|b|c|d'];
+       const result = queryParser.parse(queries);
+       expect(Object.keys(result).length).to.be.eq(1);
+   });
 });
