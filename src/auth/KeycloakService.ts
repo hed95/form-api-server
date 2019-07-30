@@ -12,7 +12,6 @@ import {getToken} from 'keycloak-admin/lib/utils/auth';
 import LRUCache from 'lru-cache';
 import {EventEmitter} from 'events';
 import {ApplicationConstants} from '../util/ApplicationConstants';
-import {error} from "winston";
 
 @provide(TYPE.KeycloakService)
 export class KeycloakService {
@@ -154,7 +153,7 @@ export class KeycloakService {
             return Promise.resolve(null);
         } catch (e) {
             logger.error('Failed to get user details', {
-                error: e.message
+                error: e.message,
             });
             return Promise.resolve(null);
         }

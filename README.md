@@ -10,10 +10,33 @@ npm run serve
 ```
 
 If you wish to run the server but want to make changes and perform dynamic compilation, then use the following:
+
 ```bash
 npm run watch-ts
 npm run watch-node
 ``` 
+
+To run all the tests run the following:
+```bash
+npm run test
+```
+
+NPM tests are broken down into unit and integration.
+
+```bash
+npm run test:unit
+```
+or
+```bash
+npm run test:int
+```
+
+To run tests full all coverage data, run the following
+
+```bash
+npm run cover
+```
+
 
 ### API Reference 
 http://localhost:3000/api-docs/swagger/#/
@@ -22,7 +45,7 @@ http://localhost:3000/api-docs/swagger/#/
 
 | Environment variable 	        | Type 	        | Default Value 	|
 |-------------------------------|---------------|-------------------|
-| NODE_ENV                      | string    	| *REQUIRED*        |   
+| NODE_ENV                      | string    	| *OPTIONAL*        |   
 | DB_USERNAME                   | string    	| *REQUIRED*        |                       
 | DB_PASSWORD                   | string    	| *REQUIRED*        |                       
 | DB_NAME                       | string    	| *REQUIRED*        |                       
@@ -32,7 +55,8 @@ http://localhost:3000/api-docs/swagger/#/
 | AUTH_BEARER_ONLY              | boolean    	| true           	|                       
 | AUTH_REALM                    | string    	| *REQUIRED*        |                       
 | AUTH_ADMIN_USERNAME           | string    	| *REQUIRED*        |                       
-| AUTH_ADMIN_PASSWORD           | string    	| *REQUIRED*        |                       
+| AUTH_ADMIN_USERNAME           | string    	| *REQUIRED*        |                       
+| AUTH_ADMIN_CLIENT_ID          | string    	| admin-cli         |                       
 | ADMIN_ROLES                   | array         | *OPTIONAL*        |
 | ENABLE_LOG_CHANGE             | boolean    	| false             |  
 | LOG_CHANGE_TIMEOUT            | number    	| false             |
@@ -49,7 +73,7 @@ http://localhost:3000/api-docs/swagger/#/
 
 
                                      
-##### Form 
+## Form Operations
 
 If no role is used when creating a form then by default the service will apply a 'anonymous' role. This
 means that anyone can make a request to get that form. If you wish to restrict access then you can define custom roles with the form.
@@ -118,3 +142,18 @@ contains - name__contains__myForm
 startsWith - name__startsWith__myForm
 ```
 
+## Admin Operations */admin*
+
+This service has a few admin operations. The admin operations are only available if the user has roles as specified in the environment config ADMIN_ROLES. The roles for the user
+are extracted from the bearer token passed into the API.
+
+### GET /forms 
+This endpoint returns all DB Form versions currently held in the DB. You will need to paginate in order to collect all versions
+
+### DELETE /forms/{:id}
+
+This endpoint allows the physical deletion of a form from the DB. 
+
+**This a cascading operation so all versions and comments will be deleted. Once this has been done it cannot be undone.**
+
+### POST /log

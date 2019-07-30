@@ -107,8 +107,8 @@ export class FormController extends BaseHttpController {
                 required: true,
                 description: 'Submission data',
                 type: SwaggerDefinitionConstant.Parameter.Type.OBJECT,
-                allowEmptyValue: false
-            }
+                allowEmptyValue: false,
+            },
         },
         responses: {
             403: {description: 'Access denied'},
@@ -140,51 +140,51 @@ export class FormController extends BaseHttpController {
         produces: ['application/json'],
         parameters: {
             query: {
-                'limit': {
+                limit: {
                     type: SwaggerDefinitionConstant.Parameter.Type.NUMBER,
                     default: 20,
                     description: 'Limit the number of forms returned in response',
                     required: false,
-                    name: 'limit'
+                    name: 'limit',
                 },
-                'offset': {
+                offset: {
                     type: SwaggerDefinitionConstant.Parameter.Type.NUMBER,
                     default: 0,
                     description: 'Page number',
                     required: false,
-                    name: 'offset'
+                    name: 'offset',
                 },
-                'select': {
+                select: {
                     type: SwaggerDefinitionConstant.Parameter.Type.ARRAY,
                     description: 'Specify fields of form schema to be returned. For example \'name\' or \'path\'',
                     required: false,
-                    name: 'select'
+                    name: 'select',
                 },
-                'filter': {
+                filter: {
                     type: SwaggerDefinitionConstant.Parameter.Type.ARRAY,
                     description: 'Comma separated filter. For example \'filter=?name__eq__myForm\'. ',
                     required: false,
-                    name: 'filter'
+                    name: 'filter',
                 },
-                'countOnly': {
+                countOnly: {
                     type: SwaggerDefinitionConstant.Parameter.Type.BOOLEAN,
                     description: 'Use to return count only',
                     required: false,
-                    name: 'countOnly'
+                    name: 'countOnly',
                 },
-                'name': {
+                name: {
                     type: SwaggerDefinitionConstant.Parameter.Type.STRING,
                     description: 'Find forms by name',
                     required: false,
-                    name: 'name'
+                    name: 'name',
                 },
-                'full' : {
+                full : {
                     type: SwaggerDefinitionConstant.Parameter.Type.BOOLEAN,
                     description: 'Load full form schema and any nested forms',
                     required: false,
                     name: 'full',
-                }
-            }
+                },
+            },
         },
 
         responses: {
