@@ -41,6 +41,7 @@ import {RestoreData} from '../model/RestoreData';
 @ApiPath({
     path: '/form',
     name: 'Forms',
+    description: 'API for creating, deleting and finding Forms',
     security: {bearerAuth: []},
 })
 @controller('/form')
@@ -113,8 +114,16 @@ export class FormController extends BaseHttpController {
                           @queryParam('countOnly') countOnly: boolean = false,
                           @principal() currentUser: User,
                           @request() req: express.Request,
-                          @response() res: express.Response): Promise<{ total: number, forms: object[] }> {
+                          @response() res: express.Response,
+                          @queryParam('name') name?: string,
+                          @queryParam('full') full?: boolean): Promise<{ total: number, forms: object[] }> {
 
+        if (full) {
+            logger.warn('Nested forms is not currently supported as yet');
+        }
+        if (name) {
+            filter = filter + `,name__eq__${name}`;
+        }
         const filterQuery: object = filter && filter.split(',').length !== 0 ?
             this.queryParser.parse(filter.split(',')) : null;
 
@@ -259,14 +268,12 @@ export class FormController extends BaseHttpController {
                     required: true,
                 },
             },
-            body: {
-                type: SwaggerDefinitionConstant.Response.Type.OBJECT, model: 'FormComment',
-            },
         },
         responses: {
             201: {description: 'Comment successfully created for form'},
             404: {description: 'Form does not exist'},
             500: {description: 'Internal execution error'},
+
         },
     })
     @httpPost('/:id/comments', TYPE.ProtectMiddleware)

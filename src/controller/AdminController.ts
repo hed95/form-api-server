@@ -28,7 +28,20 @@ import {LRUCacheClient} from '../service/LRUCacheClient';
 import {EventEmitter} from 'events';
 import {ApplicationConstants} from '../util/ApplicationConstants';
 import {SequelizeProvider} from '../model/SequelizeProvider';
+import {
+    ApiOperationDelete,
+    ApiOperationGet,
+    ApiOperationPost,
+    ApiPath,
+    SwaggerDefinitionConstant,
+} from 'swagger-express-ts';
 
+@ApiPath({
+    path: '/admin',
+    name: 'Admin',
+    description: 'Admin APIs can be invoked with the appropriate roles. See your application configuration',
+    security: {bearerAuth: []},
+})
 @controller('/admin')
 export class AdminController extends BaseHttpController {
 
@@ -48,6 +61,39 @@ export class AdminController extends BaseHttpController {
         });
     }
 
+    @ApiOperationGet({
+        path: '/forms',
+        description: 'Returns all form versions without any pre processing',
+        summary: 'Returns all form versions without any pre processing',
+        parameters: {
+            query: {
+                limit: {
+                    description: 'Limit the number of results returned per page',
+                    type: 'number',
+                    required: false,
+                    default: 20,
+                },
+                offset: {
+                    description: 'Page number',
+                    type: 'number',
+                    required: false,
+                    default: 0,
+                },
+
+            },
+        },
+        responses: {
+            200: {
+                description: 'Form versions',
+                model: 'FormVersion',
+                type: SwaggerDefinitionConstant.Response.Type.ARRAY,
+            },
+            403: {
+                description: 'Not allowed to perform this operation',
+            },
+            500: {description: 'Internal execution error'},
+        },
+    })
     @httpGet('/forms', TYPE.ProtectMiddleware, TYPE.AdminProtectMiddleware)
     public async allForms(@request() req: express.Request,
                           @response() res: express.Response,
@@ -57,6 +103,39 @@ export class AdminController extends BaseHttpController {
         res.json(result);
     }
 
+    @ApiOperationPost({
+        path: '/log',
+        description: 'Use to change log level',
+        summary: 'You can change the log level  of the ' +
+            'running application (\'info\', \'debug\', \'warn\', \'error\'). ' +
+            'Based on the configuration the log will revert back to default (DEBUG) after the configured timeout. ' +
+            'See application configuration',
+        parameters: {
+            body: {
+                required: true,
+
+                properties: {
+                    level: {
+                        type: 'string',
+                        required: true,
+                    },
+                },
+            },
+
+        },
+        responses: {
+            200: {
+                description: 'Successfully changed the log level',
+            },
+            400: {
+              description: 'Invalid log level. Use \'info\', \'debug\', \'warn\' or \'error\'',
+            },
+            403: {
+                description: 'Not allowed to perform this operation',
+            },
+            500: {description: 'Internal execution error'},
+        },
+    })
     @httpPost('/log', TYPE.ProtectMiddleware, TYPE.AdminProtectMiddleware)
     public changeLogLevel(@requestBody() logLevel: object, @response() res: express.Response): void {
         if (!this.appConfig.log.enabled) {
@@ -88,12 +167,45 @@ export class AdminController extends BaseHttpController {
         }
     }
 
+    @ApiOperationPost({
+        path: '/query-log',
+        description: 'Use to change DB query level. Changes DB query to info',
+        summary: 'By default db query logging is disabled.' +
+            ' Use this operation to see actual SQL that is being executed ',
+        parameters: {
+        },
+        responses: {
+            200: {
+                description: 'Successfully changed DB query',
+            },
+            403: {
+                description: 'Not allowed to perform this operation',
+            },
+            500: {description: 'Internal execution error'},
+        },
+    })
     @httpPost('/query-log', TYPE.ProtectMiddleware, TYPE.AdminProtectMiddleware)
     public enableQueryLogging(@response() res: express.Response, @principal() currentUser: User): void {
         logger.warn(`${currentUser.details.email} is enabling query logging. This slows down API calls`);
         this.sequlizeProvider.getSequelize().options.logging = logger.info.bind(logger);
     }
 
+    @ApiOperationDelete({
+        path: '/query-log',
+        description: 'Use to disable DB query level',
+        summary: '',
+        parameters: {
+        },
+        responses: {
+            200: {
+                description: 'Successfully changed DB query',
+            },
+            403: {
+                description: 'Not allowed to perform this operation',
+            },
+            500: {description: 'Internal execution error'},
+        },
+    })
     @httpDelete('/query-log', TYPE.ProtectMiddleware, TYPE.AdminProtectMiddleware)
     public disableQueryLogging(@response() res: express.Response, @principal() currentUser: User): void {
         logger.info(`${currentUser.details.email} is disabling query logging`);
@@ -101,12 +213,44 @@ export class AdminController extends BaseHttpController {
         res.sendStatus(HttpStatus.OK);
     }
 
+    @ApiOperationDelete({
+        path: '/cache/user',
+        description: 'Clears internal in memory user cache',
+        summary: 'Clears internal in memory user cache',
+        parameters: {
+        },
+        responses: {
+            200: {
+                description: 'Successfully cleared user cache',
+            },
+            403: {
+                description: 'Not allowed to perform this operation',
+            },
+            500: {description: 'Internal execution error'},
+        },
+    })
     @httpDelete('/cache/user', TYPE.ProtectMiddleware, TYPE.AdminProtectMiddleware)
-    public clearUserCache(@response() res: express.Response , @principal() currentUser: User): void {
+    public clearUserCache(@response() res: express.Response, @principal() currentUser: User): void {
         this.keycloakService.clearUserCache(currentUser);
         res.sendStatus(HttpStatus.OK);
     }
 
+    @ApiOperationDelete({
+        path: '/cache/form',
+        description: 'Clears internal in memory form cache',
+        summary: 'Clears internal in memory form cache',
+        parameters: {
+        },
+        responses: {
+            200: {
+                description: 'Successfully cleared form cache',
+            },
+            403: {
+                description: 'Not allowed to perform this operation',
+            },
+            500: {description: 'Internal execution error'},
+        },
+    })
     @httpDelete('/cache/form', TYPE.ProtectMiddleware, TYPE.AdminProtectMiddleware)
     public clearFormCache(@principal() currentUser: User,
                           @response() res: express.Response): void {
@@ -114,6 +258,30 @@ export class AdminController extends BaseHttpController {
         res.sendStatus(HttpStatus.OK);
     }
 
+    @ApiOperationDelete({
+        path: '/forms',
+        description: 'Delete a form and associated comments/history. This will remove records from DB',
+        summary: 'Delete a form and associated comments/history. This will remove records from DB',
+        parameters: {
+            path: {
+               id: {
+                   required: true,
+               },
+            },
+        },
+        responses: {
+            200: {
+                description: 'Successfully deleted form from system',
+            },
+            403: {
+                description: 'Not allowed to perform this operation',
+            },
+            500: {description: 'Internal execution error'},
+            404: {
+                description: 'Form does not exist',
+            },
+        },
+    })
     @httpDelete('/forms/:id', TYPE.ProtectMiddleware, TYPE.AdminProtectMiddleware)
     public async hardDelete(@requestParam('id') id: string,
                             @response() res: express.Response,

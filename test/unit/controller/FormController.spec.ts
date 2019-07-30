@@ -251,6 +251,4 @@ describe("FormController", () => {
         expect(mockResponse.getStatus()).to.be.eq(200);
     });
 
-
-
 });
