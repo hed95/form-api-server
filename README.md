@@ -154,14 +154,14 @@ This endpoint returns all DB Form versions currently held in the DB. You will ne
 
 This endpoint allows the physical deletion of a form from the DB. 
 
-**This a cascading operation so all versions and comments will be deleted. Once this has been done it cannot be undone.**
+**This a cascading operation so all versions and comments of the form will be deleted. Once this has been done it cannot be undone.**
 
 ### POST /log
 
 By the default the log level is set at DEBUG. You change the log level using this endpoint. For example:
 ```json
 {
- loglevel: 'info'
+ "loglevel": "info"
 }
 ```
 If you do not want this feature enabled then set this environment variable to false ENABLE_LOG_CHANGE
