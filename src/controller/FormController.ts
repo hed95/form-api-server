@@ -67,7 +67,7 @@ export class FormController extends BaseHttpController {
                 id: {
                     name: 'id',
                     description: 'Form id',
-                    format: 'string',
+                    type: 'string',
                     required: true,
                 },
             },
@@ -100,12 +100,11 @@ export class FormController extends BaseHttpController {
                 id: {
                     name: 'id',
                     description: 'Form id',
-                    format: 'string',
+                    type: 'string',
                     required: true,
                 },
             },
             body: {
-                required: true,
                 description: 'Submission data',
                 type: SwaggerDefinitionConstant.Parameter.Type.OBJECT,
                 allowEmptyValue: false,
@@ -410,7 +409,7 @@ export class FormController extends BaseHttpController {
                 id: {
                     name: 'id',
                     description: 'Form id',
-                    format: 'string',
+                    type: 'string',
                     required: true,
                 },
             },
@@ -439,7 +438,7 @@ export class FormController extends BaseHttpController {
                 id: {
                     name: 'id',
                     description: 'Form id',
-                    format: 'string',
+                    type: 'string',
                     required: true,
                 },
             },
@@ -470,7 +469,7 @@ export class FormController extends BaseHttpController {
                 id: {
                     name: 'id',
                     description: 'Form id',
-                    format: 'string',
+                    type: 'string',
                     required: true,
                 },
             },
@@ -502,7 +501,7 @@ export class FormController extends BaseHttpController {
                 id: {
                     name: 'versionId',
                     description: 'Version id',
-                    format: 'string',
+                    type: 'string',
                     required: true,
                 },
             },
