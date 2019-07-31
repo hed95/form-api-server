@@ -18,6 +18,7 @@ import {
     ApiOperationDelete,
     ApiOperationGet,
     ApiOperationPost,
+    ApiOperationPut,
     ApiPath,
     SwaggerDefinitionConstant,
 } from 'swagger-express-ts';
@@ -59,8 +60,8 @@ export class FormController extends BaseHttpController {
 
     @ApiOperationGet({
         path: '/{id}',
-        description: 'Get a form schema for a given id',
-        summary: 'Get a form schema for a given id',
+        description: 'Get latest form schema for a given id',
+        summary: 'Get latest form schema for a given id',
         parameters: {
             path: {
                 id: {
@@ -178,7 +179,7 @@ export class FormController extends BaseHttpController {
                     required: false,
                     name: 'name',
                 },
-                full : {
+                full: {
                     type: SwaggerDefinitionConstant.Parameter.Type.BOOLEAN,
                     description: 'Load full form schema and any nested forms',
                     required: false,
@@ -236,6 +237,45 @@ export class FormController extends BaseHttpController {
         return forms;
     }
 
+    @ApiOperationGet({
+        path: '/{id}',
+        description: 'Get all versions for given form id',
+        summary: 'Get all versions for given form id',
+        produces: ['application/json'],
+        parameters: {
+            path: {
+                'id': {
+                    required: true,
+                    name: 'id',
+                    description: 'Form id',
+                    type: 'string'
+                }
+            },
+            query: {
+                limit: {
+                    type: SwaggerDefinitionConstant.Parameter.Type.NUMBER,
+                    default: 20,
+                    description: 'Limit the number of forms returned in response',
+                    required: false,
+                    name: 'limit',
+                },
+                offset: {
+                    type: SwaggerDefinitionConstant.Parameter.Type.NUMBER,
+                    default: 0,
+                    description: 'Page number',
+                    required: false,
+                    name: 'offset',
+                },
+            }
+
+        },
+
+        responses: {
+            403: {description: 'Access denied'},
+            200: {description: 'Success', type: SwaggerDefinitionConstant.Response.Type.OBJECT},
+            404: {description: 'Form does not exist'},
+        },
+    })
     @httpGet('/:id/versions', TYPE.ProtectMiddleware)
     public async allVersions(@requestParam('id') id: string,
                              @queryParam('offset') offset: number = 0,
@@ -253,6 +293,34 @@ export class FormController extends BaseHttpController {
         res.json(result);
     }
 
+    @ApiOperationPut({
+        path: '/{id}',
+        description: 'Update a form',
+        summary: 'Update a form',
+        produces: ['application/json'],
+        consumes: ['application/json'],
+        parameters: {
+            path: {
+                'id': {
+                    required: true,
+                    name: 'id',
+                    description: 'Form id',
+                    type: 'string'
+                }
+            },
+            body: {
+                type: SwaggerDefinitionConstant.Parameter.Type.OBJECT,
+                description: 'Form schema'
+            }
+        },
+
+        responses: {
+            403: {description: 'Access denied'},
+            200: {description: 'Success', type: SwaggerDefinitionConstant.Response.Type.OBJECT},
+            404: {description: 'Form does not exist'},
+            400: {description: 'Invalid for schema'}
+        },
+    })
     @httpPut('/:id', TYPE.ProtectMiddleware)
     public async update(@requestParam('id') id: string,
                         @requestBody() form: object, @response() res: express.Response,
@@ -262,6 +330,35 @@ export class FormController extends BaseHttpController {
         res.sendStatus(HttpStatus.OK);
     }
 
+    @ApiOperationPut({
+        path: '/{id}/roles',
+        description: 'Update roles for a given form',
+        summary: 'Update roles for a given form',
+        produces: ['application/json'],
+        consumes: ['application/json'],
+        parameters: {
+            path: {
+                'id': {
+                    required: true,
+                    name: 'id',
+                    description: 'Form id',
+                    type: 'string'
+                }
+            },
+            body: {
+                type: SwaggerDefinitionConstant.Parameter.Type.ARRAY,
+                description: 'Roles to apply',
+                model: 'Role'
+            }
+        },
+
+        responses: {
+            403: {description: 'Access denied'},
+            200: {description: 'Success', type: SwaggerDefinitionConstant.Response.Type.OBJECT},
+            404: {description: 'Form does not exist'},
+            400: {description: 'Invalid for schema'}
+        },
+    })
     @httpPut('/:id/roles', TYPE.ProtectMiddleware)
     public async updateRoles(@requestParam('id') id: string,
                              @requestBody() roles: Role[], @response() res: express.Response,
@@ -270,6 +367,27 @@ export class FormController extends BaseHttpController {
         res.status(HttpStatus.OK);
     }
 
+    @ApiOperationPost({
+        path: '/',
+        description: 'Create a new form',
+        summary: 'Create a new form',
+        produces: ['application/json'],
+        consumes: ['application/json'],
+        parameters: {
+            body: {
+                type: SwaggerDefinitionConstant.Parameter.Type.ARRAY,
+                description: 'Form schema',
+                required: true
+            }
+        },
+
+        responses: {
+            403: {description: 'Access denied'},
+            201: {description: 'Success'},
+            404: {description: 'Form does not exist'},
+            400: {description: 'Invalid for schema'}
+        },
+    })
     @httpPost('/', TYPE.ProtectMiddleware)
     public async create(@requestBody() form: object,
                         @request() req: express.Request,
@@ -375,6 +493,26 @@ export class FormController extends BaseHttpController {
 
     }
 
+    @ApiOperationGet({
+        path: '/version/{versionId}',
+        description: 'Get a specific form version',
+        summary: 'Get all comments for a given form',
+        parameters: {
+            path: {
+                id: {
+                    name: 'versionId',
+                    description: 'Version id',
+                    format: 'string',
+                    required: true,
+                },
+            },
+        },
+        responses: {
+            200: {description: 'Success', type: SwaggerDefinitionConstant.Response.Type.OBJECT},
+            404: {description: 'Form does not exist'},
+            500: {description: 'Internal execution error'},
+        },
+    })
     @httpGet('/version/:versionId', TYPE.ProtectMiddleware)
     public async getByVersionId(@requestParam('versionId') versionId: string,
                                 @request() req: express.Request,
@@ -386,6 +524,31 @@ export class FormController extends BaseHttpController {
         res.json(updated);
     }
 
+    @ApiOperationPost({
+        path: '/restore',
+        description: 'Restore a specific form version to latest',
+        summary: 'Restore a specific form version to latest',
+        parameters: {
+            body: {
+                description: 'Data that contains the form id and the version that needs to be made latest',
+                properties: {
+                    'formId' : {
+                        type: 'string',
+                        required: true
+                    },
+                    'versionId' : {
+                        type: 'string',
+                        required: true
+                    }
+                }
+            }
+        },
+        responses: {
+            200: {description: 'Success', type: SwaggerDefinitionConstant.Response.Type.OBJECT},
+            404: {description: 'Form does not exist'},
+            500: {description: 'Internal execution error'},
+        },
+    })
     @httpPost('/restore', TYPE.ProtectMiddleware)
     public async restore(@requestBody() restoreData: RestoreData,
                          @request() req: express.Request,

@@ -157,3 +157,24 @@ This endpoint allows the physical deletion of a form from the DB.
 **This a cascading operation so all versions and comments will be deleted. Once this has been done it cannot be undone.**
 
 ### POST /log
+
+By the default the log level is set at DEBUG. You change the log level using this endpoint. For example:
+```json
+{
+ loglevel: 'info'
+}
+```
+If you do not want this feature enabled then set this environment variable to false ENABLE_LOG_CHANGE
+If you have configured LOG_CHANGE_TIMEOUT with a non -1 number then after the specified timeout the log level will revert back to DEBUG. This is to ensure you don't leave the logging at INFO level indefinitely causing you log files to fill up.
+
+### POST /query-log
+This endpoint enables SQL query logging at INFO level. Body not required
+
+### DELETE /query-log
+This endpoint disables SQL query logging at INFO level.
+
+### DELETE /cache/user
+Clears internal in memory user cache
+
+### DELETE /cache/form
+Clears internal in memory form cache
