@@ -122,6 +122,9 @@ server.setConfig((app: express.Application) => {
     });
 
     app.use(morgan((tokens: TokenIndexer, req: express.Request, res: express.Response) => {
+        morgan.token('referrer', (request: express.Request, response: express.Response) => {
+            return request.headers.referer;
+        });
         morgan.token('response-time-ms', (request: express.Request, response: express.Response) => {
             // @ts-ignore
             return `${tokens['response-time'](request, response)} ms`;
@@ -131,6 +134,7 @@ server.setConfig((app: express.Application) => {
                 return httpContext.get(appConfig.correlationIdRequestHeader);
             });
         return JSON.stringify({
+            referrer: tokens.referrer(req, res),
             method: tokens.method(req, res),
             url: tokens.url(req, res),
             status: tokens.status(req, res),
