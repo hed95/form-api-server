@@ -244,12 +244,12 @@ export class FormController extends BaseHttpController {
         produces: ['application/json'],
         parameters: {
             path: {
-                'id': {
+                id: {
                     required: true,
                     name: 'id',
                     description: 'Form id',
-                    type: 'string'
-                }
+                    type: 'string',
+                },
             },
             query: {
                 limit: {
@@ -266,7 +266,7 @@ export class FormController extends BaseHttpController {
                     required: false,
                     name: 'offset',
                 },
-            }
+            },
 
         },
 
@@ -301,24 +301,24 @@ export class FormController extends BaseHttpController {
         consumes: ['application/json'],
         parameters: {
             path: {
-                'id': {
+                id: {
                     required: true,
                     name: 'id',
                     description: 'Form id',
-                    type: 'string'
-                }
+                    type: 'string',
+                },
             },
             body: {
                 type: SwaggerDefinitionConstant.Parameter.Type.OBJECT,
-                description: 'Form schema'
-            }
+                description: 'Form schema',
+            },
         },
 
         responses: {
             403: {description: 'Access denied'},
             200: {description: 'Success', type: SwaggerDefinitionConstant.Response.Type.OBJECT},
             404: {description: 'Form does not exist'},
-            400: {description: 'Invalid for schema'}
+            400: {description: 'Invalid for schema'},
         },
     })
     @httpPut('/:id', TYPE.ProtectMiddleware)
@@ -338,25 +338,25 @@ export class FormController extends BaseHttpController {
         consumes: ['application/json'],
         parameters: {
             path: {
-                'id': {
+                id: {
                     required: true,
                     name: 'id',
                     description: 'Form id',
-                    type: 'string'
-                }
+                    type: 'string',
+                },
             },
             body: {
                 type: SwaggerDefinitionConstant.Parameter.Type.ARRAY,
                 description: 'Roles to apply',
-                model: 'Role'
-            }
+                model: 'Role',
+            },
         },
 
         responses: {
             403: {description: 'Access denied'},
             200: {description: 'Success', type: SwaggerDefinitionConstant.Response.Type.OBJECT},
             404: {description: 'Form does not exist'},
-            400: {description: 'Invalid for schema'}
+            400: {description: 'Invalid for schema'},
         },
     })
     @httpPut('/:id/roles', TYPE.ProtectMiddleware)
@@ -377,15 +377,15 @@ export class FormController extends BaseHttpController {
             body: {
                 type: SwaggerDefinitionConstant.Parameter.Type.ARRAY,
                 description: 'Form schema',
-                required: true
-            }
+                required: true,
+            },
         },
 
         responses: {
             403: {description: 'Access denied'},
             201: {description: 'Success'},
             404: {description: 'Form does not exist'},
-            400: {description: 'Invalid for schema'}
+            400: {description: 'Invalid for schema'},
         },
     })
     @httpPost('/', TYPE.ProtectMiddleware)
@@ -532,16 +532,16 @@ export class FormController extends BaseHttpController {
             body: {
                 description: 'Data that contains the form id and the version that needs to be made latest',
                 properties: {
-                    'formId' : {
+                    formId : {
                         type: 'string',
-                        required: true
+                        required: true,
                     },
-                    'versionId' : {
+                    versionId : {
                         type: 'string',
-                        required: true
-                    }
-                }
-            }
+                        required: true,
+                    },
+                },
+            },
         },
         responses: {
             200: {description: 'Success', type: SwaggerDefinitionConstant.Response.Type.OBJECT},

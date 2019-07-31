@@ -159,7 +159,7 @@ server.setConfig((app: express.Application) => {
              next: express.NextFunction) => {
         if (err) {
             logger.error('An exception occurred', {
-                exception: err.stack,
+                exception: err.message,
             });
         }
         const userEmailFromHeader = req.get(ApplicationConstants.USER_ID);
@@ -243,7 +243,9 @@ process.on('SIGINT', async () => {
 });
 
 process.on('unhandledRejection', (reason: Error, promise: Promise<any>) => {
-    logger.error('unhandledRejection', reason.stack || reason);
+    logger.error('unhandledRejection', {
+        exception: reason.message,
+    });
 });
 
 process.on('uncaughtException', (error) => {
