@@ -54,7 +54,7 @@ services:
       - web
       - db
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/v1/healthz"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/healthz"]
       interval: 5s
       timeout: 2s
       retries: 15
