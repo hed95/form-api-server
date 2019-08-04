@@ -13,6 +13,9 @@ const defaultDBConfig: DBConfig = {
         port: process.env.DB_PORT,
         dialect: 'postgres',
         native: false,
+        dialectOptions: {
+            ssl: process.env.DB_SSL ? process.env.DB_SSL === 'true' : false
+        },
         pool: {
             max: 10,
             min: 0,
