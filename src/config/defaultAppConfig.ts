@@ -23,7 +23,7 @@ const defaultAppConfig: AppConfig = {
         roles: process.env.ADMIN_ROLES ? process.env.ADMIN_ROLES.split(',') : [],
     },
     cors: {
-        origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split('|') : null,
+        origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : null,
     },
     log: {
         enabled: process.env.ENABLE_LOG_CHANGE ? process.env.ENABLE_LOG_CHANGE === 'true' : false,

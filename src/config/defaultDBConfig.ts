@@ -14,7 +14,7 @@ const defaultDBConfig: DBConfig = {
         dialect: 'postgres',
         native: false,
         dialectOptions: {
-            ssl: process.env.DB_SSL ? process.env.DB_SSL === 'true' : false
+            ssl: process.env.DB_SSL ? process.env.DB_SSL === 'true' : false,
         },
         pool: {
             max: 10,
