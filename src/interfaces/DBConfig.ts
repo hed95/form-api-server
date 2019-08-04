@@ -11,7 +11,7 @@ interface DBConfig {
         port: string,
         dialect: string,
         dialectOptions: {
-            ssl: boolean
+            ssl: boolean,
         },
         native: boolean,
         pool: {
