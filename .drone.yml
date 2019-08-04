@@ -1,33 +1,78 @@
-kind: pipeline
-name: default
+## Build Image
+pipeline:
 
-## Build Public Image
-steps:
-- name: test
-  image: digitalpatterns/node:4
-  commands:
-    - npm install
-    - npm run cover
-  when:
-    branch:
-      - master
-    event:
-      - push
+  tests:
+    image: digitalpatterns/node:4
+    commands:
+      - npm install
+      - npm run cover
+    when:
+      event: push
 
-#- name: image_to_docker_hub
-#  image: plugins/docker
-#  settings:
-#    username:
-#      from_secret: docker_username
-#    password:
-#      from_secret: docker_password
-#    repo: digitalpatterns/form-api-server
-#    tags:
-#      - ${DRONE_BUILD_NUMBER}
-#      - ${DRONE_COMMIT_SHA}
-#      - latest
-#  when:
-#    branch:
-#      - master
-#    event:
-#      - push
+  build_push_to_ecr:
+    image: quay.io/ukhomeofficedigital/ecr:latest
+    secrets:
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+    repo: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/cop/form-api-server
+    build_args:
+      - APP_BUILD=${DRONE_COMMIT_SHA}
+    tags:
+      - ${DRONE_COMMIT_SHA}
+    when:
+      branch: master
+      event: push
+
+  deploy_to_dev:
+    image: quay.io/ukhomeofficedigital/kd
+    secrets:
+      - DEV_NAME
+      - DEV_DOMAIN
+      - DEV_WHITELIST
+      - DEV_KUBE_NAMESPACE
+      - DEV_KUBE_SERVER
+      - DEV_KUBE_TOKEN
+      - DEV_DB_USERNAME
+      - DEV_DB_PASSWORD
+      - DEV_DB_HOSTNAME
+      - DEV_AUTH_URL
+      - DEV_AUTH_CLIENT_ID
+      - DEV_AUTH_REALM
+      - DEV_AUTH_ADMIN_USERNAME
+      - DEV_AUTH_ADMIN_CLIENT_ID
+      - DEV_ADMIN_ROLES
+      - DEV_ENABLE_LOG_CHANGE
+      - DEV_LOG_CHANGE_TIMEOUT
+      - DEV_CORS_ORIGIN
+      - DEV_ENABLE_LOG_QUERY
+      - DEV_PORT
+    commands:
+      - export NAME=$${DEV_NAME}
+      - export DOMAIN=$${DEV_DOMAIN}
+      - export WHITELIST=$${DEV_WHITELIST}
+      - export KUBE_NAMESPACE=$${DEV_KUBE_NAMESPACE}
+      - export KUBE_SERVER=$${DEV_KUBE_SERVER}
+      - export KUBE_TOKEN=$${DEV_KUBE_TOKEN}
+      - export DB_USERNAME=$${DEV_DB_USERNAME}
+      - export DB_PASSWORD=$${DEV_DB_PASSWORD}
+      - export DB_HOSTNAME=$${DEV_DB_HOSTNAME}
+      - export AUTH_URL=$${DEV_AUTH_URL}
+      - export AUTH_CLIENT_ID=$${DEV_AUTH_CLIENT_ID}
+      - export AUTH_REALM=$${DEV_AUTH_REALM}
+      - export AUTH_ADMIN_USERNAME=$${DEV_AUTH_ADMIN_USERNAME}
+      - export AUTH_ADMIN_CLIENT_ID=$${DEV_AUTH_ADMIN_CLIENT_ID}
+      - export ADMIN_ROLES=$${DEV_ADMIN_ROLES}
+      - export ENABLE_LOG_CHANGE=$${DEV_ENABLE_LOG_CHANGE}
+      - export LOG_CHANGE_TIMEOUT=$${DEV_LOG_CHANGE_TIMEOUT}
+      - export CORS_ORIGIN=$${DEV_CORS_ORIGIN}
+      - export ENABLE_LOG_QUERY=$${DEV_ENABLE_LOG_QUERY}
+      - export PORT=$${DEV_PORT}
+      - export IMAGE_TAG=${DRONE_COMMIT_SHA}
+      - kd --insecure-skip-tls-verify -f kube/cert.yml
+      - kd --insecure-skip-tls-verify -f kube/network-policy.yml
+      - kd --insecure-skip-tls-verify -f kube/service.yml
+      - kd --insecure-skip-tls-verify -f kube/deployment.yml
+      - kd --insecure-skip-tls-verify -f kube/ingress.yml
+    when:
+      environment: dev
+      event: deployment

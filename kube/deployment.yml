@@ -1,0 +1,116 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{.NAME}}
+spec:
+  selector:
+    matchLabels:
+      name: {{.NAME}}
+  replicas: 1
+  revisionHistoryLimit: 3
+  template:
+    metadata:
+      labels:
+        name: {{.NAME}}
+    spec:
+      securityContext:
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+      - name: proxy
+        image: quay.io/ukhomeofficedigital/nginx-proxy
+        imagePullPolicy: Always
+        securityContext:
+          runAsNonRoot: true
+        env:
+        - name: PROXY_SERVICE_HOST
+          value: "127.0.0.1"
+        - name: PROXY_SERVICE_PORT
+          value: "3000"
+        - name: SERVER_CERT
+          value: "/certs/tls.crt"
+        - name: SERVER_KEY
+          value: "/certs/tls.key"
+        - name: SSL_CIPHERS
+          value: "ECDHE-RSA-AES128-GCM-SHA256:AES256+EECDH:AES256+EDH:!aNULL"
+        - name: ENABLE_UUID_PARAM
+          value: "FALSE"
+        - name: NAXSI_USE_DEFAULT_RULES
+          value: "FALSE"
+        - name: PORT_IN_HOST_HEADER
+          value: "FALSE"
+        - name: ERROR_REDIRECT_CODES
+          value: "599"
+        - name: ADD_NGINX_LOCATION_CFG
+          value: |
+            gzip off;
+            proxy_buffer_size         256k;
+            proxy_buffers             4 512k;
+            proxy_busy_buffers_size   512k;
+            echo_read_request_body;
+        - name: LOG_FORMAT_NAME
+          value: "json"
+        - name: STATSD_METRICS
+          value: "FALSE"
+        ports:
+        - name: https
+          containerPort: 10443
+        volumeMounts:
+          - name: certs
+            mountPath: /certs
+      - name: {{.NAME}}
+        image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/cop/form-api-server:{{.IMAGE_TAG}}
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz
+            port: 8101
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /readiness
+            port: 8101
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        env:
+          - name: DB_USERNAME
+            value: "{{.DB_USERNAME}}"
+          - name: DB_PASSWORD
+            value: "{{.DB_PASSWORD}}"
+          - name: DB_HOSTNAME
+            value: "{{.DB_HOSTNAME}}"
+          - name: AUTH_URL
+            value: "{{.AUTH_URL}}"
+          - name: AUTH_CLIENT_ID
+            value: "{{.AUTH_CLIENT_ID}}"
+          - name: AUTH_REALM
+            value: "{{.AUTH_REALM}}"
+          - name: AUTH_ADMIN_USERNAME
+            value: "{{.AUTH_ADMIN_USERNAME}}"
+          - name: AUTH_ADMIN_CLIENT_ID
+            value: "{{.AUTH_ADMIN_CLIENT_ID}}"
+          - name: ADMIN_ROLES
+            value: "{{.ADMIN_ROLES}}"
+          - name: ENABLE_LOG_CHANGE
+            value: "{{.ENABLE_LOG_CHANGE}}"
+          - name: LOG_CHANGE_TIMEOUT
+            value: "{{.LOG_CHANGE_TIMEOUT}}"
+          - name: CORS_ORIGIN
+            value: "{{.CORS_ORIGIN}}"
+          - name: ENABLE_LOG_QUERY
+            value: "{{.ENABLE_LOG_QUERY}}"
+          - name: PORT
+            value: "{{.PORT}}"
+      volumes:
+      - name: certs
+        secret:
+          secretName: "{{.NAME}}-pod-tls"
+
