@@ -35,7 +35,7 @@ pipeline:
       - DEV_DB_USERNAME
       - DEV_DB_PASSWORD
       - DEV_DB_HOSTNAME
-      - DEV_DB_HOSTNAME
+      - DEV_DB_NAME
       - DEV_DB_PORT
       - DEV_DB_SSL
       - DEV_AUTH_URL
