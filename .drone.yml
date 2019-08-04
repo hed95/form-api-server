@@ -37,6 +37,7 @@ pipeline:
       - DEV_DB_HOSTNAME
       - DEV_DB_HOSTNAME
       - DEV_DB_PORT
+      - DEV_DB_SSL
       - DEV_AUTH_URL
       - DEV_AUTH_CLIENT_ID
       - DEV_AUTH_REALM
@@ -60,12 +61,12 @@ pipeline:
       - export DB_HOSTNAME=$${DEV_DB_HOSTNAME}
       - export DB_NAME=$${DEV_DB_NAME}
       - export DB_PORT=$${DEV_DB_PORT}
+      - export DB_SSL=$${DEV_DB_SSL}
       - export AUTH_URL=$${DEV_AUTH_URL}
       - export AUTH_CLIENT_ID=$${DEV_AUTH_CLIENT_ID}
       - export AUTH_REALM=$${DEV_AUTH_REALM}
       - export AUTH_ADMIN_USERNAME=$${DEV_AUTH_ADMIN_USERNAME}
       - export AUTH_ADMIN_PASSWORD=$${DEV_AUTH_ADMIN_PASSWORD}
-
       - export ADMIN_ROLES=$${DEV_ADMIN_ROLES}
       - export ENABLE_LOG_CHANGE=$${DEV_ENABLE_LOG_CHANGE}
       - export LOG_CHANGE_TIMEOUT=$${DEV_LOG_CHANGE_TIMEOUT}
