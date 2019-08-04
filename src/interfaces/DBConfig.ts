@@ -10,6 +10,9 @@ interface DBConfig {
         host: string,
         port: string,
         dialect: string,
+        dialectOptions: {
+            ssl: boolean
+        },
         native: boolean,
         pool: {
             max: number,

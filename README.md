@@ -50,7 +50,8 @@ http://localhost:3000/api-docs/swagger/#/
 | DB_PASSWORD                   | string    	| *REQUIRED*        |                       
 | DB_NAME                       | string    	| *REQUIRED*        |                       
 | DB_HOSTNAME                   | string    	| *REQUIRED*        |                       
-| DB_PORT                       | string    	| *REQUIRED*        |                       
+| DB_PORT                       | string    	| false             |                       
+| DB_SSL                        | string    	| *REQUIRED*        |                       
 | AUTH_URL                      | string    	| *REQUIRED*        |   
 | AUTH_CLIENT_ID                | string    	| *REQUIRED*        |                       
 | AUTH_BEARER_ONLY              | boolean    	| true           	|                       
