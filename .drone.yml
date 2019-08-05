@@ -20,6 +20,7 @@ steps:
       from_secret: docker_password
   repo: digitalpatterns/form-api-server
   tags:
+    - latest
     - ${DRONE_COMMIT_SHA}
   when:
     branch: master
@@ -50,6 +51,9 @@ steps:
     - ELF_FORM_API_CORS_ORIGIN
     - ELF_FORM_API_ENABLE_QUERY
     - ELF_FORM_API_PORT
+    - ELF_NGINX_PROXY_IMAGE_TAG
+    - ELF_NGINX_PROXY_IMAGE_REPO
+    - ELF_FORM_API_IMAGE_REPO
   commands:
     - export FORM_API_NAME=$${ELF_FORM_API_NAME}
     - export WHITELIST=$${ELF_WHITELIST}
@@ -73,7 +77,10 @@ steps:
     - export FORM_API_CORS_ORIGIN=$${ELF_FORM_API_CORS_ORIGIN}
     - export FORM_API_LOG_ENABLE_QUERY=$${ELF_FORM_API_LOG_ENABLE_QUERY}
     - export FORM_API_PORT=$${ELF_FORM_API_PORT}
-    - export IMAGE_TAG=${DRONE_COMMIT_SHA}
+    - export NGINX_PROXY_IMAGE_TAG=$${ELF_NGINX_PROXY_IMAGE_TAG}
+    - export NGINX_PROXY_IMAGE_REPO=$${ELF_NGINX_PROXY_IMAGE_REPO}
+    - export FORM_API_IMAGE_REPO=$${ELF_FORM_API_IMAGE_REPO}
+    - export FORM_API_IMAGE_TAG=${DRONE_COMMIT_SHA}
     - kd --insecure-skip-tls-verify -f kube/secret.yml
     - kd --insecure-skip-tls-verify -f kube/network-policy.yml
     - kd --insecure-skip-tls-verify -f kube/service.yml
