@@ -18,10 +18,9 @@ steps:
       from_secret: docker_username
     password:
       from_secret: docker_password
-  repo: digitalpatterns/form-api-server
-  tags:
-    - latest
-    - ${DRONE_COMMIT_SHA}
+    repo: digitalpatterns/form-api-server
+    tags:
+      - ${DRONE_COMMIT_SHA}
   when:
     branch: master
     event: push
