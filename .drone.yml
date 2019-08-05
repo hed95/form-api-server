@@ -11,7 +11,7 @@ steps:
   when:
     event: push
 
-- build_push_to_docker:
+- name: build_push_to_docker
   image: plugins/docker
   settings:
     username:
@@ -25,7 +25,7 @@ steps:
     branch: master
     event: push
 
-- deploy_to_elf:
+- name: deploy_to_elf
   image: quay.io/ukhomeofficedigital/kd
   secrets:
     - ELF_FORM_API_NAME
