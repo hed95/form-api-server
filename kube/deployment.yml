@@ -26,7 +26,7 @@ spec:
           - name: PROXY_SERVICE_HOST
             value: 'http://127.0.0.1'
           - name: PROXY_SERVICE_PORT
-            value: '5000'
+            value: "{{.FORM_API_PORT}}"
           - name: LOG_FORMAT_NAME
             value: 'json'
           - name: NAXSI_USE_DEFAULT_RULES
