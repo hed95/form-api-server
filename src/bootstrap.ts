@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import * as bodyParser from 'body-parser';
 import cors from 'cors';
-import * as express from 'express';
+import express from 'express';
 import {InversifyExpressServer} from 'inversify-express-utils';
 import * as swagger from 'swagger-express-ts';
 import {SwaggerDefinitionConstant} from 'swagger-express-ts';
@@ -25,6 +25,7 @@ import {OptimisticLockError} from 'sequelize';
 import {ApplicationConstants} from './util/ApplicationConstants';
 import {ConfigValidator} from './util/ConfigValidator';
 import {EventEmitter} from 'events';
+import {Application} from 'express';
 
 const defaultPort: number = 3000;
 
@@ -60,103 +61,103 @@ if (appConfig.log.enabled) {
 const version = 'v1';
 const basePath = ``;
 
-const server = new InversifyExpressServer(container,
-    null,
-    {rootPath: basePath},
-    null,
-    KeycloakAuthProvider);
-
-server.setConfig((app: express.Application) => {
-    app.use(httpContext.middleware);
-    const keycloakService: KeycloakService = container.get(TYPE.KeycloakService);
-    app.use('/api-docs/swagger', express.static('swagger'));
-    app.use('/api-docs/swagger/assets', express.static('node_modules/swagger-ui-dist'));
-    app.use(swagger.express(
-        {
-            definition: {
-                schemes: ['http', 'https'],
-                basePath,
-                info: {
-                    title: 'Form API Service',
-                    version,
-                },
-                securityDefinitions: {
-                    bearerAuth: {
-                        type: SwaggerDefinitionConstant.Security.Type.API_KEY,
-                        in: 'header',
-                        name: 'Authorization',
-                    },
+const expressApp: Application = express();
+if (appConfig.cors.origin) {
+    logger.info('CORS origin configured' + JSON.stringify(appConfig.cors.origin));
+    expressApp.use(cors({
+        origin: appConfig.cors.origin,
+        optionsSuccessStatus: 200,
+    }));
+}
+expressApp.use(httpContext.middleware);
+const keycloakService: KeycloakService = container.get(TYPE.KeycloakService);
+expressApp.use('/api-docs/swagger', express.static('swagger'));
+expressApp.use('/api-docs/swagger/assets', express.static('node_modules/swagger-ui-dist'));
+expressApp.use(swagger.express(
+    {
+        definition: {
+            schemes: ['http', 'https'],
+            basePath,
+            info: {
+                title: 'Form API Service',
+                version,
+            },
+            securityDefinitions: {
+                bearerAuth: {
+                    type: SwaggerDefinitionConstant.Security.Type.API_KEY,
+                    in: 'header',
+                    name: 'Authorization',
                 },
             },
         },
-    ));
+    },
+));
 
-    app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
-        httpContext.ns.bindEmitter(req);
-        httpContext.ns.bindEmitter(res);
-        const requestId = req.headers[appConfig.correlationIdRequestHeader] || uuid.v4();
-        httpContext.set(appConfig.correlationIdRequestHeader, requestId);
-        next();
-    });
+expressApp.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+    httpContext.ns.bindEmitter(req);
+    httpContext.ns.bindEmitter(res);
+    const requestId = req.headers[appConfig.correlationIdRequestHeader] || uuid.v4();
+    httpContext.set(appConfig.correlationIdRequestHeader, requestId);
+    next();
+});
 
-    app.use(keycloakService.middleware());
+expressApp.use(keycloakService.middleware());
 
-    app.use(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        httpContext.ns.bindEmitter(req);
-        httpContext.ns.bindEmitter(res);
-        let userId;
-        const userEmailFromHeader = req.get(ApplicationConstants.USER_ID);
-        if (userEmailFromHeader) {
-            const user = await keycloakService.getUser(userEmailFromHeader);
-            if (user) {
-                userId = user.details.email;
-            } else {
-                next(new UnauthorizedError(`User ${userEmailFromHeader} not authorized`));
-            }
+expressApp.use(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    httpContext.ns.bindEmitter(req);
+    httpContext.ns.bindEmitter(res);
+    let userId;
+    const userEmailFromHeader = req.get(ApplicationConstants.USER_ID);
+    if (userEmailFromHeader) {
+        const user = await keycloakService.getUser(userEmailFromHeader);
+        if (user) {
+            userId = user.details.email;
         } else {
-            // @ts-ignore
-            userId = req.kauth && req.kauth.grant ? req.kauth.grant.access_token.content.email :
-                ApplicationConstants.ANONYMOUS;
+            next(new UnauthorizedError(`User ${userEmailFromHeader} not authorized`));
         }
-        httpContext.set(ApplicationConstants.USER_ID, userId);
-        next();
-    });
-
-    app.use(morgan((tokens: TokenIndexer, req: express.Request, res: express.Response) => {
-        morgan.token('referrer', (request: express.Request, response: express.Response) => {
-            return request.headers.referer;
-        });
-        morgan.token('response-time-ms', (request: express.Request, response: express.Response) => {
-            // @ts-ignore
-            return `${tokens['response-time'](request, response)} ms`;
-        });
-        morgan.token(appConfig.correlationIdRequestHeader,
-            (request: express.Request, response: express.Response) => {
-                return httpContext.get(appConfig.correlationIdRequestHeader);
-            });
-        return JSON.stringify({
-            referrer: tokens.referrer(req, res),
-            method: tokens.method(req, res),
-            url: tokens.url(req, res),
-            status: tokens.status(req, res),
-            responseTimeInMs: tokens['response-time-ms'](req, res),
-        });
-    }, {
-        stream: new LoggerStream(),
-    }));
-    app.use(bodyParser.urlencoded({
-        extended: true,
-    }));
-    app.use(bodyParser.json());
-    if (appConfig.cors.origin) {
-        logger.info('CORS origin configured');
-        app.use(cors({
-            origin: '*',
-            optionsSuccessStatus: 200,
-        }));
+    } else {
+        // @ts-ignore
+        userId = req.kauth && req.kauth.grant ? req.kauth.grant.access_token.content.email :
+            ApplicationConstants.ANONYMOUS;
     }
+    httpContext.set(ApplicationConstants.USER_ID, userId);
+    next();
+});
 
-}).setErrorConfig((app: express.Application) => {
+expressApp.use(morgan((tokens: TokenIndexer, req: express.Request, res: express.Response) => {
+    morgan.token('referrer', (request: express.Request, response: express.Response) => {
+        return request.headers.referer;
+    });
+    morgan.token('response-time-ms', (request: express.Request, response: express.Response) => {
+        // @ts-ignore
+        return `${tokens['response-time'](request, response)} ms`;
+    });
+    morgan.token(appConfig.correlationIdRequestHeader,
+        (request: express.Request, response: express.Response) => {
+            return httpContext.get(appConfig.correlationIdRequestHeader);
+        });
+    return JSON.stringify({
+        referrer: tokens.referrer(req, res),
+        method: tokens.method(req, res),
+        url: tokens.url(req, res),
+        status: tokens.status(req, res),
+        responseTimeInMs: tokens['response-time-ms'](req, res),
+    });
+}, {
+    stream: new LoggerStream(),
+}));
+expressApp.use(bodyParser.urlencoded({
+    extended: true,
+}));
+expressApp.use(bodyParser.json());
+
+const server = new InversifyExpressServer(container,
+    null,
+    {rootPath: basePath},
+    expressApp,
+    KeycloakAuthProvider);
+
+server.setErrorConfig((app: express.Application) => {
     app.use((err: Error,
              req: express.Request,
              res: express.Response,
