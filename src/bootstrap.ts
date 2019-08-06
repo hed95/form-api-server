@@ -74,6 +74,7 @@ server.setConfig((app: express.Application) => {
     app.use(swagger.express(
         {
             definition: {
+                schemes: ['http', 'https'],
                 basePath,
                 info: {
                     title: 'Form API Service',
@@ -146,15 +147,16 @@ server.setConfig((app: express.Application) => {
     app.use(bodyParser.urlencoded({
         extended: true,
     }));
-
+    app.use(bodyParser.json());
     if (appConfig.cors.origin) {
         logger.info('CORS origin configured');
         app.use(cors({
+            methods: ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'PATCH'],
             origin: appConfig.cors.origin,
             optionsSuccessStatus: 200,
+            preflightContinue: true,
         }));
     }
-    app.use(bodyParser.json());
 
 }).setErrorConfig((app: express.Application) => {
     app.use((err: Error,

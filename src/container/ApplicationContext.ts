@@ -21,6 +21,7 @@ import defaultAppConfig from '../config/defaultAppConfig';
 import {EventEmitter} from 'events';
 import {LRUCacheClient} from '../service/LRUCacheClient';
 import {ApplicationConstants} from '../util/ApplicationConstants';
+import {PDFService} from '../service/PDFService';
 
 export class ApplicationContext {
     private readonly container: Container;
@@ -47,6 +48,7 @@ export class ApplicationContext {
         this.container.bind<FormResourceAssembler>(TYPE.FormResourceAssembler).to(FormResourceAssembler);
         this.container.bind<AdminProtectMiddleware>(TYPE.AdminProtectMiddleware).to(AdminProtectMiddleware);
         this.container.bind<CommentService>(TYPE.CommentService).to(CommentService);
+        this.container.bind<PDFService>(TYPE.PDFService).to(PDFService);
 
         logger.info('Application context initialised');
 

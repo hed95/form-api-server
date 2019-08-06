@@ -20,7 +20,8 @@ const defaultAppConfig: AppConfig = {
         },
     },
     admin: {
-        roles: process.env.FORM_API_KEYCLOAK_ADMIN_ROLES ? process.env.FORM_API_KEYCLOAK_ADMIN_ROLES.split(',') : [],
+        roles: process.env.FORM_API_KEYCLOAK_ADMIN_ROLES ?
+            process.env.FORM_API_KEYCLOAK_ADMIN_ROLES.split(',') : [],
     },
     cors: {
         origin: process.env.FORM_API_CORS_ORIGIN ? process.env.FORM_API_CORS_ORIGIN.split(',') : null,
@@ -32,15 +33,18 @@ const defaultAppConfig: AppConfig = {
     cache: {
         role: {
             maxAge: process.env.FORM_API_CACHE_ROLE_MAX_AGE ? +process.env.FORM_API_CACHE_ROLE_MAX_AGE : +TWO_MINUTES,
-            maxEntries: process.env.FORM_API_CACHE_ROLE_MAX_ENTRIES ? +process.env.FORM_API_CACHE_USER_ROLE_ENTRIES : MAX_ENTRIES,
+            maxEntries: process.env.FORM_API_CACHE_ROLE_MAX_ENTRIES ?
+                +process.env.FORM_API_CACHE_USER_ROLE_ENTRIES : MAX_ENTRIES,
         },
         form: {
             maxAge: process.env.FORM_API_CACHE_FORM_MAX_AGE ? +process.env.FORM_API_CACHE_FORM_MAX_AGE : +TWO_MINUTES,
-            maxEntries: process.env.FORM_API_CACHE_FORM_MAX_ENTRIES ? +process.env.FORM_API_CACHE_USER_FORM_ENTRIES : MAX_ENTRIES,
+            maxEntries: process.env.FORM_API_CACHE_FORM_MAX_ENTRIES ?
+                +process.env.FORM_API_CACHE_USER_FORM_ENTRIES : MAX_ENTRIES,
         },
         user: {
             maxAge: process.env.FORM_API_CACHE_USER_MAX_AGE ? +process.env.FORM_API_CACHE_USER_MAX_AGE : +TWO_MINUTES,
-            maxEntries: process.env.FORM_API_CACHE_USER_MAX_ENTRIES ? +process.env.FORM_API_CACHE_USER_MAX_ENTRIES : MAX_ENTRIES,
+            maxEntries: process.env.FORM_API_CACHE_USER_MAX_ENTRIES ?
+                +process.env.FORM_API_CACHE_USER_MAX_ENTRIES : MAX_ENTRIES,
         },
     },
     query: {

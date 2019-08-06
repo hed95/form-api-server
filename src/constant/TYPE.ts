@@ -17,4 +17,5 @@ export default {
     AppConfig: Symbol.for('AppConfig'),
     LRUCacheClient: Symbol.for('LRUCacheClient'),
     EventEmitter: Symbol.for('EventEmitter'),
+    PDFService: Symbol.for('PDFService'),
 };
