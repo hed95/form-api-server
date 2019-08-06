@@ -151,10 +151,8 @@ server.setConfig((app: express.Application) => {
     if (appConfig.cors.origin) {
         logger.info('CORS origin configured');
         app.use(cors({
-            methods: ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-            origin: appConfig.cors.origin,
+            origin: '*',
             optionsSuccessStatus: 200,
-            preflightContinue: true,
         }));
     }
 
