@@ -203,6 +203,7 @@ server.setErrorConfig((app: express.Application) => {
                 method: req.method,
                 [appConfig.correlationIdRequestHeader]: correlationId,
                 message: 'You are not authorized to perform the operation',
+                error: err.message,
             });
 
         } else if (err instanceof OptimisticLockError) {
