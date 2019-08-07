@@ -15,6 +15,7 @@ export class FormSchemaValidator {
     private schema(): object {
         return Joi.object().keys({
             id: Joi.string(),
+            _id: Joi.string(),
             name: Joi.string().required(),
             title: Joi.string().required(),
             path: Joi.string().required(),
@@ -30,6 +31,8 @@ export class FormSchemaValidator {
             createdBy: Joi.string(),
             updatedBy: Joi.string(),
             versionId: Joi.string(),
+            created: Joi.string(),
+            modified: Joi.string(),
         });
     }
 }

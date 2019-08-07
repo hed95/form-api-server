@@ -1152,6 +1152,89 @@ describe("FormService", () => {
 
     });
 
+    it('can create legacy form in new system', async() => {
+        const user = new User("id", "test", []);
+
+        const legacyForm: object = {
+            "type": "form",
+            "tags": [],
+            "owner": "5b33877b2f4aab003d587f6c",
+            "components": [],
+            "_id": "5d247238d676870012b7c3a2",
+            "title": "TEST",
+            "path": "test",
+            "display": "wizard",
+            "name": "test",
+            "machineName": "test",
+            "submissionAccess": [
+                {
+                    "roles": [
+                        "5b0fa1b2769993003d6fba70"
+                    ],
+                    "type": "create_all"
+                },
+                {
+                    "roles": [
+                        "5b0fa1b2769993003d6fba70"
+                    ],
+                    "type": "read_all"
+                },
+                {
+                    "roles": [
+                        "5b0fa1b2769993003d6fba70"
+                    ],
+                    "type": "update_all"
+                },
+                {
+                    "roles": [
+                        "5b0fa1b2769993003d6fba70"
+                    ],
+                    "type": "delete_all"
+                },
+                {
+                    "roles": [
+                        "5b0fa1b2769993003d6fba70"
+                    ],
+                    "type": "create_own"
+                },
+                {
+                    "roles": [
+                        "5b0fa1b2769993003d6fba70"
+                    ],
+                    "type": "read_own"
+                },
+                {
+                    "roles": [
+                        "5b0fa1b2769993003d6fba70"
+                    ],
+                    "type": "update_own"
+                },
+                {
+                    "roles": [
+                        "5b0fa1b2769993003d6fba70"
+                    ],
+                    "type": "delete_own"
+                }
+            ],
+            "access": [
+                {
+                    "roles": [
+                        "5b0fa1b2769993003d6fba70",
+                        "5b0fa1b2769993003d6fba6f",
+                        "5b0fa1b2769993003d6fba6e"
+                    ],
+                    "type": "read_all"
+                }
+            ],
+            "created": "2019-07-09T10:53:44.761Z",
+            "modified": "2019-08-06T15:25:48.576Z"
+        };
+
+        const newForm = await formService.create(user, legacyForm);
+        expect(newForm).to.be.not.null;
+
+    });
+
 
 });
 

@@ -62,10 +62,13 @@ const version = 'v1';
 const basePath = ``;
 
 const expressApp: Application = express();
-if (appConfig.cors.origin) {
-    logger.info('CORS origin configured' + JSON.stringify(appConfig.cors.origin));
+const corsOrigins = appConfig.cors.origin;
+if (corsOrigins) {
+    logger.info('CORS origin configured', {
+        origins: corsOrigins,
+    });
     expressApp.use(cors({
-        origin: appConfig.cors.origin,
+        origin: corsOrigins,
         optionsSuccessStatus: 200,
     }));
 }
@@ -146,8 +149,14 @@ expressApp.use(morgan((tokens: TokenIndexer, req: express.Request, res: express.
 }, {
     stream: new LoggerStream(),
 }));
+
+expressApp.use(bodyParser.json({
+    limit: '50mb',
+}));
 expressApp.use(bodyParser.urlencoded({
     extended: true,
+    limit: '50mb',
+    parameterLimit: 50000,
 }));
 expressApp.use(bodyParser.json());
 

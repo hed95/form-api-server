@@ -109,6 +109,7 @@
     "@types/validator": "^10.11.1",
     "@types/winston": "^2.4.4",
     "@types/xregexp": "^3.0.30",
+    "bluebird": "^3.5.5",
     "class-transformer": "^0.2.3",
     "class-validator": "^0.9.1",
     "continuation-local-storage": "^3.2.1",

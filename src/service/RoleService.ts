@@ -84,7 +84,6 @@ export class RoleService {
         if (!roles || roles.length === 0) {
             return Promise.resolve([]);
         }
-
         return await Promise.all(_.map(roles, async (role: any) => {
             const roleCreated: [Role, boolean] = await this.roleRepository.findOrCreate({
                 where: {

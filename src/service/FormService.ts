@@ -99,6 +99,17 @@ export class FormService {
     }
 
     private static sanitize(form: any): any {
+        if (form.access && Array.isArray(form.access)) {
+            const finalAccessRoles: object[] = [];
+            _.forEach(form.access, (access) => {
+                _.forEach(access, (a) => {
+                    if (typeof a.role === 'object' && a.role !== null) {
+                        finalAccessRoles.push(a.role);
+                    }
+                });
+            });
+            form.access = finalAccessRoles;
+        }
         return _.omit(form, [
             'createdOn',
             'updatedOn',
@@ -108,6 +119,10 @@ export class FormService {
             'links',
             'machineName',
             'owner',
+            '_id',
+            'created',
+            'modified',
+            'submissionAccess',
         ]);
     }
 
@@ -187,7 +202,6 @@ export class FormService {
             });
             const rolesToApply: Role[] = roles.length === 0 ? [defaultRole] : roles;
             await form.$add('roles', rolesToApply);
-
             payload.id = form.id;
 
             await this.formVersionRepository.create({
