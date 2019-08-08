@@ -6,8 +6,8 @@ const MAX_ENTRIES = 100;
 
 const defaultAppConfig: AppConfig = {
     keycloak: {
-        protocol: process.env.KEYCLOAK_PROTOCOL,
-        url: process.env.KEYCLOAK_URL,
+        protocol: process.env.KEYCLOAK_PROTOCOL || 'http://',
+        url: process.env.KEYCLOAK_URL || 'localhost',
         resource: process.env.FORM_KEYCLOAK_CLIENT_ID,
         bearerOnly: process.env.FORM_KEYCLOAK_BEARER_ONLY || 'true',
         realm: process.env.KEYCLOAK_REALM,
