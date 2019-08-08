@@ -6,15 +6,15 @@ const defaultDBConfig: DBConfig = {
         storage: ':memory:',
     },
     production: {
-        username: process.env.FORM_API_DB_USERNAME,
-        password: process.env.FORM_API_DB_PASSWORD,
-        database: process.env.FORM_API_DB_NAME,
-        host: process.env.FORM_API_DB_HOSTNAME,
-        port: process.env.FORM_API_DB_PORT,
+        username: process.env.DB_FORM_DEFAULT_USERNAME,
+        password: process.env.DB_FORM_DEFAULT_PASSWORD,
+        database: process.env.DB_FORM_DEFAULT_DBNAME,
+        host: process.env.DB_FORM_HOSTNAME,
+        port: process.env.DB_FORM_PORT,
         dialect: 'postgres',
         native: false,
         dialectOptions: {
-            ssl: process.env.FORM_API_DB_SSL ? process.env.FORM_API_DB_SSL === 'true' : false,
+            ssl: process.env.DB_FORM_SSL ? process.env.DB_FORM_SSL === 'true' : false,
         },
         pool: {
             max: 10,

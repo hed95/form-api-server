@@ -1,5 +1,6 @@
 interface AppConfig {
     keycloak: {
+        protocol: string,
         url: string,
         resource: string,
         bearerOnly: string,

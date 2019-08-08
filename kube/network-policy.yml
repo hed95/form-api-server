@@ -1,11 +1,11 @@
 apiVersion: extensions/v1beta1
 kind: NetworkPolicy
 metadata:
-  name: {{.FORM_API_NAME}}
+  name: {{.FORM_NAME}}
 spec:
   podSelector:
     matchLabels:
-      name: {{.FORM_API_NAME}}
+      name: {{.FORM_NAME}}
   egress:
   - {}
   ingress:

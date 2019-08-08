@@ -2,31 +2,31 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{.FORM_API_NAME}}
+  name: {{.FORM_NAME}}
 spec:
   selector:
     matchLabels:
-      name: {{.FORM_API_NAME}}
+      name: {{.FORM_NAME}}
   replicas: 1
   revisionHistoryLimit: 3
   template:
     metadata:
       labels:
-        name: {{.FORM_API_NAME}}
+        name: {{.FORM_NAME}}
     spec:
       securityContext:
         runAsUser: 1000
         fsGroup: 1000
       containers:
       - name: proxy
-        image: {{.NGINX_PROXY_IMAGE_REPO}}:{{.NGINX_PROXY_IMAGE_TAG}}
+        image: {{.NGINX_IMAGE}}:{{.NGINX_TAG}}
         securityContext:
           runAsNonRoot: true
         env:
           - name: PROXY_SERVICE_HOST
             value: 'http://127.0.0.1'
           - name: PROXY_SERVICE_PORT
-            value: "{{.FORM_API_PORT}}"
+            value: "{{.FORM_PORT}}"
           - name: LOG_FORMAT_NAME
             value: 'json'
           - name: NAXSI_USE_DEFAULT_RULES
@@ -36,14 +36,14 @@ spec:
         ports:
           - name: https
             containerPort: 10443
-      - name: {{.FORM_API_NAME}}
-        image: {{.FORM_API_IMAGE_REPO}}:{{.FORM_API_IMAGE_TAG}}
+      - name: {{.FORM_NAME}}
+        image: {{.FORM_IMAGE}}:{{.FORM_TAG}}
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 3
           httpGet:
             path: /healthz
-            port: {{.FORM_API_PORT}}
+            port: {{.FORM_PORT}}
             scheme: HTTP
           periodSeconds: 10
           successThreshold: 1
@@ -52,49 +52,53 @@ spec:
           failureThreshold: 3
           httpGet:
             path: /readiness
-            port: {{.FORM_API_PORT}}
+            port: {{.FORM_PORT}}
             scheme: HTTP
           periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 1
         env:
-          - name: FORM_API_DB_USERNAME
-            value: "{{.FORM_API_DB_USERNAME}}"
-          - name: FORM_API_DB_PASSWORD
+          - name: DB_FORM_DEFAULT_USERNAME
+            value: "{{.DB_FORM_DEFAULT_USERNAME}}"
+          - name: DB_FORM_DEFAULT_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: {{.FORM_API_NAME}}
+                name: {{.FORM_NAME}}
                 key: dbPassword
-          - name: FORM_API_DB_HOSTNAME
-            value: "{{.FORM_API_DB_HOSTNAME}}"
-          - name: FORM_API_DB_NAME
-            value: "{{.FORM_API_DB_NAME}}"
-          - name: FORM_API_DB_PORT
-            value: "{{.FORM_API_DB_PORT}}"
-          - name: FORM_API_DB_SSL
-            value: "{{.FORM_API_DB_SSL}}"
+          - name: DB_FORM_HOSTNAME
+            value: "{{.DB_FORM_HOSTNAME}}"
+          - name: DB_FORM_PROTOCOL
+            value: "{{.DB_FORM_PROTOCOL}}"
+          - name: DB_FORM_DEFAULT_DBNAME
+            value: "{{.DB_FORM_DEFAULT_DBNAME}}"
+          - name: DB_FORM_PORT
+            value: "{{.DB_FORM_PORT}}"
+          - name: DB_FORM_SSL
+            value: "{{.DB_FORM_SSL}}"
+          - name: KEYCLOAK_PROTOCOL
+            value: "{{.KEYCLOAK_PROTOCOL}}"
           - name: KEYCLOAK_URL
             value: "{{.KEYCLOAK_URL}}"
-          - name: FORM_API_KEYCLOAK_CLIENT_ID
-            value: "{{.FORM_API_KEYCLOAK_CLIENT_ID}}"
-          - name: FORM_API_KEYCLOAK_REALM
-            value: "{{.FORM_API_KEYCLOAK_REALM}}"
-          - name: FORM_API_KEYCLOAK_ADMIN_USERNAME
-            value: "{{.FORM_API_KEYCLOAK_ADMIN_USERNAME}}"
-          - name: FORM_API_KEYCLOAK_ADMIN_PASSWORD
+          - name: KEYCLOAK_REALM
+            value: "{{.KEYCLOAK_REALM}}"
+          - name: FORM_KEYCLOAK_CLIENT_ID
+            value: "{{.FORM_KEYCLOAK_CLIENT_ID}}"
+          - name: FORM_KEYCLOAK_ADMIN_USERNAME
+            value: "{{.FORM_KEYCLOAK_ADMIN_USERNAME}}"
+          - name: FORM_KEYCLOAK_ADMIN_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: {{.FORM_API_NAME}}
+                name: {{.FORM_NAME}}
                 key: authAdminPassword
-          - name: FORM_API_KEYCLOAK_ROLES
-            value: "{{.FORM_API_KEYCLOAK_ROLES}}"
-          - name: FORM_API_LOG_ENABLE_CHANGE
-            value: "{{.FORM_API_LOG_ENABLE_CHANGE}}"
-          - name: FORM_API_LOG_CHANGE_TIMEOUT
-            value: "{{.FORM_API_LOG_CHANGE_TIMEOUT}}"
-          - name: FORM_API_CORS_ORIGIN
-            value: "{{.FORM_API_CORS_ORIGIN}}"
-          - name: FORM_API_LOG_ENABLE_QUERY
-            value: "{{.FORM_API_LOG_ENABLE_QUERY}}"
-          - name: FORM_API_PORT
-            value: "{{.FORM_API_PORT}}"
+          - name: FORM_KEYCLOAK_ROLES
+            value: "{{.FORM_KEYCLOAK_ROLES}}"
+          - name: FORM_LOG_ENABLE_CHANGE
+            value: "{{.FORM_LOG_ENABLE_CHANGE}}"
+          - name: FORM_LOG_ENABLE_QUERY
+            value: "{{.FORM_LOG_ENABLE_QUERY}}"
+          - name: FORM_LOG_CHANGE_TIMEOUT
+            value: "{{.FORM_LOG_CHANGE_TIMEOUT}}"
+          - name: FORM_CORS_ORIGIN
+            value: "{{.FORM_CORS_ORIGIN}}"
+          - name: FORM_PORT
+            value: "{{.FORM_PORT}}"

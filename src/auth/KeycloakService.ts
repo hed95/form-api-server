@@ -26,7 +26,7 @@ export class KeycloakService {
                 @inject(TYPE.EventEmitter) private readonly eventEmitter: EventEmitter) {
         const keycloak: any = appConfig.keycloak;
         this.keycloak = new Keycloak({}, {
-            'auth-server-url': keycloak.url,
+            'auth-server-url': keycloak.protocol.concat(keycloak.url),
             'bearer-only': keycloak.bearerOnly,
             'enable-cors': true,
             'realm': keycloak.realm,
