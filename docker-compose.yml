@@ -48,7 +48,7 @@ services:
       - FORM_API_LOG_ENABLE_CHANGE=false
       - API_FORM_KEYCLOAK_CLIENT_ID=${FORM_API_KEYCLOAK_CLIENT_ID}
       - API_FORM_CORS_ORIGIN=http://localhost:3000
-      - FORM_API_CORRELATION_ID_REQUEST_HEADER=correlationId
+      - API_FORM_CORRELATION_ID_REQUEST_HEADER=correlationId
     depends_on:
       - postgres_formapi
     networks:

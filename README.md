@@ -43,35 +43,37 @@ http://localhost:3000/api-docs/swagger/#/
 
 ##### Environment variable
 
-| Environment variable 	        | Type 	        | Default Value 	|
-|-------------------------------|---------------|-------------------|
-| NODE_ENV                      | string    	| *OPTIONAL*        |   
-| DB_USERNAME                   | string    	| *REQUIRED*        |                       
-| DB_PASSWORD                   | string    	| *REQUIRED*        |                       
-| DB_NAME                       | string    	| *REQUIRED*        |                       
-| DB_HOSTNAME                   | string    	| *REQUIRED*        |                       
-| DB_PORT                       | string    	| false             |                       
-| DB_SSL                        | string    	| *REQUIRED*        |                       
-| AUTH_URL                      | string    	| *REQUIRED*        |   
-| AUTH_CLIENT_ID                | string    	| *REQUIRED*        |                       
-| AUTH_BEARER_ONLY              | boolean    	| true           	|                       
-| AUTH_REALM                    | string    	| *REQUIRED*        |                       
-| AUTH_ADMIN_USERNAME           | string    	| *REQUIRED*        |                       
-| AUTH_ADMIN_USERNAME           | string    	| *REQUIRED*        |                       
-| AUTH_ADMIN_CLIENT_ID          | string    	| admin-cli         |                       
-| ADMIN_ROLES                   | array         | *OPTIONAL*        |
-| ENABLE_LOG_CHANGE             | boolean    	| false             |  
-| LOG_CHANGE_TIMEOUT            | number    	| false             |
-| CORS_ORIGIN                   | array         | *OPTIONAL*        |
-| CORRELATION_ID_REQUEST_HEADER | string        | *OPTIONAL*        |
-| CACHE_ROLE_MAX_AGE            | number        | 2 mins (ms)       |
-| CACHE_ROLE_MAX_ENTRIES        | number        | 100               |
-| CACHE_FORM_MAX_AGE            | number        | 2 mins (ms)       |
-| CACHE_FORM_MAX_ENTRIES        | number        | 100               |
-| CACHE_USER_MAX_AGE            | number        | 2 mins (ms)       |
-| CACHE_USER_MAX_ENTRIES        | number        | 100               |
-| ENABLE_LOG_QUERY              | boolean       | false             |
-| PORT                          | number        | 3000              |
+|Environment variable 	               |Type 	    |Default Value 	|
+|--------------------------------------|------------|-------------------|
+|NODE_ENV                              |string    	| *OPTIONAL*        |   
+|DB_FORM_DEFAULT_USERNAME              |string    	| *REQUIRED*        |                       
+|DB_FORM_DEFAULT_PASSWORD              |string    	| *REQUIRED*        |                       
+|DB_FORM_DEFAULT_DBNAME                |string    	| *REQUIRED*        |                       
+|DB_FORM_HOSTNAME                      |string    	| *REQUIRED*        |                       
+|DB_FORM_PORT                          |string    	| false             |                       
+|DB_FORM_SSL                           |string    	| *REQUIRED*        |  
+|KEYCLOAK_PROTOCOL                     |string    	| http://           |         
+|KEYCLOAK_URL                          |string    	| *REQUIRED*        |   
+|API_FORM_KEYCLOAK_CLIENT_ID           |string    	| *REQUIRED*        |                       
+|API_FORM_KEYCLOAK_BEARER_ONLY         |boolean    	| true           	|                       
+|KEYCLOAK_REALM                        |string    	| *REQUIRED*        |                       
+|API_FORM_KEYCLOAK_ADMIN_USERNAME      |string    	| *REQUIRED*        |                       
+|API_FORM_KEYCLOAK_ADMIN_PASSWORD      |string    	| *REQUIRED*        |                       
+|API_FORM_KEYCLOAK_ADMIN_CLIENT_ID     |string    	| admin-cli         |                       
+|API_FORM_KEYCLOAK_ROLES               |array       | *OPTIONAL*        |
+|API_FORM_LOG_ENABLE_CHANGE            |boolean    	| false             |  
+|API_FORM_LOG_CHANGE_TIMEOUT           |number    	| false             |
+|API_FORM_CORS_ORIGIN                  |array       | *OPTIONAL*        |
+|API_FORM_LOG_CHANGE_TIMEOUT           |string      | *OPTIONAL*        |
+|API_FORM_CACHE_ROLE_MAX_AGE           |number      | 2 mins (ms)       |
+|API_FORM_CACHE_USER_ROLE_ENTRIES      |number      | 100               |
+|API_FORM_CACHE_FORM_MAX_AGE           |number      | 2 mins (ms)       |
+|API_FORM_CACHE_FORM_MAX_ENTRIES       |number      | 100               |
+|API_FORM_CACHE_USER_MAX_AGE           |number      | 2 mins (ms)       |
+|API_FORM_CACHE_USER_MAX_ENTRIES       |number      | 100               |
+|API_FORM_LOG_ENABLE_QUERY             |boolean     | false             |
+|API_FORM_PORT                         |number      | 3000              |
+|API_FORM_CORRELATION_ID_REQUEST_HEADER|string      | x-request-id      |
 
 
                                      

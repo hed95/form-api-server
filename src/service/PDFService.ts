@@ -74,19 +74,19 @@ export class PDFService {
 
     private deleteFile(file: string): Promise<string> {
         return new Promise((resolve, reject) => {
-            fs.unlink(file, error => {
-                if (error) reject(error);
+            fs.unlink(file, (error) => {
+                if (error) { reject(error); }
                 resolve(`file ${file} successfully deleted`);
             });
         });
-    };
+    }
 
     private writeFilePromise(file: string, data: string): Promise<string> {
         return new Promise((resolve, reject) => {
-            fs.writeFile(file, data, error => {
-                if (error) reject(error);
+            fs.writeFile(file, data, (error) => {
+                if (error) { reject(error); }
                 resolve(`${file} successfully created`);
             });
         });
-    };
+    }
 }

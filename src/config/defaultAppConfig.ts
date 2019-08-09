@@ -21,7 +21,7 @@ const defaultAppConfig: AppConfig = {
         },
     },
     admin: {
-        roles: process.env.API_FORM_KEYCLOAK__ROLES ?
+        roles: process.env.API_FORM_KEYCLOAK_ROLES ?
             process.env.API_FORM_KEYCLOAK_ROLES.split(',') : [],
     },
     cors: {
