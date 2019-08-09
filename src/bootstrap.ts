@@ -29,7 +29,7 @@ import {Application} from 'express';
 
 const defaultPort: number = 3000;
 
-const port = process.env.PORT || defaultPort;
+const port = process.env.API_FORM_PORT || defaultPort;
 const applicationContext: ApplicationContext = new ApplicationContext();
 
 const container = applicationContext.iocContainer();
