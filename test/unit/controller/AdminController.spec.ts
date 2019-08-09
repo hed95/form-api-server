@@ -16,7 +16,7 @@ import {User} from "../../../src/auth/User";
 import {LRUCacheClient} from "../../../src/service/LRUCacheClient";
 import {EventEmitter} from "events";
 import {SequelizeProvider} from "../../../src/model/SequelizeProvider";
-import {ApplicationConstants} from "../../../src/util/ApplicationConstants";
+import {ApplicationConstants} from "../../../src/constant/ApplicationConstants";
 
 
 describe('AdminController', () => {

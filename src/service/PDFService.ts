@@ -1,7 +1,6 @@
 import puppeteer from 'puppeteer';
 import {provide} from 'inversify-binding-decorators';
 import TYPE from '../constant/TYPE';
-import * as fs from 'fs';
 import InternalServerError from '../error/InternalServerError';
 import ResourceValidationError from '../error/ResourceValidationError';
 import {User} from '../auth/User';
@@ -10,14 +9,18 @@ import {FormService} from './FormService';
 import ResourceNotFoundError from '../error/ResourceNotFoundError';
 import {FormVersion} from '../model/FormVersion';
 import logger from '../util/logger';
+import {FormTemplateResolver} from '../pdf/FormTemplateResolver';
 
 @provide(TYPE.PDFService)
 export class PDFService {
 
     private readonly formService: FormService;
+    private readonly formTemplateResolver: FormTemplateResolver;
 
-    constructor(@inject(TYPE.FormService) formService: FormService) {
+    constructor(@inject(TYPE.FormService) formService: FormService,
+                @inject(TYPE.FormTemplateResolver) formTemplateResolver: FormTemplateResolver) {
         this.formService = formService;
+        this.formTemplateResolver = formTemplateResolver;
     }
 
     public async generatePDF(formId: string, currentUser: User, submission?: object) {
@@ -34,19 +37,22 @@ export class PDFService {
         }
         const formName = formVersion.schema.name;
         logger.info(`${currentUser.details.email} has requested to generate PDF of form ${formName}`);
-        const browser = await puppeteer.launch({headless: true});
+        const browser = await puppeteer.launch({headless: false});
+        logger.debug('Opened browser for creating PDF');
         try {
+
+            const htmlContent = await this.formTemplateResolver.renderContentAsHtml(formVersion.schema,
+                submission, currentUser);
             const page = await browser.newPage();
-            const contentHtml = fs.readFileSync('/Users/aminmc/Downloads/test.html', 'utf8');
-            await page.setContent(contentHtml, {waitUntil: ['networkidle0', 'load', 'domcontentloaded']});
-            const pdf = await page.pdf({format: 'A4'});
-            await browser.close();
-            return pdf;
+            await page.setContent(htmlContent, {waitUntil: ['networkidle0', 'load', 'domcontentloaded']});
+            return await page.pdf({format: 'A4'});
         } catch (e) {
+            logger.error('An exception occurred', e.message);
             throw new InternalServerError(`Failed to PDF, Error: ${JSON.stringify(e)}`);
         } finally {
             if (browser !== null) {
                 await browser.close();
+                logger.debug('Browser closed');
             }
         }
 

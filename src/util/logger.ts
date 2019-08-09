@@ -2,7 +2,7 @@ import * as winston from 'winston';
 import {createLogger, format, transports} from 'winston';
 import httpContext from 'express-http-context';
 import defaultAppConfig from '../config/defaultAppConfig';
-import {ApplicationConstants} from './ApplicationConstants';
+import {ApplicationConstants} from '../constant/ApplicationConstants';
 
 const {combine, json, splat} = format;
 

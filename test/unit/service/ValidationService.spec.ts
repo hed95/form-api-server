@@ -103,5 +103,5 @@ describe('Validation Service', () => {
         }, user);
 
         expect(result.length).to.be.eq(1);
-    })
+    });
 });

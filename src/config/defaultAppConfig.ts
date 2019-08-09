@@ -1,5 +1,5 @@
 import AppConfig from '../interfaces/AppConfig';
-import {ApplicationConstants} from '../util/ApplicationConstants';
+import {ApplicationConstants} from '../constant/ApplicationConstants';
 
 export const TWO_MINUTES = '120000';
 const MAX_ENTRIES = 100;

@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {ConfigValidator} from "../../../src/util/ConfigValidator";
+import {ConfigValidator} from "../../../src/config/ConfigValidator";
 import defaultAppConfig from "../../../src/config/defaultAppConfig";
 import {ValidationResult} from "@hapi/joi";
 

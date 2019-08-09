@@ -18,4 +18,5 @@ export default {
     LRUCacheClient: Symbol.for('LRUCacheClient'),
     EventEmitter: Symbol.for('EventEmitter'),
     PDFService: Symbol.for('PDFService'),
+    FormTemplateResolver: Symbol.for('FormTemplateResolver'),
 };

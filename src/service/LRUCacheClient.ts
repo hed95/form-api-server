@@ -9,7 +9,7 @@ import {User} from '../auth/User';
 import {TWO_MINUTES} from '../config/defaultAppConfig';
 import LRUCache = require('lru-cache');
 import {EventEmitter} from 'events';
-import {ApplicationConstants} from '../util/ApplicationConstants';
+import {ApplicationConstants} from '../constant/ApplicationConstants';
 
 @provide(TYPE.LRUCacheClient)
 export class LRUCacheClient implements CacheClient {

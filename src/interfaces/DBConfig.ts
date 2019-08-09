@@ -18,6 +18,7 @@ interface DBConfig {
             max: number,
             min: number,
             idle: number,
+            acquire: number,
         },
     };
 }

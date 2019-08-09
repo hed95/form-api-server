@@ -11,7 +11,7 @@ import {Role} from '../model/Role';
 import {getToken} from 'keycloak-admin/lib/utils/auth';
 import LRUCache from 'lru-cache';
 import {EventEmitter} from 'events';
-import {ApplicationConstants} from '../util/ApplicationConstants';
+import {ApplicationConstants} from '../constant/ApplicationConstants';
 
 @provide(TYPE.KeycloakService)
 export class KeycloakService {
@@ -25,8 +25,9 @@ export class KeycloakService {
     constructor(@inject(TYPE.AppConfig) private readonly appConfig: AppConfig,
                 @inject(TYPE.EventEmitter) private readonly eventEmitter: EventEmitter) {
         const keycloak: any = appConfig.keycloak;
+        const keycloakBaseUrl = keycloak.protocol.concat(keycloak.url);
         this.keycloak = new Keycloak({}, {
-            'auth-server-url': keycloak.protocol.concat(keycloak.url),
+            'auth-server-url': keycloakBaseUrl,
             'bearer-only': keycloak.bearerOnly,
             'enable-cors': true,
             'realm': keycloak.realm,
@@ -35,7 +36,7 @@ export class KeycloakService {
             'confidentialPort': keycloak.confidentialPort,
         });
         this.kcAdminClient = new KcAdminClient({
-            baseUrl: keycloak.protocol.concat(keycloak.url),
+            baseUrl: keycloakBaseUrl,
             realmName: keycloak.realm,
         });
         const admin: { clientId: string, username: string, password: string } = keycloak.admin;
@@ -53,7 +54,7 @@ export class KeycloakService {
             logger.info('kcAdminClient successfully initialised');
             this.intervalId = setInterval(async () => {
                 getToken({
-                    baseUrl: keycloak.protocol.concat(keycloak.url),
+                    baseUrl: keycloakBaseUrl,
                     realmName: keycloak.realm,
                     credentials,
                 }).then((token: any) => {

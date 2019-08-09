@@ -20,11 +20,13 @@ import AppConfig from '../interfaces/AppConfig';
 import defaultAppConfig from '../config/defaultAppConfig';
 import {EventEmitter} from 'events';
 import {LRUCacheClient} from '../service/LRUCacheClient';
-import {ApplicationConstants} from '../util/ApplicationConstants';
+import {ApplicationConstants} from '../constant/ApplicationConstants';
 import {PDFService} from '../service/PDFService';
+import {FormTemplateResolver} from '../pdf/FormTemplateResolver';
 
 export class ApplicationContext {
     private readonly container: Container;
+
     constructor() {
         this.container = new Container({
             defaultScope: 'Singleton',
@@ -49,6 +51,7 @@ export class ApplicationContext {
         this.container.bind<AdminProtectMiddleware>(TYPE.AdminProtectMiddleware).to(AdminProtectMiddleware);
         this.container.bind<CommentService>(TYPE.CommentService).to(CommentService);
         this.container.bind<PDFService>(TYPE.PDFService).to(PDFService);
+        this.container.bind<FormTemplateResolver>(TYPE.FormTemplateResolver).to(FormTemplateResolver);
 
         logger.info('Application context initialised');
 

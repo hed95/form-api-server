@@ -7,7 +7,7 @@ import {Role} from '../model/Role';
 import logger from '../util/logger';
 import {KeycloakService} from './KeycloakService';
 import {User} from './User';
-import {ApplicationConstants} from '../util/ApplicationConstants';
+import {ApplicationConstants} from '../constant/ApplicationConstants';
 import AppConfig from '../interfaces/AppConfig';
 
 const keycloakService = inject(TYPE.KeycloakService);

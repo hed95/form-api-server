@@ -22,8 +22,8 @@ import HttpStatus from 'http-status-codes';
 import UnauthorizedError from './error/UnauthorizedError';
 import AppConfig from './interfaces/AppConfig';
 import {OptimisticLockError} from 'sequelize';
-import {ApplicationConstants} from './util/ApplicationConstants';
-import {ConfigValidator} from './util/ConfigValidator';
+import {ApplicationConstants} from './constant/ApplicationConstants';
+import {ConfigValidator} from './config/ConfigValidator';
 import {EventEmitter} from 'events';
 import {Application} from 'express';
 

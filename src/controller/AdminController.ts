@@ -26,7 +26,7 @@ import {User} from '../auth/User';
 import {KeycloakService} from '../auth/KeycloakService';
 import {LRUCacheClient} from '../service/LRUCacheClient';
 import {EventEmitter} from 'events';
-import {ApplicationConstants} from '../util/ApplicationConstants';
+import {ApplicationConstants} from '../constant/ApplicationConstants';
 import {SequelizeProvider} from '../model/SequelizeProvider';
 import {
     ApiOperationDelete,

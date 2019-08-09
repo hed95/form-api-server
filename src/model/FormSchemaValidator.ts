@@ -1,15 +1,50 @@
 import * as Joi from '@hapi/joi';
-import {ValidationResult} from '@hapi/joi';
+import {ValidationErrorItem, ValidationResult} from '@hapi/joi';
 import {provide} from 'inversify-binding-decorators';
 import TYPE from '../constant/TYPE';
+import util from 'formiojs/utils/index';
+import _ from 'lodash';
 
 @provide(TYPE.FormSchemaValidator)
 export class FormSchemaValidator {
 
-    public validate(payload: object): ValidationResult<object> {
-        return Joi.validate(payload, this.schema(), {
+    public validate(payload: any): ValidationResult<object> {
+        const validationResult = Joi.validate(payload, this.schema(), {
             abortEarly: false,
         });
+        const msg: string = 'Component keys must be unique: ';
+        const paths = this.componentPaths(payload.components);
+        const uniq = paths.uniq();
+        const diff = paths.filter((value: any, index: any, collection: any) =>
+            _.includes(collection, value, index + 1));
+
+        if (!_.isEqual(paths.value(), uniq.value())) {
+            if (!validationResult.error) {
+                const details: ValidationErrorItem[] = [];
+                // @ts-ignore
+                validationResult.error = {
+                    details,
+                };
+            }
+            validationResult.error.details.push({
+                message: msg + diff.value().join(', '),
+                type: 'x',
+                path: paths,
+            });
+        }
+        return validationResult;
+    }
+
+    private componentPaths(components: object[]): any {
+        const paths: string[] = [];
+        util.eachComponent(components, (component: object, path: string) => {
+            // @ts-ignore
+            if (component.input && !_.isUndefined(component.key) && !_.isNull(component.key)) {
+                paths.push(path);
+            }
+        }, true);
+
+        return _(paths);
     }
 
     private schema(): object {
