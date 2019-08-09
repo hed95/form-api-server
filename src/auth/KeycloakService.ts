@@ -35,7 +35,7 @@ export class KeycloakService {
             'confidentialPort': keycloak.confidentialPort,
         });
         this.kcAdminClient = new KcAdminClient({
-            baseUrl: keycloak.url,
+            baseUrl: keycloak.protocol.concat(keycloak.url),
             realmName: keycloak.realm,
         });
         const admin: { clientId: string, username: string, password: string } = keycloak.admin;
@@ -53,7 +53,7 @@ export class KeycloakService {
             logger.info('kcAdminClient successfully initialised');
             this.intervalId = setInterval(async () => {
                 getToken({
-                    baseUrl: keycloak.url,
+                    baseUrl: keycloak.protocol.concat(keycloak.url),
                     realmName: keycloak.realm,
                     credentials,
                 }).then((token: any) => {
