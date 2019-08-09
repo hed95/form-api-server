@@ -8,6 +8,7 @@ export class ConfigValidator {
     constructor() {
         this.schema = Joi.object().keys({
             keycloak: Joi.object({
+                protocol: Joi.string().required(),
                 url: Joi.string().required(),
                 resource: Joi.string().required(),
                 realm: Joi.string().required(),
