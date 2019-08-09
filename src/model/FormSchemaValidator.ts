@@ -28,8 +28,8 @@ export class FormSchemaValidator {
             }
             validationResult.error.details.push({
                 message: msg + diff.value().join(', '),
-                type: 'x',
-                path: paths,
+                type: 'unique component keys',
+                path: diff.value(),
             });
         }
         return validationResult;
