@@ -1,5 +1,5 @@
-import {ApiPath} from "swagger-express-ts";
-import {controller} from "inversify-express-utils";
+import {ApiPath} from 'swagger-express-ts';
+import {controller} from 'inversify-express-utils';
 
 @ApiPath({
     path: '/templates',
