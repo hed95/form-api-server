@@ -2,7 +2,7 @@ import * as Joi from '@hapi/joi';
 import {ValidationErrorItem, ValidationResult} from '@hapi/joi';
 import {provide} from 'inversify-binding-decorators';
 import TYPE from '../constant/TYPE';
-import util from 'formiojs/utils/index';
+import util from 'formiojs/utils';
 import _ from 'lodash';
 
 @provide(TYPE.FormSchemaValidator)

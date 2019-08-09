@@ -16,12 +16,14 @@ export class FormTemplateResolver {
         const parsedContent = content({
             formSchema: sanitizedFormSchema,
             submission,
+            user: user.details.email,
         }, {});
         return Promise.resolve(parsedContent);
     }
 
     private sanitize(formSchema: object): object {
         // @ts-ignore
+
         return formSchema;
     }
 }

@@ -30,9 +30,10 @@ export class PDFController extends BaseHttpController {
     public async pdf(@requestParam('formId') formId: string,
                      @requestBody() submission: object, @response() res: express.Response,
                      @principal() currentUser: User): Promise<void> {
-        const pdf = await this.pdfService.generatePDF(formId, currentUser, submission);
+        const [formName, pdf] = await this.pdfService.generatePDF(formId, currentUser, submission);
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Length', pdf.length);
+        res.setHeader('Content-Disposition', `attachment; filename=${formName}.pdf`);
         res.send(pdf);
     }
 

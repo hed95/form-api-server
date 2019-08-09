@@ -1,1 +1,1 @@
-declare module 'formiojs/utils/index'
+declare module 'formiojs/utils'

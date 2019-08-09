@@ -10,6 +10,8 @@ import ResourceNotFoundError from '../error/ResourceNotFoundError';
 import {FormVersion} from '../model/FormVersion';
 import logger from '../util/logger';
 import {FormTemplateResolver} from '../pdf/FormTemplateResolver';
+import * as fs from 'fs';
+import moment from 'moment';
 
 @provide(TYPE.PDFService)
 export class PDFService {
@@ -23,7 +25,7 @@ export class PDFService {
         this.formTemplateResolver = formTemplateResolver;
     }
 
-    public async generatePDF(formId: string, currentUser: User, submission?: object) {
+    public async generatePDF(formId: string, currentUser: User, submission?: object): Promise<[string, any]> {
         if (!formId) {
             throw new ResourceValidationError('Form Id required', [{
                 message: 'Form id required',
@@ -37,24 +39,54 @@ export class PDFService {
         }
         const formName = formVersion.schema.name;
         logger.info(`${currentUser.details.email} has requested to generate PDF of form ${formName}`);
-        const browser = await puppeteer.launch({headless: false});
-        logger.debug('Opened browser for creating PDF');
-        try {
+        const browser = await puppeteer.launch({headless: true, args: ['--disable-web-security', '--no-sandbox']});
+        const page = await browser.newPage();
 
+        logger.debug('Opened browser for creating PDF');
+
+        const fileName = `/tmp/form-${formName}-${moment().toDate().getTime()}.html`;
+
+        try {
             const htmlContent = await this.formTemplateResolver.renderContentAsHtml(formVersion.schema,
                 submission, currentUser);
-            const page = await browser.newPage();
-            await page.setContent(htmlContent, {waitUntil: ['networkidle0', 'load', 'domcontentloaded']});
-            return await page.pdf({format: 'A4'});
+
+            const result = await this.writeFilePromise(fileName, htmlContent);
+            logger.info(`${result}`);
+
+            await page.goto(`file://${fileName}`, {waitUntil: ['networkidle0', 'load', 'domcontentloaded']});
+            const pdf = await page.pdf({format: 'A4'});
+            return Promise.resolve([formName, pdf]);
         } catch (e) {
             logger.error('An exception occurred', e.message);
             throw new InternalServerError(`Failed to PDF, Error: ${JSON.stringify(e)}`);
         } finally {
+            if (page !== null) {
+                await page.close();
+            }
             if (browser !== null) {
                 await browser.close();
                 logger.debug('Browser closed');
             }
+            const output = await this.deleteFile(fileName);
+            logger.debug(`${output}`);
         }
-
     }
+
+    private deleteFile(file: string): Promise<string> {
+        return new Promise((resolve, reject) => {
+            fs.unlink(file, error => {
+                if (error) reject(error);
+                resolve(`file ${file} successfully deleted`);
+            });
+        });
+    };
+
+    private writeFilePromise(file: string, data: string): Promise<string> {
+        return new Promise((resolve, reject) => {
+            fs.writeFile(file, data, error => {
+                if (error) reject(error);
+                resolve(`${file} successfully created`);
+            });
+        });
+    };
 }
