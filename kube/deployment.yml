@@ -17,6 +17,8 @@ spec:
       securityContext:
         runAsUser: 1000
         fsGroup: 1000
+      imagePullSecrets:
+        - name: {{.DOCKER_CREDENTIALS}}
       containers:
       - name: proxy
         image: {{.NGINX_IMAGE}}:{{.NGINX_TAG}}
@@ -74,8 +76,6 @@ spec:
                 key: dbPassword
           - name: DB_FORM_HOSTNAME
             value: "{{.DB_FORM_HOSTNAME}}"
-          - name: DB_FORM_PROTOCOL
-            value: "{{.DB_FORM_PROTOCOL}}"
           - name: DB_FORM_DEFAULT_DBNAME
             value: "{{.DB_FORM_DEFAULT_DBNAME}}"
           - name: DB_FORM_PORT
