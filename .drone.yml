@@ -53,7 +53,6 @@ steps:
     - DEV_API_FORM_LOG_CHANGE_TIMEOUT
     - DEV_API_FORM_LOG_ENABLE_QUERY
     - DEV_API_FORM_PORT
-    - DEV_API_FORM_CORS_ORIGIN
   commands:
     - export KUBE_SERVER=$${DEV_KUBE_SERVER}
     - export KUBE_PROTOCOL=$${DEV_KUBE_PROTOCOL}
@@ -81,7 +80,6 @@ steps:
     - export API_FORM_LOG_CHANGE_TIMEOUT=$${DEV_API_FORM_LOG_CHANGE_TIMEOUT}
     - export API_FORM_LOG_ENABLE_QUERY=$${DEV_API_FORM_LOG_ENABLE_QUERY}
     - export API_FORM_PORT=$${DEV_API_FORM_PORT}
-    - export API_FORM_CORS_ORIGIN=$${DEV_API_FORM_CORS_ORIGIN}
     - export API_FORM_TAG=${DRONE_COMMIT_SHA}
     - kd --insecure-skip-tls-verify -f kube/cert.yml
     - kd --insecure-skip-tls-verify -f kube/secret.yml
