@@ -3,6 +3,7 @@ import {ApplicationConstants} from '../constant/ApplicationConstants';
 
 export const TWO_MINUTES = '120000';
 const MAX_ENTRIES = 100;
+const DEFAULT_REDIS_PORT = 6379;
 
 const defaultAppConfig: AppConfig = {
     keycloak: {
@@ -25,7 +26,7 @@ const defaultAppConfig: AppConfig = {
             process.env.API_FORM_KEYCLOAK_ROLES.split(',') : [],
     },
     cors: {
-        origin: process.env.API_FORM_CORS_ORIGIN ? process.env.API_FORM_CORS_ORIGIN.split(',') : null,
+        origin: process.env.API_FORM_CORS_ORIGIN ? process.env.API_FORM_CORS_ORIGIN.split(',') : [],
     },
     log: {
         enabled: process.env.API_FORM_LOG_ENABLE_CHANGE ? process.env.API_FORM_LOG_ENABLE_CHANGE === 'true' : false,
@@ -51,6 +52,24 @@ const defaultAppConfig: AppConfig = {
     query: {
         log: {
             enabled: process.env.API_FORM_LOG_ENABLE_QUERY ? (process.env.API_FORM_LOG_ENABLE_QUERY === 'true') : false,
+        },
+    },
+    redis: {
+        port: process.env.REDIS_PORT ? +process.env.REDIS_PORT : DEFAULT_REDIS_PORT,
+        host: process.env.REDIS_URL || '127.0.0.1',
+        token: process.env.REDIS_TOKEN,
+        ssl: process.env.REDIS_SSL ? process.env.REDIS_SSL === 'true' : false,
+    },
+    aws: {
+        s3: {
+            endpoint: process.env.API_FORM_AWS_S3_ENDPOINT || '127.0.0.1',
+            buckets: {
+                pdf: process.env.API_FORM_AWS_S3_PDF_BUCKETNAME || 'pdf',
+            },
+            useSSL: true,
+            port: 9000,
+            accessKey:  process.env.API_FORM_AWS_S3_ACCESS_KEY,
+            secretKey: process.env.API_FORM_AWS_S3_SECRET_KEY,
         },
     },
     correlationIdRequestHeader: process.env.API_FORM_CORRELATION_ID_REQUEST_HEADER

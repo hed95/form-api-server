@@ -25,8 +25,8 @@ export class ConfigValidator {
             admin: Joi.object().keys({
                 roles: Joi.array().items(Joi.string()),
             }),
-            cors: Joi.object().keys({
-                origin: Joi.array().items(Joi.string()),
+            cors: Joi.object().optional().keys({
+                origin: Joi.array().optional().items(Joi.string()),
             }),
             log: Joi.object().keys({
                 enabled: Joi.boolean(),
@@ -46,10 +46,28 @@ export class ConfigValidator {
                     maxEntries: Joi.number(),
                 }),
             }),
+            redis: Joi.object().keys({
+               port: Joi.number(),
+               host: Joi.string(),
+               token: Joi.string(),
+               ssl: Joi.boolean(),
+            }),
             query: Joi.object().keys({
                 log: Joi.object().keys({
                     enabled: Joi.boolean(),
                 }),
+            }),
+            aws: Joi.object().optional().keys({
+               s3: Joi.object().keys({
+                   endpoint: Joi.string().optional(),
+                   useSSL: Joi.boolean().optional(),
+                   port: Joi.number().optional(),
+                   accessKey: Joi.string().optional(),
+                   secretKey: Joi.string().optional(),
+                   buckets: Joi.object().optional().keys({
+                       pdf: Joi.string().optional(),
+                   }),
+               }),
             }),
             correlationIdRequestHeader: Joi.string(),
         });

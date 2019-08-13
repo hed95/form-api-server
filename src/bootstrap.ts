@@ -62,8 +62,9 @@ const version = 'v1';
 const basePath = ``;
 
 const expressApp: Application = express();
+
 const corsOrigins = appConfig.cors.origin;
-if (corsOrigins) {
+if (corsOrigins.length !== 0) {
     logger.info('CORS origin configured', {
         origins: corsOrigins,
     });
@@ -71,6 +72,15 @@ if (corsOrigins) {
         origin: corsOrigins,
         optionsSuccessStatus: 200,
     }));
+} else {
+    logger.info('No CORS configured defaulting to *');
+
+    const corsConfiguration = {
+        origin: '*',
+        methods: ['GET', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    };
+    expressApp.use(cors(corsConfiguration));
+    expressApp.options('*', cors(corsConfiguration));
 }
 expressApp.use(httpContext.middleware);
 const keycloakService: KeycloakService = container.get(TYPE.KeycloakService);
@@ -158,7 +168,6 @@ expressApp.use(bodyParser.urlencoded({
     limit: '50mb',
     parameterLimit: 50000,
 }));
-expressApp.use(bodyParser.json());
 
 const server = new InversifyExpressServer(container,
     null,
