@@ -2,26 +2,26 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{.API_FORM_NAME}}
+  name: "{{.API_FORM_NAME}}"
 spec:
   selector:
     matchLabels:
-      name: {{.API_FORM_NAME}}
+      name: "{{.API_FORM_NAME}}"
   replicas: 1
   revisionHistoryLimit: 3
   template:
     metadata:
       labels:
-        name: {{.API_FORM_NAME}}
+        name: "{{.API_FORM_NAME}}"
     spec:
       securityContext:
         runAsUser: 1000
         fsGroup: 1000
       imagePullSecrets:
-        - name: {{.DOCKER_CREDENTIALS}}
+        - name: "{{.DOCKER_CREDENTIALS}}"
       containers:
       - name: proxy
-        image: {{.NGINX_IMAGE}}:{{.NGINX_TAG}}
+        image: "{{.NGINX_IMAGE}}:{{.NGINX_TAG}}"
         securityContext:
           runAsNonRoot: true
         env:
@@ -45,14 +45,14 @@ spec:
         volumeMounts:
           - name: certs
             mountPath: /certs
-      - name: {{.API_FORM_NAME}}
-        image: {{.API_FORM_IMAGE}}:{{.API_FORM_TAG}}
+      - name: "{{.API_FORM_NAME}}"
+        image: "{{.API_FORM_IMAGE}}:{{.API_FORM_TAG}}"
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 3
           httpGet:
             path: /healthz
-            port: {{.API_FORM_PORT}}
+            port: "{{.API_FORM_PORT}}"
             scheme: HTTP
           periodSeconds: 10
           successThreshold: 1
@@ -61,7 +61,7 @@ spec:
           failureThreshold: 3
           httpGet:
             path: /readiness
-            port: {{.API_FORM_PORT}}
+            port: "{{.API_FORM_PORT}}"
             scheme: HTTP
           periodSeconds: 10
           successThreshold: 1
@@ -72,7 +72,7 @@ spec:
           - name: DB_FORM_DEFAULT_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: {{.API_FORM_NAME}}
+                name: "{{.API_FORM_NAME}}"
                 key: dbPassword
           - name: DB_FORM_HOSTNAME
             value: "{{.DB_FORM_HOSTNAME}}"
@@ -95,7 +95,7 @@ spec:
           - name: API_FORM_KEYCLOAK_ADMIN_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: {{.API_FORM_NAME}}
+                name: "{{.API_FORM_NAME}}"
                 key: authAdminPassword
           - name: API_FORM_KEYCLOAK_ROLES
             value: "{{.API_FORM_KEYCLOAK_ROLES}}"
