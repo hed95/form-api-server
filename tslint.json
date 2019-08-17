@@ -26,14 +26,8 @@
       "single"
     ],
     "curly": true,
-    "await-promise": true,
+    "await-promise": [true, "Bluebird"],
     "only-arrow-functions": true,
-    "no-unused-variable": [
-      true,
-      {
-        "check-parameters": true
-      }
-    ],
     "ordered-imports": false,
     "no-debugger": true,
     "no-string-throw": true,

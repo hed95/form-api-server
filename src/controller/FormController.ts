@@ -129,7 +129,7 @@ export class FormController extends BaseHttpController {
         if (validationErrors.length !== 0) {
             res.status(HttpStatus.BAD_REQUEST).send(validationErrors);
         } else {
-            res.sendStatus(HttpStatus.OK);
+            res.status(HttpStatus.OK).send(submission);
         }
     }
 

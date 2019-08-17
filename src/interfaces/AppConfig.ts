@@ -43,23 +43,10 @@ interface AppConfig {
             enabled: boolean,
         },
     };
-    aws: {
-        s3: {
-            endpoint: string,
-            useSSL: boolean,
-            port: number,
-            accessKey: string,
-            secretKey: string
-            buckets: {
-                pdf: string,
-            },
-        },
-    };
     redis: {
         port: number,
         host: string,
         token: string,
-        ssl: boolean,
     };
     correlationIdRequestHeader: string;
 }

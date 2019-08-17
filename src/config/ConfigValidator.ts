@@ -57,18 +57,6 @@ export class ConfigValidator {
                     enabled: Joi.boolean(),
                 }),
             }),
-            aws: Joi.object().optional().keys({
-               s3: Joi.object().keys({
-                   endpoint: Joi.string().optional(),
-                   useSSL: Joi.boolean().optional(),
-                   port: Joi.number().optional(),
-                   accessKey: Joi.string().optional(),
-                   secretKey: Joi.string().optional(),
-                   buckets: Joi.object().optional().keys({
-                       pdf: Joi.string().optional(),
-                   }),
-               }),
-            }),
             correlationIdRequestHeader: Joi.string(),
         });
     }

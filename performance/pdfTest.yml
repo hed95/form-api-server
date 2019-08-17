@@ -1,0 +1,24 @@
+config:
+  target: 'http://localhost:4000'
+  phases:
+    - duration: 60
+      arrivalRate: 20
+  defaults:
+    headers:
+      Authorization: 'Bearer {{ $processEnvironment.BEARER_TOKEN }}'
+scenarios:
+  - name: 'Generate PDF'
+    flow:
+      - post:
+          url: "/pdf/8a9631c8-faf0-4139-98b2-701e8f334b4c"
+          json:
+            submission: {
+              data: {
+                "businessKey": "{{ $randomString() }}",
+                "page1Makegridvisible": "yes",
+                "page1Makepagevisible": "yes",
+                "page1DataGrid": [
+                ]
+              }
+            }
+            webhookUrl: 'test'

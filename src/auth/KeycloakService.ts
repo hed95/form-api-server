@@ -74,6 +74,10 @@ export class KeycloakService {
         });
     }
 
+    public getKcAdminClient() {
+        return this.kcAdminClient;
+    }
+
     public middleware(): RequestHandler {
         return this.keycloak.middleware();
     }

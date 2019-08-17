@@ -22,7 +22,10 @@ import {EventEmitter} from 'events';
 import {LRUCacheClient} from '../service/LRUCacheClient';
 import {ApplicationConstants} from '../constant/ApplicationConstants';
 import {PDFService} from '../service/PDFService';
-import {FormTemplateResolver} from '../pdf/FormTemplateResolver';
+import {Queue} from 'bull';
+import createQueue from '../queues/create-queue';
+import redis from '../queues/Redis';
+import {PdfJob} from '../model/PdfJob';
 
 export class ApplicationContext {
     private readonly container: Container;
@@ -51,7 +54,13 @@ export class ApplicationContext {
         this.container.bind<AdminProtectMiddleware>(TYPE.AdminProtectMiddleware).to(AdminProtectMiddleware);
         this.container.bind<CommentService>(TYPE.CommentService).to(CommentService);
         this.container.bind<PDFService>(TYPE.PDFService).to(PDFService);
-        this.container.bind<FormTemplateResolver>(TYPE.FormTemplateResolver).to(FormTemplateResolver);
+
+        const redisClient = redis(defaultAppConfig);
+        const pdfQueue: Queue<PdfJob> = createQueue(redisClient,
+            redisClient,
+            redisClient,
+            ApplicationConstants.PDF_QUEUE_NAME);
+        this.container.bind<Queue>(TYPE.PDFQueue).toConstantValue(pdfQueue);
 
         logger.info('Application context initialised');
 

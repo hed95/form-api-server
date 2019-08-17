@@ -8,7 +8,7 @@ describe('PDFService', () => {
     const formService: FormService = applicationContext.get(TYPE.FormService);
     const pdfService: PDFService = applicationContext.get(TYPE.PDFService);
 
-    it('can generate pdf', (done) => {
-        done();
+    it('can generate pdf', async () => {
+
     });
 });
