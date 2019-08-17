@@ -52,7 +52,7 @@ spec:
           failureThreshold: 3
           httpGet:
             path: /healthz
-            port: "{{.API_FORM_PORT}}"
+            port: {{.API_FORM_PORT}}
             scheme: HTTP
           periodSeconds: 10
           successThreshold: 1
@@ -61,7 +61,7 @@ spec:
           failureThreshold: 3
           httpGet:
             path: /readiness
-            port: "{{.API_FORM_PORT}}"
+            port: {{.API_FORM_PORT}}
             scheme: HTTP
           periodSeconds: 10
           successThreshold: 1
@@ -105,8 +105,6 @@ spec:
             value: "{{.API_FORM_LOG_ENABLE_QUERY}}"
           - name: API_FORM_LOG_CHANGE_TIMEOUT
             value: "{{.API_FORM_LOG_CHANGE_TIMEOUT}}"
-          - name: API_FORM_CORS_ORIGIN
-            value: "{{.API_FORM_CORS_ORIGIN}}"
           - name: API_FORM_PORT
             value: "{{.API_FORM_PORT}}"
       volumes:
