@@ -1,5 +1,4 @@
 import * as Joi from '@hapi/joi';
-import {ValidationResult} from '@hapi/joi';
 import AppConfig from '../interfaces/AppConfig';
 
 export class ConfigValidator {
@@ -61,7 +60,7 @@ export class ConfigValidator {
         });
     }
 
-    public validate(config: AppConfig): ValidationResult<any> {
+    public validate(config: AppConfig): Joi.ValidationResult<any> {
         return Joi.validate(config, this.schema, {abortEarly: false});
     }
 }

@@ -44,6 +44,7 @@ interface AppConfig {
         },
     };
     redis: {
+        ssl: boolean,
         port: number,
         host: string,
         token: string,

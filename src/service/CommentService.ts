@@ -27,7 +27,7 @@ export class CommentService {
                 if (!form) {
                     throw new ResourceNotFoundError(`Form with id ${formId} does not exist`);
                 }
-                return await this.formCommentRepository.findAndCountAll({
+                return this.formCommentRepository.findAndCountAll({
                     limit,
                     offset,
                     order: [['createdOn', 'DESC']],
@@ -57,7 +57,7 @@ export class CommentService {
         if (!comment.createdBy) {
             comment.createdBy = user.details.email;
         }
-        return await this.formCommentRepository.sequelize.transaction(async () => {
+        return this.formCommentRepository.sequelize.transaction(async () => {
             const created: FormComment = await this.formCommentRepository.create({
                 comment: comment.comment,
                 createdOn: comment.createdOn,

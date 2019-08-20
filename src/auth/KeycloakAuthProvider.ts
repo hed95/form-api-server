@@ -34,7 +34,7 @@ export class KeycloakAuthProvider implements interfaces.AuthProvider {
                 logger.debug('x-user-email detected. Checking if this user exists', {
                     email: userId,
                 });
-                return await this.keycloakService.getUser(userId);
+                return this.keycloakService.getUser(userId);
             } else {
                 try {
                     const grant: Keycloak.Grant = await this.keycloakService.keycloakInstance().getGrant(req, res);

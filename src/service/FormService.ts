@@ -161,7 +161,7 @@ export class FormService {
         const name: string = payload.name;
         const accessRoles: object[] = payload.access;
 
-        return await this.formRepository.sequelize.transaction(async () => {
+        return this.formRepository.sequelize.transaction(async () => {
             const profiler = logger.startTimer();
             const loaded: FormVersion = await this.formVersionRepository.findOne({
                 where: {
@@ -298,7 +298,7 @@ export class FormService {
     @CacheClear({cacheKey: FormService.setCacheKey})
     public async restore(formId: string, formVersionId: string, currentUser: User): Promise<FormVersion> {
         const profiler = logger.startTimer();
-        return await this.formVersionRepository.sequelize.transaction(async (transaction) => {
+        return this.formVersionRepository.sequelize.transaction(async (transaction) => {
             const date = new Date();
             const latestVersion = await this.formVersionRepository.findOne({
                 where: FormService.latestFormClause(formId),
@@ -524,7 +524,7 @@ export class FormService {
                 updatedOn: today,
                 updatedBy: userId,
             });
-            return await version.update({
+            return version.update({
                 updatedBy: userId,
                 validTo: today,
                 latest: false,
@@ -609,7 +609,7 @@ export class FormService {
                 }],
 
         };
-        return await this.formRepository.findOne(query);
+        return this.formRepository.findOne(query);
     }
 
     @CacheClear({cacheKey: FormService.setCacheKey})

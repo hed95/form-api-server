@@ -29,6 +29,7 @@ const {
   API_FORM_CACHE_USER_MAX_ENTRIES,
   API_FORM_LOG_ENABLE_QUERY,
   REDIS_PORT,
+  REDIS_SSL,
   REDIS_URI,
   REDIS_TOKEN,
   API_FORM_CORRELATION_ID_REQUEST_HEADER,
@@ -84,6 +85,7 @@ const defaultAppConfig: AppConfig = {
     },
   },
   redis: {
+    ssl: REDIS_SSL ? REDIS_SSL === 'true' : false,
     port: REDIS_PORT ? +REDIS_PORT : DEFAULT_REDIS_PORT,
     host: REDIS_URI || '127.0.0.1',
     token: REDIS_TOKEN,

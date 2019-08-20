@@ -1,7 +1,7 @@
 {
   "defaultSeverity": "error",
   "extends": [
-    "tslint:recommended"
+    "tslint:latest"
   ],
   "jsRules": {
     "object-literal-sort-keys": [
@@ -9,6 +9,7 @@
     ]
   },
   "rules": {
+    "no-submodule-imports": [true, "keycloak-admin/lib/utils/auth", "formiojs/utils"],
     "interface-name": [
       false
     ],

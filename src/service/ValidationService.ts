@@ -253,6 +253,7 @@ export class ValidationService {
         return fieldValidator;
     }
 
+    /* tslint:disable */
     private numberValidator(component: any) {
         let fieldValidator = JoiX.number().empty(null);
         if (component.validate) {
@@ -271,8 +272,10 @@ export class ValidationService {
                 }
             });
         }
+
         return fieldValidator;
     }
+    /* tslint:enable */
 
     private containerValidator(component: any, componentData: any, submission: any) {
         let fieldValidator;

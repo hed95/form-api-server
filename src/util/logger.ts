@@ -1,10 +1,9 @@
 import * as winston from 'winston';
-import {createLogger, format, transports} from 'winston';
 import httpContext from 'express-http-context';
 import defaultAppConfig from '../config/defaultAppConfig';
 import {ApplicationConstants} from '../constant/ApplicationConstants';
 
-const {combine, json, splat} = format;
+const {combine, json, splat} = winston.format;
 
 const addXRequestId = winston.format((info) => {
     info[defaultAppConfig.correlationIdRequestHeader] = httpContext.get(defaultAppConfig.correlationIdRequestHeader);
@@ -16,20 +15,20 @@ const addUserId = winston.format((info) => {
     return info;
 });
 
-const logger = createLogger({
+const logger = winston.createLogger({
     format: combine(
         addXRequestId(),
         addUserId(),
-        format.timestamp({
+        winston.format.timestamp({
             format: 'YYYY-MM-DD HH:mm:ss',
         }),
-        format.errors({stack: true}),
+        winston.format.errors({stack: true}),
         splat(),
         json(),
     ),
     defaultMeta: {service: ApplicationConstants.SERVICE_NAME},
     transports: [
-        new transports.Console({
+        new winston.transports.Console({
             level: 'info',
         }),
     ],

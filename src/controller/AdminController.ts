@@ -20,7 +20,6 @@ import logger from '../util/logger';
 import AppConfig from '../interfaces/AppConfig';
 import HttpStatus from 'http-status-codes';
 import * as Joi from '@hapi/joi';
-import {ValidationResult} from '@hapi/joi';
 import ResourceValidationError from '../error/ResourceValidationError';
 import {User} from '../auth/User';
 import {KeycloakService} from '../auth/KeycloakService';
@@ -144,7 +143,7 @@ export class AdminController extends BaseHttpController {
             // @ts-ignore
             const level = logLevel.level;
 
-            const result: ValidationResult<object> = Joi.object().keys({
+            const result: Joi.ValidationResult<object> = Joi.object().keys({
                 level: Joi.string().valid('info', 'debug', 'warn', 'error').required(),
             }).validate(logLevel);
 

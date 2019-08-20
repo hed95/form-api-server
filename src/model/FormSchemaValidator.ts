@@ -1,5 +1,4 @@
 import * as Joi from '@hapi/joi';
-import {ValidationErrorItem, ValidationResult} from '@hapi/joi';
 import {provide} from 'inversify-binding-decorators';
 import TYPE from '../constant/TYPE';
 import util from 'formiojs/utils';
@@ -8,7 +7,7 @@ import _ from 'lodash';
 @provide(TYPE.FormSchemaValidator)
 export class FormSchemaValidator {
 
-    public validate(payload: any): ValidationResult<object> {
+    public validate(payload: any): Joi.ValidationResult<object> {
         const validationResult = Joi.validate(payload, this.schema(), {
             abortEarly: false,
         });
@@ -20,7 +19,7 @@ export class FormSchemaValidator {
 
         if (!_.isEqual(paths.value(), uniq.value())) {
             if (!validationResult.error) {
-                const details: ValidationErrorItem[] = [];
+                const details: Joi.ValidationErrorItem[] = [];
                 // @ts-ignore
                 validationResult.error = {
                     details,

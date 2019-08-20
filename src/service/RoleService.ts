@@ -7,7 +7,6 @@ import _ from 'lodash';
 import {User} from '../auth/User';
 import logger from '../util/logger';
 import * as Joi from '@hapi/joi';
-import {ValidationResult} from '@hapi/joi';
 import ResourceValidationError from '../error/ResourceValidationError';
 import LRUCache from 'lru-cache';
 import AppConfig from '../interfaces/AppConfig';
@@ -53,7 +52,7 @@ export class RoleService {
             description: Joi.string(),
         });
 
-        const validation: ValidationResult<object> = Joi.validate(roles, Joi.array().items(roleSchema), {
+        const validation: Joi.ValidationResult<object> = Joi.validate(roles, Joi.array().items(roleSchema), {
             abortEarly: false,
         });
 
@@ -84,7 +83,7 @@ export class RoleService {
         if (!roles || roles.length === 0) {
             return Promise.resolve([]);
         }
-        return await Promise.all(_.map(roles, async (role: any) => {
+        return Promise.all(_.map(roles, async (role: any) => {
             const roleCreated: [Role, boolean] = await this.roleRepository.findOrCreate({
                 where: {
                     name: role.name,
@@ -97,7 +96,7 @@ export class RoleService {
     }
 
     public async roles(limit: number = 20, offset: number = 0): Promise<{ rows: Role[], count: number }> {
-        return await this.roleRepository.findAndCountAll({
+        return this.roleRepository.findAndCountAll({
             limit,
             offset,
         });

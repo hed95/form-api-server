@@ -38,6 +38,7 @@ import HttpStatus from 'http-status-codes';
 import {CommentService} from '../service/CommentService';
 import ResourceNotFoundError from '../error/ResourceNotFoundError';
 import {RestoreData} from '../model/RestoreData';
+import InternalServerError from "../error/InternalServerError";
 
 @ApiPath({
     path: '/form',

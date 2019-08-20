@@ -4,7 +4,6 @@ import cors from 'cors';
 import express from 'express';
 import {InversifyExpressServer} from 'inversify-express-utils';
 import * as swagger from 'swagger-express-ts';
-import {SwaggerDefinitionConstant} from 'swagger-express-ts';
 import {KeycloakAuthProvider} from './auth/KeycloakAuthProvider';
 import {KeycloakService} from './auth/KeycloakService';
 import TYPE from './constant/TYPE';
@@ -25,7 +24,6 @@ import {OptimisticLockError} from 'sequelize';
 import {ApplicationConstants} from './constant/ApplicationConstants';
 import {ConfigValidator} from './config/ConfigValidator';
 import {EventEmitter} from 'events';
-import {Application} from 'express';
 
 const defaultPort: number = 3000;
 
@@ -61,7 +59,7 @@ if (appConfig.log.enabled) {
 const version = 'v1';
 const basePath = ``;
 
-const expressApp: Application = express();
+const expressApp: express.Application = express();
 
 const corsOrigins = appConfig.cors.origin;
 if (corsOrigins.length !== 0) {
@@ -97,7 +95,7 @@ expressApp.use(swagger.express(
             },
             securityDefinitions: {
                 bearerAuth: {
-                    type: SwaggerDefinitionConstant.Security.Type.API_KEY,
+                    type: swagger.SwaggerDefinitionConstant.Security.Type.API_KEY,
                     in: 'header',
                     name: 'Authorization',
                 },
