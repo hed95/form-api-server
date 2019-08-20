@@ -14,8 +14,7 @@ import {PDFService} from '../service/PDFService';
 import * as express from 'express';
 import {User} from '../auth/User';
 import HttpStatus from 'http-status-codes';
-import ResourceValidationError from '../error/ResourceValidationError';
-import {PdfSubmission} from '../model/PdfSubmission';
+import {PdfRequest} from '../model/PdfRequest';
 
 @ApiPath({
     path: '/pdf',
@@ -30,17 +29,20 @@ export class PDFController extends BaseHttpController {
     }
 
     @httpPost('/:formId', TYPE.ProtectMiddleware)
-    public async pdf(@requestParam('formId') formId: string,
-                     @requestBody() pdfData: PdfSubmission, @response() res: express.Response,
-                     @principal() currentUser: User): Promise<void> {
-        if (!pdfData.webhookUrl || pdfData.webhookUrl === '') {
-            throw new ResourceValidationError('Failed validation', [{
-                type: 'missing',
-                message: 'Webhook URL required for pdf generation',
-                path: ['webhookUrl'],
-            }]);
-        }
-        await this.pdfService.generatePDF(formId, currentUser, pdfData.webhookUrl, pdfData.submission);
+    public async pdf(@requestBody() pdfRequest: PdfRequest,
+                     @response() res: express.Response,
+                     @principal() currentUser: User,
+                     @requestParam('formId') formId?: string): Promise<void> {
+
+        await this.pdfService.generatePDF(currentUser, pdfRequest, formId);
+        res.sendStatus(HttpStatus.ACCEPTED);
+    }
+
+    @httpPost('', TYPE.ProtectMiddleware)
+    public async pdfWithJson(@requestBody() pdfRequest: PdfRequest,
+                             @response() res: express.Response,
+                             @principal() currentUser: User): Promise<void> {
+        await this.pdfService.generatePDF(currentUser, pdfRequest);
         res.sendStatus(HttpStatus.ACCEPTED);
     }
 

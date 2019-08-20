@@ -9,6 +9,7 @@ import {FormVersion} from '../model/FormVersion';
 import {Queue} from 'bull';
 import logger from '../util/logger';
 import {PdfJob} from '../model/PdfJob';
+import {PdfRequest} from '../model/PdfRequest';
 
 @provide(TYPE.PDFService)
 export class PDFService {
@@ -22,21 +23,37 @@ export class PDFService {
         this.pdfQueue = pdfQueue;
     }
 
-    public async generatePDF(formId: string, currentUser: User,
-                             webhookUrl: string,
-                             submission?: object): Promise<void> {
-        if (!formId) {
-            throw new ResourceValidationError('Form Id required', [{
-                message: 'Form id required',
-                type: 'missing form id',
-                path: ['formId'],
+    public async generatePDF(currentUser: User,
+                             pdfRequest: PdfRequest, formId?: string): Promise<void> {
+
+        if (!pdfRequest.webhookUrl || pdfRequest.webhookUrl === '') {
+            throw new ResourceValidationError('Failed validation', [{
+                type: 'missing',
+                message: 'Webhook URL required for pdf generation',
+                path: ['webhookUrl'],
             }]);
         }
-        const formVersion: FormVersion = await this.formService.findForm(formId, currentUser);
+        const schema = pdfRequest.schema;
+        const submission = pdfRequest.submission;
+        const webHookUrl = pdfRequest.webhookUrl;
+
+        if (!formId && !pdfRequest.schema) {
+            throw new ResourceValidationError('Form Id required', [{
+                message: 'Form id or schema required',
+                type: 'missing form id or schema',
+                path: ['formId', 'schema'],
+            }]);
+        }
+        const schemaToPdf = formId ? await this.getForm(formId, currentUser) : Promise.resolve(schema);
+        logger.debug(`PDF request submitted for processing`);
+        await this.pdfQueue.add(new PdfJob(schemaToPdf, submission, webHookUrl));
+    }
+
+    private async getForm(formId: string, currentUser: User): Promise<object> {
+        const formVersion: FormVersion =  await this.formService.findForm(formId, currentUser);
         if (!formVersion) {
             throw new ResourceNotFoundError(`Form ${formId} does not exist`);
         }
-        logger.debug(`PDF request submitted for processing`);
-        await this.pdfQueue.add(new PdfJob(formVersion.schema, submission, webhookUrl));
+        return formVersion.schema;
     }
 }
