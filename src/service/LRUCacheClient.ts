@@ -7,7 +7,7 @@ import {FormVersion} from '../model/FormVersion';
 import logger from '../util/logger';
 import {User} from '../auth/User';
 import {TWO_MINUTES} from '../config/defaultAppConfig';
-import LRUCache = require('lru-cache');
+import LRUCache from 'lru-cache';
 import {EventEmitter} from 'events';
 import {ApplicationConstants} from '../constant/ApplicationConstants';
 

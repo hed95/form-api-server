@@ -337,7 +337,6 @@ export class FormService {
         });
     }
 
-    @Cacheable({cacheKey: FormService.setCacheKey})
     public async findForm(formId: string, user: User): Promise<FormVersion> {
         const isUUID: boolean = Validator.isUUID(formId);
         if (!isUUID) {
