@@ -8,7 +8,7 @@ const redis = (appConfig: AppConfig) => {
             host: appConfig.redis.host,
             password: appConfig.redis.token,
             tls: {
-            }
+            },
         });
     }
     return new Redis({
