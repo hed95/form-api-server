@@ -27,7 +27,7 @@ export class ValidationService {
     constructor(@inject(TYPE.FormService) private readonly formService: FormService) {}
 
     public async validate(formId: string, submission: any, user: User): Promise<ValidationError[]> {
-        const form: FormVersion = await this.formService.findForm(formId, user);
+        const form: FormVersion = await this.formService.findLatestForm(formId, user);
         if (!form) {
             throw new ResourceNotFoundError(`Form with id ${formId} not found`);
         }

@@ -146,15 +146,10 @@ describe("FormService", () => {
         expect(result.form.roles.length).to.be.eq(1);
         expect(result.form.roles[0].name).to.be.eq("Role for access");
 
-        const result1: FormVersion = await formService.findForm(form.id, user);
-
-        const result2: FormVersion = await formService.findForm(form.id, user);
 
     });
 
     it('can restore a version', async () => {
-
-
         const form = await formRepository.create({
             createdBy: "test@test.com"
         });

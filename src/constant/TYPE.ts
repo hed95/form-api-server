@@ -14,8 +14,8 @@ export default {
     AdminProtectMiddleware: Symbol.for('AdminProtectMiddleware'),
     CommentService: Symbol.for('CommentService'),
     AppConfig: Symbol.for('AppConfig'),
-    LRUCacheClient: Symbol.for('LRUCacheClient'),
     EventEmitter: Symbol.for('EventEmitter'),
     PDFService: Symbol.for('PDFService'),
     PDFQueue: Symbol.for('PDFQueue'),
+    CacheManager: Symbol.for('CacheManager'),
 };

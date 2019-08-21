@@ -16,13 +16,13 @@ import _ from 'lodash';
 import {Sequelize} from 'sequelize-typescript';
 import {RoleService} from './RoleService';
 import Validator from 'validator';
-import cacheManager, {Cacheable, CacheClear} from 'type-cacheable';
-import {LRUCacheClient} from './LRUCacheClient';
+import {Cacheable, CacheClear} from 'type-cacheable';
+import AppConfig from '../interfaces/AppConfig';
 
 @provide(TYPE.FormService)
 export class FormService {
 
-    private static setCacheKey = (args: any[]) => args[0];
+    public static setCacheKey = (args: any[]) => `form-${args[0]}`;
 
     private static roleWhereClause(user: User, defaultRole: Role): WhereOptions {
         return {
@@ -131,20 +131,17 @@ export class FormService {
     private readonly roleAttributes: string[] = ['id', 'name', 'description', 'active'];
     private readonly formSchemaValidator: FormSchemaValidator;
     private readonly roleService: RoleService;
-    private readonly lruCacheClient: LRUCacheClient;
 
     constructor(@inject(TYPE.FormRepository) formRepository: FormRepository,
                 @inject(TYPE.FormVersionRepository) formVersionRepository: FormVersionRepository,
                 @inject(TYPE.FormSchemaValidator) formSchemaValidator: FormSchemaValidator,
                 @inject(TYPE.RoleService) roleService: RoleService,
-                @inject(TYPE.LRUCacheClient) lruCacheClient: LRUCacheClient) {
+                @inject(TYPE.AppConfig) appConfig: AppConfig) {
         this.formRepository = formRepository;
         this.formVersionRepository = formVersionRepository;
         this.formSchemaValidator = formSchemaValidator;
         this.roleService = roleService;
-        this.lruCacheClient = lruCacheClient;
-        // @ts-ignore
-        cacheManager.setClient(this.lruCacheClient);
+
     }
 
     public async create(user: User, payload: any): Promise<string> {
@@ -331,13 +328,18 @@ export class FormService {
                 validTo: null,
                 updatedBy: userId,
             });
-            const reloaded = await this.findForm(formId, currentUser);
+            const reloaded = await this.findLatestForm(formId, currentUser);
             profiler.done({message: `restored form id ${formId} to version ${versionToRestore.id}`});
             return reloaded;
         });
     }
 
+    @Cacheable({cacheKey: FormService.setCacheKey, ttlSeconds: 120})
     public async findForm(formId: string, user: User): Promise<FormVersion> {
+        return this.findLatestForm(formId, user);
+    }
+
+    public async findLatestForm(formId: string, user: User): Promise<FormVersion> {
         const isUUID: boolean = Validator.isUUID(formId);
         if (!isUUID) {
             throw new ResourceValidationError('Validation failure', [
@@ -435,7 +437,7 @@ export class FormService {
 
         form = FormService.sanitize(form);
 
-        const latestVersion = await this.findForm(id, currentUser);
+        const latestVersion = await this.findLatestForm(id, currentUser);
 
         if (!latestVersion) {
             throw new ResourceNotFoundError(`FormVersion with ${id} does not exist for update`);
@@ -613,7 +615,7 @@ export class FormService {
 
     @CacheClear({cacheKey: FormService.setCacheKey})
     public async purge(id: string, user: User): Promise<boolean> {
-        const formVersion: FormVersion = await this.findForm(id, user);
+        const formVersion: FormVersion = await this.findLatestForm(id, user);
         if (!formVersion) {
             throw new ResourceNotFoundError(`Form with id ${id} does not exist`);
         }

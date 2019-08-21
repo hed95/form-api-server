@@ -5,7 +5,7 @@ import {FormService} from "../../../src/service/FormService";
 import {FormResourceAssembler} from "../../../src/controller/FormResourceAssembler";
 import {MockResponse} from "../../MockResponse";
 import {MockRequest} from "../../MockRequest";
-import {Arg, Substitute} from "@fluffy-spoon/substitute";
+import {Arg, Substitute, SubstituteOf} from "@fluffy-spoon/substitute";
 import {FormVersion} from "../../../src/model/FormVersion";
 import logger from "../../../src/util/logger";
 import AppConfig from "../../../src/interfaces/AppConfig";
@@ -13,10 +13,11 @@ import defaultAppConfig from "../../../src/config/defaultAppConfig";
 import ResourceValidationError from "../../../src/error/ResourceValidationError";
 import {KeycloakService} from "../../../src/auth/KeycloakService";
 import {User} from "../../../src/auth/User";
-import {LRUCacheClient} from "../../../src/service/LRUCacheClient";
 import {EventEmitter} from "events";
 import {SequelizeProvider} from "../../../src/model/SequelizeProvider";
 import {ApplicationConstants} from "../../../src/constant/ApplicationConstants";
+import CacheManager from "type-cacheable/dist/CacheManager";
+import {CacheClient} from "type-cacheable/lib/interfaces/CacheClient";
 
 
 describe('AdminController', () => {
@@ -34,24 +35,26 @@ describe('AdminController', () => {
     let formResourceAssembler: FormResourceAssembler;
     let keycloakService: KeycloakService;
     let appConfig: AppConfig;
-    let lruCacheClient: LRUCacheClient;
     let eventEmitter: EventEmitter;
     let sequelizeProvider: SequelizeProvider;
+    let cacheManager: SubstituteOf<CacheManager>;
+
     beforeEach(() => {
         mockResponse = new MockResponse();
         mockRequest = new MockRequest("/forms", "/api/v1");
         formService = Substitute.for<FormService>();
         formResourceAssembler = Substitute.for<FormResourceAssembler>();
         keycloakService = Substitute.for<KeycloakService>();
-        lruCacheClient = Substitute.for<LRUCacheClient>();
+        cacheManager = Substitute.for<CacheManager>();
         eventEmitter = new EventEmitter();
         sequelizeProvider = Substitute.for<SequelizeProvider>();
         defaultAppConfig.log.enabled = true;
         defaultAppConfig.log.timeout = 200;
         appConfig = defaultAppConfig;
-        underTest = new AdminController(formService, keycloakService, lruCacheClient, eventEmitter,
+
+        underTest = new AdminController(formService, keycloakService, eventEmitter,
             sequelizeProvider,
-            appConfig);
+            appConfig, cacheManager);
 
     });
 
@@ -115,11 +118,15 @@ describe('AdminController', () => {
         keycloakService.received().clearUserCache(user);
     });
 
-    it('can delete form cache', () => {
+    it('can delete form cache', async () => {
         const user: User = new User("email", "email", []);
-        underTest.clearFormCache(user, mockResponse);
-        // @ts-ignore
-        lruCacheClient.received().clearAll(user);
+        const cacheClient: SubstituteOf<CacheClient> = Substitute.for<CacheClient>();
+        cacheManager.client.returns(cacheClient);
+
+        await underTest.clearFormCache('id', user, mockResponse);
+
+        cacheClient.received(1).del(FormService.setCacheKey(['id']));
+
     });
     it('can change query log level', () => {
         const user: User = new User("email", "email", []);

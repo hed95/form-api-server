@@ -53,7 +53,7 @@ const defaultAppConfig: AppConfig = {
   },
   admin: {
     roles: API_FORM_KEYCLOAK_ROLES ?
-            API_FORM_KEYCLOAK_ROLES.split(',') : [],
+            API_FORM_KEYCLOAK_ROLES.split(',') : ['platform'  ],
   },
   cors: {
     origin: API_FORM_CORS_ORIGIN ? API_FORM_CORS_ORIGIN.split(',') : [],

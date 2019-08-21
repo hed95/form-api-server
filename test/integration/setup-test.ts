@@ -5,17 +5,16 @@ import TYPE from "../../src/constant/TYPE";
 import {SequelizeProvider} from "../../src/model/SequelizeProvider";
 import {cleanUpMetadata} from "inversify-express-utils";
 import {KeycloakService} from "../../src/auth/KeycloakService";
-import {LRUCacheClient} from "../../src/service/LRUCacheClient";
 import {Queue} from "bull";
 
 import * as createQueueModule from "../../src/queues/create-queue";
 import * as redisFunction from '../../src/queues/Redis';
 import {ImportMock} from 'ts-mock-imports';
 import {Substitute} from "@fluffy-spoon/substitute";
-import MockRedis from 'ioredis-mock';
 import {PdfJob} from "../../src/model/PdfJob";
+import mockRedis from 'redis-mock';
 
-ImportMock.mockFunction(redisFunction, "default", new MockRedis());
+ImportMock.mockFunction(redisFunction, "default", mockRedis.createClient(1, 'x', {}));
 ImportMock.mockFunction(createQueueModule, "default", Substitute.for<Queue>());
 
 export let sequelizeProvider: SequelizeProvider;
@@ -35,9 +34,6 @@ before(async () => {
 afterEach(async () => {
     const keycloakService: KeycloakService = applicationContext.get(TYPE.KeycloakService);
     keycloakService.clearTimer();
-
-    const lruCacheClient: LRUCacheClient = applicationContext.get(TYPE.LRUCacheClient);
-    lruCacheClient.clearTimer();
 
     const pdfQueue: Queue<PdfJob> = applicationContext.get(TYPE.PDFQueue);
     await pdfQueue.close();

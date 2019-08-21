@@ -19,13 +19,14 @@ import {CommentService} from '../service/CommentService';
 import AppConfig from '../interfaces/AppConfig';
 import defaultAppConfig from '../config/defaultAppConfig';
 import {EventEmitter} from 'events';
-import {LRUCacheClient} from '../service/LRUCacheClient';
 import {ApplicationConstants} from '../constant/ApplicationConstants';
 import {PDFService} from '../service/PDFService';
 import {Queue} from 'bull';
 import createQueue from '../queues/create-queue';
 import redis from '../queues/Redis';
 import {PdfJob} from '../model/PdfJob';
+import cacheManager, {useRedisAdapter} from 'type-cacheable';
+import CacheManager from 'type-cacheable/dist/CacheManager';
 
 export class ApplicationContext {
     private readonly container: Container;
@@ -38,7 +39,6 @@ export class ApplicationContext {
         const eventEmitter = new EventEmitter();
         this.container.bind<EventEmitter>(TYPE.EventEmitter).toConstantValue(eventEmitter);
         this.container.bind<AppConfig>(TYPE.AppConfig).toConstantValue(defaultAppConfig);
-        this.container.bind<LRUCacheClient>(TYPE.LRUCacheClient).to(LRUCacheClient);
         this.container.bind<KeycloakService>(TYPE.KeycloakService).to(KeycloakService);
         this.container.bind<ProtectMiddleware>(TYPE.ProtectMiddleware).to(ProtectMiddleware);
         this.container.bind<FormSchemaValidator>(TYPE.FormSchemaValidator).to(FormSchemaValidator);
@@ -61,6 +61,10 @@ export class ApplicationContext {
             redisClient,
             ApplicationConstants.PDF_QUEUE_NAME);
         this.container.bind<Queue>(TYPE.PDFQueue).toConstantValue(pdfQueue);
+
+        useRedisAdapter(redis(defaultAppConfig));
+
+        this.container.bind<CacheManager>(TYPE.CacheManager).toConstantValue(cacheManager);
 
         logger.info('Application context initialised');
 

@@ -50,7 +50,7 @@ export class PDFService {
     }
 
     private async getForm(formId: string, currentUser: User): Promise<object> {
-        const formVersion: FormVersion =  await this.formService.findForm(formId, currentUser);
+        const formVersion: FormVersion =  await this.formService.findLatestForm(formId, currentUser);
         if (!formVersion) {
             throw new ResourceNotFoundError(`Form ${formId} does not exist`);
         }

@@ -33,7 +33,7 @@ describe('PDFService', () => {
     it('throws ResourceNotFoundError if service returns null', async() => {
         const user: User = new User('id', 'id', []);
         try {
-            formService.findForm('formId', user).returns(Promise.resolve(null));
+            formService.findLatestForm('formId', user).returns(Promise.resolve(null));
             await pdfService.generatePDF(user, new PdfRequest('/webhookUrl', {}, null), 'formId');
         } catch (err) {
             expect(err instanceof ResourceNotFoundError).to.be.eq(true);
@@ -48,7 +48,7 @@ describe('PDFService', () => {
             components: []
         };
 
-        formService.findForm('formId', user).returns(Promise.resolve(version));
+        formService.findLatestForm('formId', user).returns(Promise.resolve(version));
         await pdfService.generatePDF(user, new PdfRequest('/webhookUrl', {}, null), 'formId')
         // @ts-ignore
         pdfQueue.received(1).add(Arg.any())
@@ -62,12 +62,11 @@ describe('PDFService', () => {
             components: []
         };
 
-        formService.findForm('formId', user).returns(Promise.resolve(version));
         await pdfService.generatePDF(user, new PdfRequest('/webhookUrl', {}, {
             name: 'name',
             components: []
         }));
-        formService.didNotReceive(1).findForm(Arg.any(), Arg.any());
+        formService.didNotReceive(1).findLatestForm(Arg.any(), Arg.any());
         // @ts-ignore
         pdfQueue.received(1).add(Arg.any())
     });

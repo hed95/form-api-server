@@ -21,7 +21,7 @@ describe('Validation Service', () => {
         const version: FormVersion = Object.assign(FormVersion.prototype, {});
         version.schema = basicForm;
         // @ts-ignore
-        formService.findForm(Arg.any(), Arg.any()).returns(Promise.resolve(version));
+        formService.findLatestForm(Arg.any(), Arg.any()).returns(Promise.resolve(version));
 
         const result = await underTest.validate("formId", {
             "data" : {
@@ -39,7 +39,7 @@ describe('Validation Service', () => {
         const version: FormVersion = Object.assign(FormVersion.prototype, {});
         version.schema = basicForm;
         // @ts-ignore
-        formService.findForm(Arg.any(), Arg.any()).returns(Promise.resolve(version));
+        formService.findLatestForm(Arg.any(), Arg.any()).returns(Promise.resolve(version));
 
         const result = await underTest.validate("formId", {
             data: {
@@ -56,7 +56,7 @@ describe('Validation Service', () => {
         const version: FormVersion = Object.assign(FormVersion.prototype, {});
         version.schema = numberForm;
         // @ts-ignore
-        formService.findForm(Arg.any(), Arg.any()).returns(Promise.resolve(version));
+        formService.findLatestForm(Arg.any(), Arg.any()).returns(Promise.resolve(version));
 
         const result = await underTest.validate("formId", {
             data: {
@@ -73,7 +73,7 @@ describe('Validation Service', () => {
         const version: FormVersion = Object.assign(FormVersion.prototype, {});
         version.schema = emailForm;
         // @ts-ignore
-        formService.findForm(Arg.any(), Arg.any()).returns(Promise.resolve(version));
+        formService.findLatestForm(Arg.any(), Arg.any()).returns(Promise.resolve(version));
 
         const result = await underTest.validate("formId", {
             data: {
@@ -90,7 +90,7 @@ describe('Validation Service', () => {
         const version: FormVersion = Object.assign(FormVersion.prototype, {});
         version.schema = dataGridForm;
         // @ts-ignore
-        formService.findForm(Arg.any(), Arg.any()).returns(Promise.resolve(version));
+        formService.findLatestForm(Arg.any(), Arg.any()).returns(Promise.resolve(version));
 
         const result = await underTest.validate("formId", {
             data: {

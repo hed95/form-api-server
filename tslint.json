@@ -9,7 +9,7 @@
     ]
   },
   "rules": {
-    "no-submodule-imports": [true, "keycloak-admin/lib/utils/auth", "formiojs/utils"],
+    "no-submodule-imports": [true, "keycloak-admin/lib/utils/auth", "formiojs/utils", "type-cacheable/dist/CacheManager"],
     "interface-name": [
       false
     ],

@@ -23,7 +23,6 @@ import * as Joi from '@hapi/joi';
 import ResourceValidationError from '../error/ResourceValidationError';
 import {User} from '../auth/User';
 import {KeycloakService} from '../auth/KeycloakService';
-import {LRUCacheClient} from '../service/LRUCacheClient';
 import {EventEmitter} from 'events';
 import {ApplicationConstants} from '../constant/ApplicationConstants';
 import {SequelizeProvider} from '../model/SequelizeProvider';
@@ -34,6 +33,7 @@ import {
     ApiPath,
     SwaggerDefinitionConstant,
 } from 'swagger-express-ts';
+import CacheManager from 'type-cacheable/dist/CacheManager';
 
 @ApiPath({
     path: '/admin',
@@ -48,10 +48,10 @@ export class AdminController extends BaseHttpController {
 
     constructor(@inject(TYPE.FormService) private readonly formService: FormService,
                 @inject(TYPE.KeycloakService) private readonly keycloakService: KeycloakService,
-                @inject(TYPE.LRUCacheClient) private readonly lruCacheClient: LRUCacheClient,
                 @inject(TYPE.EventEmitter) private readonly eventEmitter: EventEmitter,
                 @inject(TYPE.SequelizeProvider) private readonly sequlizeProvider: SequelizeProvider,
-                @inject(TYPE.AppConfig) private readonly appConfig: AppConfig) {
+                @inject(TYPE.AppConfig) private readonly appConfig: AppConfig,
+                @inject(TYPE.CacheManager) private readonly cacheManager: CacheManager) {
         super();
 
         this.eventEmitter.on(ApplicationConstants.SHUTDOWN_EVENT, () => {
@@ -127,7 +127,7 @@ export class AdminController extends BaseHttpController {
                 description: 'Successfully changed the log level',
             },
             400: {
-              description: 'Invalid log level. Use \'info\', \'debug\', \'warn\' or \'error\'',
+                description: 'Invalid log level. Use \'info\', \'debug\', \'warn\' or \'error\'',
             },
             403: {
                 description: 'Not allowed to perform this operation',
@@ -171,8 +171,7 @@ export class AdminController extends BaseHttpController {
         description: 'Use to change DB query level. Changes DB query to info',
         summary: 'By default db query logging is disabled.' +
             ' Use this operation to see actual SQL that is being executed ',
-        parameters: {
-        },
+        parameters: {},
         responses: {
             200: {
                 description: 'Successfully changed DB query',
@@ -193,8 +192,7 @@ export class AdminController extends BaseHttpController {
         path: '/query-log',
         description: 'Use to disable DB query level',
         summary: '',
-        parameters: {
-        },
+        parameters: {},
         responses: {
             200: {
                 description: 'Successfully changed DB query',
@@ -216,8 +214,7 @@ export class AdminController extends BaseHttpController {
         path: '/cache/user',
         description: 'Clears internal in memory user cache',
         summary: 'Clears internal in memory user cache',
-        parameters: {
-        },
+        parameters: {},
         responses: {
             200: {
                 description: 'Successfully cleared user cache',
@@ -235,10 +232,15 @@ export class AdminController extends BaseHttpController {
     }
 
     @ApiOperationDelete({
-        path: '/cache/form',
-        description: 'Clears internal in memory form cache',
-        summary: 'Clears internal in memory form cache',
+        path: '/cache/form/:id',
+        description: 'Clear form internal in memory form cache',
+        summary: 'Clear form internal in memory form cache',
         parameters: {
+            path: {
+                id: {
+                    required: true,
+                },
+            },
         },
         responses: {
             200: {
@@ -250,22 +252,24 @@ export class AdminController extends BaseHttpController {
             500: {description: 'Internal execution error'},
         },
     })
-    @httpDelete('/cache/form', TYPE.ProtectMiddleware, TYPE.AdminProtectMiddleware)
-    public clearFormCache(@principal() currentUser: User,
-                          @response() res: express.Response): void {
-        (this.lruCacheClient as LRUCacheClient).clearAll(currentUser);
+    @httpDelete('/cache/form/:id', TYPE.ProtectMiddleware, TYPE.AdminProtectMiddleware)
+    public async clearFormCache(@requestParam('id') id: string,
+                                @principal() currentUser: User,
+                                @response() res: express.Response): Promise<void> {
+
+        await this.cacheManager.client.del(FormService.setCacheKey([id]));
         res.sendStatus(HttpStatus.OK);
     }
 
     @ApiOperationDelete({
-        path: '/forms',
+        path: '/forms/:id',
         description: 'Delete a form and associated comments/history. This will remove records from DB',
         summary: 'Delete a form and associated comments/history. This will remove records from DB',
         parameters: {
             path: {
-               id: {
-                   required: true,
-               },
+                id: {
+                    required: true,
+                },
             },
         },
         responses: {
