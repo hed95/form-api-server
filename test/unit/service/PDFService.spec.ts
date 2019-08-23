@@ -51,7 +51,7 @@ describe('PDFService', () => {
         formService.findLatestForm('formId', user).returns(Promise.resolve(version));
         await pdfService.generatePDF(user, new PdfRequest('/webhookUrl', {}, null), 'formId')
         // @ts-ignore
-        pdfQueue.received(1).add(Arg.any())
+        pdfQueue.received(1).add(Arg.any(),Arg.any())
     });
     it('Adds to queue if schema present', async() => {
         const user = new User("id", "email");
@@ -68,6 +68,6 @@ describe('PDFService', () => {
         }));
         formService.didNotReceive(1).findLatestForm(Arg.any(), Arg.any());
         // @ts-ignore
-        pdfQueue.received(1).add(Arg.any())
+        pdfQueue.received(1).add(Arg.any(),Arg.any())
     });
 });

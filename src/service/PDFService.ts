@@ -44,9 +44,9 @@ export class PDFService {
                 path: ['formId', 'schema'],
             }]);
         }
-        const schemaToPdf = formId ? await this.getForm(formId, currentUser) : Promise.resolve(schema);
+        const schemaToPdf = formId ? await this.getForm(formId, currentUser) : schema;
         logger.debug(`PDF request submitted for processing`);
-        await this.pdfQueue.add(new PdfJob(schemaToPdf, submission, webHookUrl));
+        await this.pdfQueue.add(new PdfJob(schemaToPdf, submission, webHookUrl), {attempts: 5, backoff: 5000});
     }
 
     private async getForm(formId: string, currentUser: User): Promise<object> {
