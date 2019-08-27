@@ -4,11 +4,11 @@ module.exports = {
     up: (queryInterface, Sequelize) => {
         return queryInterface
             .sequelize
-            .query('CREATE INDEX form_version_schema_gin ON formversion USING gin (schema)')
+            .query("CREATE INDEX form_version_schema_gin ON formversion USING gin (schema)")
             .then(() => {
             queryInterface
                 .sequelize
-                .query('CREATE INDEX form_version_schema_gin_jsonb ON formversion ' +
+                .query("CREATE INDEX form_version_schema_gin_jsonb ON formversion " +
                     "USING gin (schema jsonb_path_ops)")
                 .done();
             });

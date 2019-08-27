@@ -4,7 +4,7 @@ import {Role} from './Role';
 
 @Table({
     tableName: 'formroles',
-    timestamps: false
+    timestamps: false,
 })
 export class FormRoles extends Model<FormRoles> {
 
@@ -18,14 +18,14 @@ export class FormRoles extends Model<FormRoles> {
     @ForeignKey(() => Form)
     @Column({
         type: DataType.UUID,
-        field: 'formid'
+        field: 'formid',
     })
     public formId: string;
 
     @ForeignKey(() => Role)
     @Column({
         type: DataType.UUID,
-        field : 'roleid'
+        field : 'roleid',
     })
     public roleId: string;
 }

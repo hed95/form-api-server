@@ -41,6 +41,6 @@ module.exports = {
 
     down: (queryInterface, Sequelize) => {
         return queryInterface.sequelize
-            .query('DROP TABLE formcomment');
+            .query("DROP TABLE formcomment");
     },
 };

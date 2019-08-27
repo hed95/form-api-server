@@ -56,6 +56,6 @@ module.exports = {
 
     down: (queryInterface, Sequelize) => {
         return queryInterface.sequelize
-            .query('DROP TABLE formversion');
+            .query("DROP TABLE formversion");
     },
 };

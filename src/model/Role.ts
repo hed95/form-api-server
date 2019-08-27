@@ -8,7 +8,7 @@ import {ApiModel, ApiModelProperty} from 'swagger-express-ts';
 @Table({
     freezeTableName: true,
     tableName: 'role',
-    timestamps: false
+    timestamps: false,
 })
 export class Role extends Model<Role> {
 

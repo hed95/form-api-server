@@ -18,7 +18,7 @@ import {RoleService} from './RoleService';
 import Validator from 'validator';
 import {Cacheable, CacheClear} from 'type-cacheable';
 import AppConfig from '../interfaces/AppConfig';
-import CacheManager from "type-cacheable/dist/CacheManager";
+import CacheManager from 'type-cacheable/dist/CacheManager';
 
 @provide(TYPE.FormService)
 export class FormService {

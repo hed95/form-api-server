@@ -41,6 +41,6 @@ module.exports = {
 
     down: (queryInterface, Sequelize) => {
         return queryInterface.sequelize
-            .query('DROP TABLE formroles');
+            .query("DROP TABLE formroles");
     },
 };

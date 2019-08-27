@@ -37,7 +37,7 @@ const eventEmitter: EventEmitter = container.get(TYPE.EventEmitter);
 const sequelizeProvider: SequelizeProvider = applicationContext.get(TYPE.SequelizeProvider);
 
 SequelizeProvider.initDefaultRole(process.env.DEFAULT_ROLE).then(() => {
-   logger.info('Default role initialised')
+   logger.info('Default role initialised');
 }, (error) => {
     logger.error(error);
 });

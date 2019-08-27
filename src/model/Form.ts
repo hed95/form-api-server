@@ -5,7 +5,7 @@ import {Role} from './Role';
 
 @Table({
     timestamps: false,
-    tableName: 'form'
+    tableName: 'form',
 })
 export class Form extends Model<Form> {
     @Column({
@@ -17,24 +17,24 @@ export class Form extends Model<Form> {
 
     @Column({
         type: DataType.DATE,
-        field: 'createdon'
+        field: 'createdon',
     })
     @CreatedAt
     public createdOn: Date;
 
     @Column({
         type: DataType.DATE,
-        field: 'updatedon'
+        field: 'updatedon',
     })
     public updatedOn: Date;
 
     @Column({
-        field: 'createdby'
+        field: 'createdby',
     })
     public createdBy: string;
 
     @Column({
-        field:'updatedby'
+        field: 'updatedby',
     })
     public updatedBy: string;
 

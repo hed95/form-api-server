@@ -33,6 +33,6 @@ module.exports = {
 
   down: (queryInterface, Sequelize) => {
     return queryInterface.sequelize
-        .query('DROP TABLE form');
+        .query("DROP TABLE form");
   },
 };

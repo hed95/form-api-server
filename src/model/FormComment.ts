@@ -8,7 +8,7 @@ import {Form} from './Form';
 })
 @Table({
     timestamps: false,
-    tableName: 'formcomment'
+    tableName: 'formcomment',
 })
 export class FormComment extends Model<FormComment> {
 
@@ -32,7 +32,7 @@ export class FormComment extends Model<FormComment> {
     })
     @Column({
         type: DataType.DATE,
-        field: 'createdon'
+        field: 'createdon',
     })
     public createdOn: Date;
 
@@ -41,7 +41,7 @@ export class FormComment extends Model<FormComment> {
         example: ['someone@domain.com'],
     })
     @Column({
-        field: 'createdby'
+        field: 'createdby',
     })
     public createdBy: string;
 
@@ -56,7 +56,7 @@ export class FormComment extends Model<FormComment> {
     @ForeignKey(() => Form)
     @Column({
         type: DataType.UUID,
-        field: 'formid'
+        field: 'formid',
     })
     public formId: string;
 

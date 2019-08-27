@@ -9,7 +9,7 @@ import {ApiModel, ApiModelProperty} from 'swagger-express-ts';
 })
 @Table({
     timestamps: false,
-    tableName: 'formversion'
+    tableName: 'formversion',
 })
 export class FormVersion extends Model<FormVersion> {
 
@@ -22,7 +22,7 @@ export class FormVersion extends Model<FormVersion> {
         type: DataType.UUID,
         defaultValue: DataType.UUIDV4,
         primaryKey: true,
-        field: 'versionid'
+        field: 'versionid',
     })
     public versionId: string;
 
@@ -33,17 +33,17 @@ export class FormVersion extends Model<FormVersion> {
     })
     @Column({
         type: DataType.DATE,
-        field: 'createdon'
+        field: 'createdon',
     })
     public createdOn: Date;
 
     @ApiModelProperty({
         description: 'User who created this form version',
         type: 'string',
-        format: 'string'
+        format: 'string',
     })
     @Column({
-        field: 'createdby'
+        field: 'createdby',
     })
     public createdBy: string;
 
