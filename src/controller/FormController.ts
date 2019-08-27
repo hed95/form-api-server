@@ -38,7 +38,6 @@ import HttpStatus from 'http-status-codes';
 import {CommentService} from '../service/CommentService';
 import ResourceNotFoundError from '../error/ResourceNotFoundError';
 import {RestoreData} from '../model/RestoreData';
-import InternalServerError from '../error/InternalServerError';
 
 @ApiPath({
     path: '/form',
@@ -487,7 +486,6 @@ export class FormController extends BaseHttpController {
                                @requestBody() comment: FormComment,
                                @response() res: express.Response,
                                @principal() currentUser: User): Promise<void> {
-
         const formCreated: FormComment = await this.commentService.createComment(id, currentUser, comment);
         res.json(formCreated).status(HttpStatus.CREATED);
 

@@ -5,9 +5,11 @@ import {ApiModel, ApiModelProperty} from 'swagger-express-ts';
 @ApiModel({
     description: 'Database representation of a Form stored in the API Server',
     name: 'FormVersion',
+
 })
 @Table({
     timestamps: false,
+    tableName: 'formversion'
 })
 export class FormVersion extends Model<FormVersion> {
 
@@ -20,6 +22,7 @@ export class FormVersion extends Model<FormVersion> {
         type: DataType.UUID,
         defaultValue: DataType.UUIDV4,
         primaryKey: true,
+        field: 'versionid'
     })
     public versionId: string;
 
@@ -30,15 +33,18 @@ export class FormVersion extends Model<FormVersion> {
     })
     @Column({
         type: DataType.DATE,
+        field: 'createdon'
     })
     public createdOn: Date;
 
     @ApiModelProperty({
         description: 'User who created this form version',
         type: 'string',
-        format: 'string',
+        format: 'string'
     })
-    @Column
+    @Column({
+        field: 'createdby'
+    })
     public createdBy: string;
 
     @ApiModelProperty({
@@ -46,7 +52,9 @@ export class FormVersion extends Model<FormVersion> {
         type: 'string',
         format: 'string',
     })
-    @Column
+    @Column({
+        field: 'updatedby',
+    })
     public updatedBy: string;
 
     @ApiModelProperty({
@@ -65,7 +73,7 @@ export class FormVersion extends Model<FormVersion> {
         type: 'string',
         format: 'string',
     })
-    @Column({comment: ''})
+    @Column({comment: '',   field: 'validfrom'})
     public validFrom: Date;
 
     @ApiModelProperty({
@@ -73,7 +81,7 @@ export class FormVersion extends Model<FormVersion> {
         type: 'string',
         format: 'string',
     })
-    @Column({comment: 'if validTo is null then this is the latest version of the form'})
+    @Column({comment: 'if validTo is null then this is the latest version of the form',   field: 'validto'})
     public validTo: Date;
 
     @BelongsTo(() => Form)
@@ -87,6 +95,7 @@ export class FormVersion extends Model<FormVersion> {
     @ForeignKey(() => Form)
     @Column({
         type: DataType.UUID,
+        field: 'formid',
     })
     public formId: string;
 

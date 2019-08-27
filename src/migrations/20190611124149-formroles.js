@@ -4,43 +4,43 @@ const DataType = require("sequelize");
 
 module.exports = {
     up: (queryInterface, Sequelize) => {
-        return queryInterface.createTable("FORMROLES", {
+        return queryInterface.createTable("formroles", {
             id: {
                 type: DataType.UUID,
                 primaryKey: true,
                 allowNull: false,
                 defaultValue: DataType.UUIDV4,
             },
-            formId: {
+            formid: {
                 type: DataType.UUID,
                 allowNull: false,
                 references: {
                     model: {
-                        schema: "formschema",
-                        tableName: "FORM",
+                        schema: "public",
+                        tableName: "form",
                     },
                     key: "id",
                 },
 
             },
-            roleId: {
+            roleid: {
                 type: DataType.UUID,
                 allowNull: false,
                 references: {
                     model: {
-                        schema: "formschema",
-                        tableName: "ROLE",
+                        schema: "public",
+                        tableName: "role",
                     },
                     key: "id",
                 },
             },
         }, {
-            schema: "formschema",
+            schema: "public",
         });
     },
 
     down: (queryInterface, Sequelize) => {
         return queryInterface.sequelize
-            .query('DROP TABLE formschema."FORMROLES"');
+            .query('DROP TABLE formroles');
     },
 };

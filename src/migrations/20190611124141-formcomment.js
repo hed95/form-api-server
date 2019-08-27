@@ -5,18 +5,18 @@ const DataType = require("sequelize");
 module.exports = {
 
     up: (queryInterface, Sequelize) => {
-        return queryInterface.createTable("FORMCOMMENT", {
+        return queryInterface.createTable("formcomment", {
             id: {
                 type: DataType.UUID,
                 primaryKey: true,
                 allowNull: false,
                 defaultValue: DataType.UUIDV4,
             },
-            createOn: {
+            createdon: {
                 type: DataType.DATE,
                 allowNull: false,
             },
-            createdBy: {
+            createdby: {
                 type: DataType.STRING,
                 allowNull: false,
             },
@@ -24,23 +24,23 @@ module.exports = {
                 type: DataType.TEXT,
                 allowNull: false,
             },
-            formId: {
+            formid: {
                 type: DataType.UUID,
                 references: {
                     model: {
-                        tableName: "FORM",
-                        schema: "formschema",
+                        tableName: "form",
+                        schema: "public",
                     },
                     key: "id",
                 },
             },
         }, {
-            schema: "formschema",
+            schema: "public",
         });
     },
 
     down: (queryInterface, Sequelize) => {
         return queryInterface.sequelize
-            .query('DROP TABLE formschema."FORMCOMMENT"');
+            .query('DROP TABLE formcomment');
     },
 };

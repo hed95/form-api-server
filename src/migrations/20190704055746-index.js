@@ -4,11 +4,11 @@ module.exports = {
     up: (queryInterface, Sequelize) => {
         return queryInterface
             .sequelize
-            .query('CREATE INDEX form_version_formid_idx ON "formschema"."FORMVERSION" ("formId")')
+            .query('CREATE INDEX form_version_formid_idx ON formversion ("formid")')
             .then(() => {
             queryInterface
                 .sequelize
-                .query('CREATE  INDEX formcomment_formid_idx ON  "formschema"."FORMCOMMENT" ("formId")')
+                .query('CREATE  INDEX formcomment_formid_idx ON  formcomment ("formid")')
                 .done();
             });
     },
@@ -16,6 +16,6 @@ module.exports = {
     down: (queryInterface, Sequelize) => {
         return queryInterface
             .sequelize
-            .query("DROP INDEX formschema.form_version_formid_idx, formschema.formcomment_formid_idx CASCADE");
+            .query("DROP INDEX public.form_version_formid_idx, public.formcomment_formid_idx CASCADE");
     },
 };

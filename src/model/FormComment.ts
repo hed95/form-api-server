@@ -8,6 +8,7 @@ import {Form} from './Form';
 })
 @Table({
     timestamps: false,
+    tableName: 'formcomment'
 })
 export class FormComment extends Model<FormComment> {
 
@@ -31,6 +32,7 @@ export class FormComment extends Model<FormComment> {
     })
     @Column({
         type: DataType.DATE,
+        field: 'createdon'
     })
     public createdOn: Date;
 
@@ -38,7 +40,9 @@ export class FormComment extends Model<FormComment> {
         description: 'Created by usually email address. If one is not provided then will use the caller\'s details',
         example: ['someone@domain.com'],
     })
-    @Column
+    @Column({
+        field: 'createdby'
+    })
     public createdBy: string;
 
     @ApiModelProperty({
@@ -52,6 +56,7 @@ export class FormComment extends Model<FormComment> {
     @ForeignKey(() => Form)
     @Column({
         type: DataType.UUID,
+        field: 'formid'
     })
     public formId: string;
 

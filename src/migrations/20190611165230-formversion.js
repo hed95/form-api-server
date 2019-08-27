@@ -4,22 +4,22 @@ const DataType = require("sequelize");
 
 module.exports = {
     up: (queryInterface, Sequelize) => {
-        return queryInterface.createTable("FORMVERSION", {
-            versionId: {
+        return queryInterface.createTable("formversion", {
+            versionid: {
                 type: DataType.UUID,
                 primaryKey: true,
                 allowNull: false,
                 defaultValue: DataType.UUIDV4,
             },
-            createdOn: {
+            createdon: {
                 type: DataType.DATE,
                 allowNull: false,
             },
-            createdBy: {
+            createdby: {
                 type: DataType.STRING,
                 allowNull: false,
             },
-            updatedBy: {
+            updatedby: {
                 type: DataType.STRING,
                 allowNull: true,
             },
@@ -27,20 +27,20 @@ module.exports = {
                 type: DataType.JSONB,
                 allowNull: false,
             },
-            validFrom: {
+            validfrom: {
                 type: DataType.DATE,
                 allowNull: false,
             },
-            validTo: {
+            validto: {
                 type: DataType.STRING,
                 allowNull: true,
             },
-            formId: {
+            formid: {
                 type: DataType.UUID,
                 references: {
                     model: {
-                        tableName: "FORM",
-                        schema: "formschema",
+                        tableName: "form",
+                        schema: "public",
                     },
                     key: "id",
                 },
@@ -50,12 +50,12 @@ module.exports = {
                 allowNull: false,
             },
         }, {
-            schema: "formschema",
+            schema: "public",
         });
     },
 
     down: (queryInterface, Sequelize) => {
         return queryInterface.sequelize
-            .query('DROP TABLE formschema."FORMVERSION"');
+            .query('DROP TABLE formversion');
     },
 };

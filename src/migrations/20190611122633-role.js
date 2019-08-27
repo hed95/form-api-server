@@ -4,7 +4,7 @@ const DataType = require("sequelize");
 
 module.exports = {
     up: (queryInterface, Sequelize) => {
-        return queryInterface.createTable("ROLE", {
+        return queryInterface.createTable("role", {
             id: {
                 type: DataType.UUID,
                 primaryKey: true,
@@ -24,12 +24,12 @@ module.exports = {
                 allowNull: false,
             },
         }, {
-            schema: "formschema",
+            schema: "public",
         });
     },
 
     down: (queryInterface, Sequelize) => {
         return queryInterface.sequelize
-            .query('DROP TABLE formschema."ROLE"');
+            .query('DROP TABLE role');
     },
 };

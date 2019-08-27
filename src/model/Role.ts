@@ -5,7 +5,11 @@ import {ApiModel, ApiModelProperty} from 'swagger-express-ts';
     description: 'Role defined in API Server. Use to access control a form',
     name: 'Role',
 })
-@Table
+@Table({
+    freezeTableName: true,
+    tableName: 'role',
+    timestamps: false
+})
 export class Role extends Model<Role> {
 
     @ApiModelProperty({

@@ -18,6 +18,7 @@ import {RoleService} from './RoleService';
 import Validator from 'validator';
 import {Cacheable, CacheClear} from 'type-cacheable';
 import AppConfig from '../interfaces/AppConfig';
+import CacheManager from "type-cacheable/dist/CacheManager";
 
 @provide(TYPE.FormService)
 export class FormService {
@@ -131,17 +132,19 @@ export class FormService {
     private readonly roleAttributes: string[] = ['id', 'name', 'description', 'active'];
     private readonly formSchemaValidator: FormSchemaValidator;
     private readonly roleService: RoleService;
+    private readonly cacheManager: CacheManager;
 
     constructor(@inject(TYPE.FormRepository) formRepository: FormRepository,
                 @inject(TYPE.FormVersionRepository) formVersionRepository: FormVersionRepository,
                 @inject(TYPE.FormSchemaValidator) formSchemaValidator: FormSchemaValidator,
                 @inject(TYPE.RoleService) roleService: RoleService,
-                @inject(TYPE.AppConfig) appConfig: AppConfig) {
+                @inject(TYPE.AppConfig) appConfig: AppConfig,
+                @inject(TYPE.CacheManager) cacheManager: CacheManager) {
         this.formRepository = formRepository;
         this.formVersionRepository = formVersionRepository;
         this.formSchemaValidator = formSchemaValidator;
         this.roleService = roleService;
-
+        this.cacheManager = cacheManager;
     }
 
     public async create(user: User, payload: any): Promise<string> {
@@ -250,7 +253,7 @@ export class FormService {
             offset,
             where: baseQueryOptions,
             distinct: true,
-            col: 'formId',
+            col: 'formid',
             include: [{
                 required: true,
                 model: Form,
@@ -297,13 +300,6 @@ export class FormService {
         const profiler = logger.startTimer();
         return this.formVersionRepository.sequelize.transaction(async (transaction) => {
             const date = new Date();
-            const latestVersion = await this.formVersionRepository.findOne({
-                where: FormService.latestFormClause(formId),
-            });
-
-            if (!latestVersion) {
-                throw new ResourceNotFoundError(`Form ${formId} does not exist`);
-            }
             const versionToRestore = await this.formVersionRepository.findOne({
                 where: {
                     versionId: {
@@ -316,12 +312,17 @@ export class FormService {
             }
 
             const userId = currentUser.details.email;
-            await latestVersion.update({
-                validTo: date,
-                latest: false,
-                updatedBy: userId,
+            const latestVersion = await this.formVersionRepository.findOne({
+                where: FormService.latestFormClause(formId),
             });
+            if (latestVersion) {
+                await latestVersion.update({
+                    validTo: date,
+                    latest: false,
+                    updatedBy: userId,
+                });
 
+            }
             await versionToRestore.update({
                 latest: true,
                 validFrom: date,
@@ -460,15 +461,6 @@ export class FormService {
                     modelName: 'Form',
                 });
             }
-            await formReloaded.update({
-                updatedOn: currentDate,
-                updatedBy: userId,
-            });
-            await latestVersion.update({
-                validTo: currentDate,
-                latest: false,
-                updatedBy: userId,
-            });
             form.id = formId;
             form = FormService.sanitize(form);
             const newVersion = await new FormVersion({
@@ -480,8 +472,20 @@ export class FormService {
                 createdOn: currentDate,
                 createdBy: userId,
             }).save({});
+
             logger.info(`New version created. New version id ${newVersion.versionId} `
                 + `for form id ${formReloaded.id}`);
+
+            await formReloaded.update({
+                updatedOn: currentDate,
+                updatedBy: userId,
+            });
+            await latestVersion.update({
+                validTo: currentDate,
+                latest: false,
+                updatedBy: userId,
+            });
+
             return newVersion;
 
         });

@@ -6,11 +6,11 @@ const defaultDBConfig: DBConfig = {
     storage: ':memory:',
   },
   production: {
-    username: process.env.DB_FORM_DEFAULT_USERNAME,
-    password: process.env.DB_FORM_DEFAULT_PASSWORD,
-    database: process.env.DB_FORM_DEFAULT_DBNAME,
-    host: process.env.DB_FORM_HOSTNAME,
-    port: process.env.DB_FORM_PORT,
+    username: '',
+    password: 'sa',
+    database: 'formdb3',
+    host: 'localhost',
+    port: '5432',
     dialect: 'postgres',
     native: false,
     dialectOptions: {

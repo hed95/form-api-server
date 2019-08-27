@@ -2,7 +2,10 @@ import {Column, DataType, ForeignKey, Model, Table} from 'sequelize-typescript';
 import {Form} from './Form';
 import {Role} from './Role';
 
-@Table
+@Table({
+    tableName: 'formroles',
+    timestamps: false
+})
 export class FormRoles extends Model<FormRoles> {
 
     @Column({
@@ -15,12 +18,14 @@ export class FormRoles extends Model<FormRoles> {
     @ForeignKey(() => Form)
     @Column({
         type: DataType.UUID,
+        field: 'formid'
     })
     public formId: string;
 
     @ForeignKey(() => Role)
     @Column({
         type: DataType.UUID,
+        field : 'roleid'
     })
     public roleId: string;
 }

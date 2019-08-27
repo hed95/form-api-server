@@ -1,10 +1,11 @@
-import {BelongsToMany, Column, DataType, HasMany, Model, Table} from 'sequelize-typescript';
+import {BelongsToMany, Column, CreatedAt, DataType, HasMany, Model, Table} from 'sequelize-typescript';
 import {FormComment} from './FormComment';
 import {FormRoles} from './FormRoles';
 import {Role} from './Role';
 
 @Table({
     timestamps: false,
+    tableName: 'form'
 })
 export class Form extends Model<Form> {
     @Column({
@@ -16,18 +17,25 @@ export class Form extends Model<Form> {
 
     @Column({
         type: DataType.DATE,
+        field: 'createdon'
     })
+    @CreatedAt
     public createdOn: Date;
 
     @Column({
         type: DataType.DATE,
+        field: 'updatedon'
     })
     public updatedOn: Date;
 
-    @Column
+    @Column({
+        field: 'createdby'
+    })
     public createdBy: string;
 
-    @Column
+    @Column({
+        field:'updatedby'
+    })
     public updatedBy: string;
 
     @BelongsToMany(() => Role, () => FormRoles, 'formId', 'roleId')
