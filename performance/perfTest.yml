@@ -3,11 +3,121 @@ config:
   phases:
     - duration: 60
       arrivalRate: 20
-  defaults:
-    headers:
-      Authorization: 'Bearer {{ $processEnvironment.BEARER_TOKEN }}'
 scenarios:
-  - name: 'Get form by id'
+  - name: 'Create, get and update form'
     flow:
+      - log: "Get access token"
+      - post:
+          url: "https://keycloak.elf79.dev/auth/realms/elf/protocol/openid-connect/token"
+          headers:
+            Content-Type: "application/x-www-form-urlencoded"
+          form:
+            username: "{{ $processEnvironment.USERNAME }}"
+            password: "{{ $processEnvironment.PASSWORD }}"
+            grant_type: "password"
+            client_id: "platform-ui"
+          capture:
+            json: "$.access_token"
+            as: "accessToken"
+      - think: 1
+
+      - log: "Posting new form"
+      - post:
+          url: "/form"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+          capture:
+            - header: "location"
+              as: "formId"
+          json:
+            "type": "form"
+            "components": [
+                  {
+                    "label": "Text Field",
+                    "widget": {
+                      "type": "input"
+                    },
+                    "tableView": true,
+                    "inputFormat": "plain",
+                    "validate": {
+                      "required": true
+                    },
+                    "key": "textField",
+                    "type": "textfield",
+                    "input": true
+                  },
+                  {
+                    "type": "button",
+                    "label": "Submit",
+                    "key": "submit",
+                    "disableOnInvalid": true,
+                    "input": true,
+                    "tableView": false
+                  }
+            ]
+            "title": "{{ $randomString() }}"
+            "path": "{{ $randomString() }}"
+            "display": "form"
+            "name": "{{ $randomString() }}"
+            "submissionAccess": []
+            "access": []
+
+      - think: 1
+      - log: "Getting form that was posted"
       - get:
-          url: "/form/f91e96d8-91f3-4bb0-bde8-dcc0b5e2b9da"
+          url: "{{ formId }}"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+      - log: "Updating the form"
+      - think: 1
+
+      - put:
+          url: "{{ formId }}"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+          json:
+            "type": "form"
+            "components": [
+              {
+                "label": "Text Field",
+                "widget": {
+                  "type": "input"
+                },
+                "tableView": true,
+                "inputFormat": "plain",
+                "validate": {
+                  "required": true
+                },
+                "key": "textField",
+                "type": "textfield",
+                "input": true
+              },
+              {
+                "label": "Text Field",
+                "widget": {
+                  "type": "input"
+                },
+                "tableView": true,
+                "inputFormat": "plain",
+                "validate": {
+                  "required": true
+                },
+                "key": "textField2",
+                "type": "textfield",
+                "input": true
+              },
+              {
+                "type": "button",
+                "label": "Submit",
+                "key": "submit",
+                "disableOnInvalid": true,
+                "input": true,
+                "tableView": false
+              }
+            ]
+            "title": "{{ $randomString() }}"
+            "path": "{{ $randomString() }}"
+            "display": "form"
+            "name": "{{ $randomString() }}"
+            "submissionAccess": []
+            "access": []

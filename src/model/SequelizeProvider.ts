@@ -13,7 +13,7 @@ import defaultDBConfig from '../config/defaultDBConfig';
 import defaultAppConfig from '../config/defaultAppConfig';
 
 const namespace = cls.createNamespace('sequelize-transaction');
-Sequelize.useCLS(namespace);
+(Sequelize as any).__proto__.useCLS(namespace);
 
 @provide(TYPE.SequelizeProvider)
 export class SequelizeProvider {
