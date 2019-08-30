@@ -9,7 +9,7 @@ import * as express from 'express';
 @provide(TYPE.FormResourceAssembler)
 export class FormResourceAssembler implements ResourceAssembler<FormVersion, object> {
 
-    public toResource(entity: FormVersion, req: express.Request, includeLinks: boolean = true): object {
+    public  toResource(entity: FormVersion, req: express.Request, includeLinks: boolean = true): object {
         if (!entity.schema) {
             return _.cloneDeepWith(entity, (value) => {
                 const form = value.form;
@@ -36,6 +36,7 @@ export class FormResourceAssembler implements ResourceAssembler<FormVersion, obj
         resource.createdBy = entity.form.createdBy;
         resource.updatedBy = entity.form.updatedBy;
         resource.updatedOn = entity.form.updatedOn;
+        resource.latest = entity.latest;
         const formId: string = entity.form.id;
         resource.id = formId;
         if (includeLinks) {

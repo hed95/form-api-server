@@ -321,6 +321,7 @@ export class FormService {
                     latest: false,
                     updatedBy: userId,
                 });
+                logger.debug(`Latest version ${latestVersion.versionId} updated to not latest`);
 
             }
             await versionToRestore.update({
@@ -329,6 +330,7 @@ export class FormService {
                 validTo: null,
                 updatedBy: userId,
             });
+            logger.debug(`version ${versionToRestore.versionId} updated to  latest`);
             const reloaded = await this.findLatestForm(formId, currentUser);
             profiler.done({message: `restored form id ${formId} to version ${versionToRestore.id}`});
             return reloaded;
@@ -382,7 +384,9 @@ export class FormService {
         }
     }
 
-    public async findAllVersions(formId: string, user: User, offset: number = 0, limit: number = 20): Promise<{
+    public async findAllVersions(formId: string, user: User,
+                                 offset: number = 0, limit: number = 20,
+                                 select?: string[]): Promise<{
         offset: number,
         limit: number,
         versions: FormVersion[],
@@ -394,7 +398,7 @@ export class FormService {
             throw new ResourceNotFoundError(`Form with id ${formId} does not exist`);
         }
 
-        const result: { rows: FormVersion[], count: number } = await this.formVersionRepository.findAndCountAll({
+        const query: FindAndCountOptions = {
             where: {
                 formId: {
                     [Op.eq]: formId,
@@ -417,7 +421,13 @@ export class FormService {
                     },
                 }],
             }],
-        });
+        };
+
+        if (select) {
+            query.attributes = _.union(select, ['validFrom', 'formId']);
+        }
+
+        const result: { rows: FormVersion[], count: number } = await this.formVersionRepository.findAndCountAll(query);
         try {
             return Promise.resolve(
                 {
@@ -549,7 +559,6 @@ export class FormService {
         });
     }
 
-    @Cacheable({cacheKey: FormService.setCacheKey})
     public async findByVersionId(id: string, user: User): Promise<FormVersion> {
         const defaultRole = await this.roleService.getDefaultRole();
         const version = await this.formVersionRepository.findByPk(id, {
