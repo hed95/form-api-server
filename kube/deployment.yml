@@ -90,6 +90,8 @@ spec:
             value: "{{.KEYCLOAK_REALM}}"
           - name: API_FORM_KEYCLOAK_CLIENT_ID
             value: "{{.API_FORM_KEYCLOAK_CLIENT_ID}}"
+          - name: API_FORM_KEYCLOAK_BEARER_ONLY
+            value: "{{.API_FORM_KEYCLOAK_BEARER_ONLY}}"
           - name: API_FORM_KEYCLOAK_ADMIN_USERNAME
             value: "{{.API_FORM_KEYCLOAK_ADMIN_USERNAME}}"
           - name: API_FORM_KEYCLOAK_ADMIN_PASSWORD
@@ -97,6 +99,8 @@ spec:
               secretKeyRef:
                 name: "{{.API_FORM_NAME}}"
                 key: authAdminPassword
+          - name: API_FORM_KEYCLOAK_ADMIN_CLIENT_ID
+            value: "{{.API_FORM_KEYCLOAK_ADMIN_CLIENT_ID}}"
           - name: API_FORM_KEYCLOAK_ROLES
             value: "{{.API_FORM_KEYCLOAK_ROLES}}"
           - name: API_FORM_LOG_ENABLE_CHANGE
@@ -105,6 +109,22 @@ spec:
             value: "{{.API_FORM_LOG_ENABLE_QUERY}}"
           - name: API_FORM_LOG_CHANGE_TIMEOUT
             value: "{{.API_FORM_LOG_CHANGE_TIMEOUT}}"
+          - name: API_FORM_CACHE_ROLE_MAX_AGE
+            value: "{{.API_FORM_CACHE_ROLE_MAX_AGE}}"
+          - name: API_FORM_CACHE_ROLE_MAX_ENTRIES
+            value: "{{.API_FORM_CACHE_ROLE_MAX_ENTRIES}}"
+          - name: API_FORM_CACHE_FORM_MAX_AGE
+            value: "{{.API_FORM_CACHE_FORM_MAX_AGE}}"
+          - name: API_FORM_CACHE_FORM_MAX_ENTRIES
+            value: "{{.API_FORM_CACHE_FORM_MAX_ENTRIES}}"
+          - name: API_FORM_CACHE_USER_ROLE_ENTRIES
+            value: "{{.API_FORM_CACHE_USER_ROLE_ENTRIES}}"
+          - name: API_FORM_CACHE_USER_FORM_ENTRIES
+            value: "{{.API_FORM_CACHE_USER_FORM_ENTRIES}}"
+          - name: API_FORM_CACHE_USER_MAX_AGE
+            value: "{{.API_FORM_CACHE_USER_MAX_AGE}}"
+          - name: API_FORM_CACHE_USER_MAX_ENTRIES
+            value: "{{.API_FORM_CACHE_USER_MAX_ENTRIES}}"
           - name: API_FORM_PORT
             value: "{{.API_FORM_PORT}}"
       volumes:
