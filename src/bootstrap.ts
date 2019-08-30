@@ -275,6 +275,7 @@ process.on('uncaughtException', (error) => {
     logger.error('uncaughtException', error);
 });
 
+
 const expressApplication = server.build();
 
 expressApplication.listen(port);

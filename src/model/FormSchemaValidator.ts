@@ -67,7 +67,7 @@ export class FormSchemaValidator {
             versionId: Joi.string(),
             created: Joi.string(),
             modified: Joi.string(),
-            latest: Joi.boolean().optional()
+            latest: Joi.boolean().optional(),
         });
     }
 }
