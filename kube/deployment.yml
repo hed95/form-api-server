@@ -127,6 +127,17 @@ spec:
             value: "{{.API_FORM_CACHE_USER_MAX_ENTRIES}}"
           - name: API_FORM_PORT
             value: "{{.API_FORM_PORT}}"
+          - name: REDIS_PORT
+            value: "{{.REDIS_PORT}}"
+          - name: REDIS_SSL
+            value: "{{.REDIS_SSL}}"
+          - name: REDIS_URI
+            value: "{{.REIDS_URI}}"
+          - name: REDIS_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: "{{.API_FORM_NAME}}"
+                key: redisToken
       volumes:
       - name: certs
         secret:
