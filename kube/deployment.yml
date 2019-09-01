@@ -132,7 +132,7 @@ spec:
           - name: REDIS_SSL
             value: "{{.REDIS_SSL}}"
           - name: REDIS_URI
-            value: "{{.REIDS_URI}}"
+            value: "{{.REDIS_URL}}"
           - name: REDIS_TOKEN
             valueFrom:
               secretKeyRef:

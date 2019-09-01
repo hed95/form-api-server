@@ -1,20 +1,20 @@
 import AppConfig from '../interfaces/AppConfig';
 import * as Redis from 'redis';
-import logger from "../util/logger";
+import logger from '../util/logger';
 
 const redis = (appConfig: AppConfig): Redis.RedisClient => {
     let redisClient;
     if (appConfig.redis.ssl) {
         redisClient = Redis.createClient({
             port: appConfig.redis.port,
-            host: appConfig.redis.token,
+            host: appConfig.redis.host,
             password: appConfig.redis.token,
             tls: {},
         });
     } else {
         redisClient = Redis.createClient({
             port: appConfig.redis.port,
-            host: appConfig.redis.token,
+            host: appConfig.redis.host,
             password: appConfig.redis.token,
         });
     }
