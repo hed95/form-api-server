@@ -178,15 +178,9 @@ describe("FormController", () => {
         // @ts-ignore
         formService.findByVersionId(Arg.any(), Arg.any()).returns(Promise.resolve(version));
 
-        // @ts-ignore
-        formResourceAssembler.toResource(Arg.any(), Arg.any()).returns({
-            display: 'form',
-            components: []
-        });
-
         await formController.getByVersionId("id", mockRequest, mockResponse, user);
 
-        expect(JSON.stringify(mockResponse.getJsonData())).to.eq(JSON.stringify(version.schema));
+        expect(JSON.stringify(mockResponse.getJsonData().schema)).to.eq(JSON.stringify(version.schema));
 
     });
     it('throws error if form does not exist', async () => {

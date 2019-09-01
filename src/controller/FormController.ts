@@ -281,14 +281,15 @@ export class FormController extends BaseHttpController {
                              @queryParam('limit') limit: number = 20,
                              @request() req: express.Request,
                              @response() res: express.Response,
-                             @principal() currentUser: User): Promise<void> {
+                             @principal() currentUser: User,
+                             @queryParam('select') select?: string[]): Promise<void> {
 
         const result: {
             offset: number,
             limit: number,
             versions: FormVersion[],
             total: number,
-        } = await this.formService.findAllVersions(id, currentUser, offset, limit);
+        } = await this.formService.findAllVersions(id, currentUser, offset, limit, select);
         res.json(result);
     }
 
@@ -518,8 +519,7 @@ export class FormController extends BaseHttpController {
                                 @principal() currentUser: User): Promise<void> {
 
         const formVersion: FormVersion = await this.formService.findByVersionId(versionId, currentUser);
-        const updated = this.formResourceAssembler.toResource(formVersion, req, false);
-        res.json(updated);
+        res.json(formVersion);
     }
 
     @ApiOperationPost({

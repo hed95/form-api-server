@@ -181,7 +181,7 @@ server.setErrorConfig((app: express.Application) => {
              next: express.NextFunction) => {
         if (err) {
             logger.error('An exception occurred', {
-                exception: err.message,
+                exception: err.stack,
             });
         }
         const userEmailFromHeader = req.get(ApplicationConstants.USER_ID);
@@ -274,6 +274,7 @@ process.on('unhandledRejection', (reason: Error, promise: Promise<any>) => {
 process.on('uncaughtException', (error) => {
     logger.error('uncaughtException', error);
 });
+
 
 const expressApplication = server.build();
 
