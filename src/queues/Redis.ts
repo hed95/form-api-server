@@ -1,6 +1,6 @@
 import AppConfig from '../interfaces/AppConfig';
 import * as Redis from 'redis';
-import logger from "../util/logger";
+import logger from '../util/logger';
 
 const redis = (appConfig: AppConfig): Redis.RedisClient => {
     let redisClient;
