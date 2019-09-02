@@ -21,7 +21,7 @@ const redis = (appConfig: AppConfig): Redis.RedisClient => {
     redisClient.on('ready', () => {
         logger.info('Client ready');
     });
-    redisClient.on('connect',()=> {
+    redisClient.on('connect', () => {
         logger.info('Redis client connected');
     });
 

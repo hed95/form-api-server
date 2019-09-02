@@ -1,5 +1,5 @@
 import Bull, {Queue} from 'bull';
-import AppConfig from "../interfaces/AppConfig";
+import AppConfig from '../interfaces/AppConfig';
 
 const createQueue = (appConfig: AppConfig,
                      name: string): Queue => {
@@ -10,8 +10,8 @@ const createQueue = (appConfig: AppConfig,
                 port: appConfig.redis.port,
                 host: appConfig.redis.host,
                 password: appConfig.redis.token,
-                tls: {}
-            }
+                tls: {},
+            },
         });
     }
     return new Bull(name, {
@@ -20,7 +20,7 @@ const createQueue = (appConfig: AppConfig,
             host: appConfig.redis.host,
             password: appConfig.redis.token,
 
-        }
+        },
     });
 };
 export default createQueue;
