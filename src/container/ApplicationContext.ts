@@ -55,11 +55,7 @@ export class ApplicationContext {
         this.container.bind<CommentService>(TYPE.CommentService).to(CommentService);
         this.container.bind<PDFService>(TYPE.PDFService).to(PDFService);
 
-        const redisClient = redis(defaultAppConfig);
-        const pdfQueue: Queue<PdfJob> = createQueue(redisClient,
-            redisClient,
-            redisClient,
-            ApplicationConstants.PDF_QUEUE_NAME);
+        const pdfQueue: Queue<PdfJob> = createQueue(defaultAppConfig, ApplicationConstants.PDF_QUEUE_NAME);
         this.container.bind<Queue>(TYPE.PDFQueue).toConstantValue(pdfQueue);
 
         useRedisAdapter(redis(defaultAppConfig));
