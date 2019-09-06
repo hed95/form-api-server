@@ -1,24 +1,183 @@
 config:
   target: 'http://localhost:4000'
   phases:
-    - duration: 60
-      arrivalRate: 20
-  defaults:
-    headers:
-      Authorization: 'Bearer {{ $processEnvironment.BEARER_TOKEN }}'
+    - duration: 180
+      arrivalCount: 10
 scenarios:
   - name: 'Generate PDF'
     flow:
+      - log: "Get access token"
       - post:
-          url: "/pdf/8a9631c8-faf0-4139-98b2-701e8f334b4c"
+          url: "https://keycloak.elf79.dev/auth/realms/elf/protocol/openid-connect/token"
+          headers:
+            Content-Type: "application/x-www-form-urlencoded"
+          form:
+            username: "{{ $processEnvironment.USERNAME }}"
+            password: "{{ $processEnvironment.PASSWORD }}"
+            grant_type: "password"
+            client_id: "www"
+          capture:
+            json: "$.access_token"
+            as: "accessToken"
+      - post:
+          url: "/pdf"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
           json:
-            submission: {
-              data: {
-                "businessKey": "{{ $randomString() }}",
-                "page1Makegridvisible": "yes",
-                "page1Makepagevisible": "yes",
-                "page1DataGrid": [
-                ]
-              }
+            {
+              "submission": {
+                "data": {
+                  "firstName":"TEST",
+                  "familyName":"TEST",
+                  "phoneNumber":"+555555555",
+                  "email":"xxx@xxxx.com",
+                  "eventTypeId":"27",
+                  "shifthistoryid":"",
+                  "themeModeContainer":{
+                    "businessKey":"BF-190903-373",
+                    "goodsCheck":{
+                      "goodsFound":true
+                    },
+                    "peopleCheck":{
+                      "peopleFound":false
+                    },
+                    "selectTheMode":"generalAviation"
+                  },
+                  "controlContainer":{
+                    "HCode":"Lawful",
+                    "controlGrid":[
+                    {
+                      "controlStrategy":""
+                    }
+                    ],
+                    "adoptionCheck":{
+                      "hmrc":false,
+                      "nca":false,
+                      "defra":false,
+                      "cfi":false,
+                      "other":false
+                    },
+                    "unadopted":{
+                      "yes":false
+                    },
+                    "civilPenaltyCheck":false
+                  },
+                  "shiftDetailsContainer":{
+                    "shiftLocation":"belgium",
+                    "DetectionDetails_locationName":"jkyguy",
+                    "portDecDMS":"",
+                    "DetectionDetails_timeDate":"",
+                    "DetectionDetails_detectionNotes":""
+                  },
+                  "peopleMOContainer":{
+                    "peopleConcealmentFilter":"filter=air=eq.TRUE"
+                  },
+                  "itemMOcontainer":{
+                    "itemConcealmentFilter":"filter=air=eq.TRUE",
+                    "moItems_detectionTechRad":"",
+                    "moItem_Grid":[
+                    {
+                      "moItem_concealmentMethod":""
+                    }
+                    ],
+                    "moItems_furtherDetails":""
+                  },
+                  "profileIndicatorContainer":{
+                    "profileIndicator_prePostRad":"pa",
+                    "profileIndicator_scannedRad":"",
+                    "profileIndicator_furtherDetails":"",
+                    "profileIndicatorGrid_notRoRo":[
+                    {
+                      "profileIndicator":""
+                    }
+                    ]
+                  },
+                  "officerContainer":{
+                    "OfficerDetails_ROID":"af4601db-1640-4ff2-a4cc-da44bce99226",
+                    "OfficerDetails_ROteam":"737674f3-6fc2-413e-aca3-ce06b42e4a7a",
+                    "OfficerDetails_IOID":"",
+                    "OfficerDetails_IOteam":"",
+                    "OfficerDetails_IOemail":""
+                  },
+                  "summary":"af4601db-1640-4ff2-a4cc-da44bce99226",
+                  "summary4":"",
+                  "itemContainer":{
+                    "centaurNumber":"",
+                    "itemBdGrid":[
+                    {
+                      "item_itemBd":3,
+                      "item_unitBd":1,
+                      "item_quantityBd":1
+                    }
+                    ]
+                  },
+                  "aviationContainer":{
+                    "aviationTravelDetails_aircraftReg":"sdcsdf",
+                    "aviationTravelDetails_flightNo":"",
+                    "aviationTravelDetails_departureTime":"",
+                    "aviationTravelDetails_departureCountry":"",
+                    "aviationTravelDetails_departurePort":"",
+                    "aviationTravelDetails_portDecDMSDep":"",
+                    "aviationTravelDetails_arrivalTime":"",
+                    "aviationTravelDetails_destinationCountry":"",
+                    "aviationTravelDetails_destinationPort":"",
+                    "aviationTravelDetails_portDecDMSArr":"",
+                    "aviationTravelDetails_specificPortArr":"",
+                    "aviationTravelDetails_legBdGrid":[
+                    {
+                      "aviationTravelDetails_legDepPort":"",
+                      "aviationTravelDetails_legDepDate":"00/00/0000",
+                      "aviationTravelDetails_legArrPort":"",
+                      "aviationTravelDetails_legArrDate":"00/00/0000",
+                      "aviationTravelDetails_legPayment":""
+                    }
+                    ],
+                    "aviationTravelDetails_aircraftType":"",
+                    "aviationTravelDetails_aircraftTypeUse":"",
+                    "aviationTravelDetails_brokerSchool":""
+                  },
+                  "generalAviationContainer":{
+                    "aviationAircraftOwner_companyName":"",
+                    "aviationAircraftOwner_surname":"",
+                    "aviationAircraftOwner_forename":"",
+                    "aviationAircraftOwner_addressLine1":"",
+                    "aviationAircraftOwner_addressLine2":"",
+                    "aviationAircraftOwner_addressLine3":"",
+                    "aviationAircraftOwner_townCity":"",
+                    "aviationAircraftOwner_postcode":"",
+                    "aviationAircraftOwner_country":"",
+                    "aviationAircraftOwner_phoneNumber":""
+                  },
+                  "commercialAviationContainer":{
+
+                  },
+                  "aviationPassengerCrewContainer":{
+                    "checkbox":false,
+                    "aviationPassengerCrewGrid":[
+                    {
+                      "aviationPassengerCrew_crewRole":"",
+                      "aviationPassengerCrew_surname":"",
+                      "aviationPassengerCrew_forename":"",
+                      "aviationPassengerCrew_dob":"00/00/0000",
+                      "aviationPassengerCrew_sex":"",
+                      "aviationPassengerCrew_passportIDNum":"",
+                      "aviationPassengerCrew_nationality":"",
+                      "aviationPassengerCrew_addressLine1":"",
+                      "aviationPassengerCrew_addressLine2":"",
+                      "aviationPassengerCrew_addressLine3":"",
+                      "aviationPassengerCrew_townCity":"",
+                      "aviationPassengerCrew_postcode":"",
+                      "aviationPassengerCrew_country":"",
+                      "aviationPassengerCrew_phoneNumber":"",
+                      "aviationPassengerCrew_validVisaRad":""
+                    }
+                    ]
+                  }
+                }
+
+              },
+              "webhookUrl": "http://localhost:9001/webhook",
+              "formUrl": "http://localhost:4000/form/89685cec-a3e0-4c8a-be7c-b3e7aab53290"
             }
-            webhookUrl: 'test'
+
+

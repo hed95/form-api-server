@@ -273,6 +273,9 @@ export class FormService {
         if (attributes.length !== 0) {
             // @ts-ignore
             query.attributes = _.map(attributes, (attribute) => {
+                if (attribute === '_id') {
+                    attribute = 'id';
+                }
                 return [Sequelize.json(`schema.${attribute}`), attribute];
             });
         }

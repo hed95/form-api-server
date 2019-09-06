@@ -82,7 +82,8 @@ export class FormController extends BaseHttpController {
     public async get(@requestParam('id') id: string,
                      @request() req: express.Request,
                      @response() res: express.Response,
-                     @principal() currentUser: User): Promise<void> {
+                     @principal() currentUser: User,
+                     @queryParam() live?: number): Promise<void> {
         const formVersion = await this.formService.findForm(id, currentUser);
         if (!formVersion) {
             throw new ResourceNotFoundError(`Form with id ${id} does not exist. Check id or access controls`);
@@ -237,7 +238,7 @@ export class FormController extends BaseHttpController {
     }
 
     @ApiOperationGet({
-        path: '/{id}',
+        path: '/{id}/versions',
         description: 'Get all versions for given form id',
         summary: 'Get all versions for given form id',
         produces: ['application/json'],

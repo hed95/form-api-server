@@ -37,16 +37,20 @@ export class PDFService {
         const submission = pdfRequest.submission;
         const webHookUrl = pdfRequest.webhookUrl;
 
-        if (!formId && !pdfRequest.schema) {
+        if (!formId && !pdfRequest.schema && !pdfRequest.formUrl) {
             throw new ResourceValidationError('Form Id required', [{
-                message: 'Form id or schema required',
+                message: 'Form id , schema or formUrl required',
                 type: 'missing form id or schema',
-                path: ['formId', 'schema'],
+                path: ['formId', 'schema', 'formUrl'],
             }]);
         }
         const schemaToPdf = formId ? await this.getForm(formId, currentUser) : schema;
         logger.debug(`PDF request submitted for processing`);
-        await this.pdfQueue.add(new PdfJob(schemaToPdf, submission, webHookUrl), {attempts: 5, backoff: 5000});
+        await this.pdfQueue.add(new PdfJob(schemaToPdf,
+            submission,
+            webHookUrl,
+            pdfRequest.formUrl),
+            {attempts: 5, backoff: 5000});
     }
 
     private async getForm(formId: string, currentUser: User): Promise<object> {
