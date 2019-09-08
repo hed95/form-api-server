@@ -1,8 +1,8 @@
 config:
   target: 'http://localhost:4000'
   phases:
-    - duration: 180
-      arrivalCount: 10
+    - duration: 60
+      arrivalCount: 20
 scenarios:
   - name: 'Generate PDF'
     flow:

@@ -1,7 +1,7 @@
 import AppConfig from '../interfaces/AppConfig';
 import { ApplicationConstants } from '../constant/ApplicationConstants';
 
-export const TWO_MINUTES = '120000';
+export const FIFTY_EIGHT_SECONDS = '58000';
 const MAX_ENTRIES = 100;
 const DEFAULT_REDIS_PORT = 6379;
 
@@ -44,7 +44,7 @@ const defaultAppConfig: AppConfig = {
     realm: KEYCLOAK_REALM,
     confidentialPort: 0,
     sslRequired: 'external',
-    tokenRefreshInterval: KEYCLOAK_TOKEN_REFRESH_INTERVAL || TWO_MINUTES,
+    tokenRefreshInterval: KEYCLOAK_TOKEN_REFRESH_INTERVAL || FIFTY_EIGHT_SECONDS,
     admin: {
       username: API_FORM_KEYCLOAK_ADMIN_USERNAME,
       password: API_FORM_KEYCLOAK_ADMIN_PASSWORD,
@@ -64,17 +64,17 @@ const defaultAppConfig: AppConfig = {
   },
   cache: {
     role: {
-      maxAge: API_FORM_CACHE_ROLE_MAX_AGE ? +API_FORM_CACHE_ROLE_MAX_AGE : +TWO_MINUTES,
+      maxAge: API_FORM_CACHE_ROLE_MAX_AGE ? +API_FORM_CACHE_ROLE_MAX_AGE : +FIFTY_EIGHT_SECONDS,
       maxEntries: API_FORM_CACHE_ROLE_MAX_ENTRIES ?
                 +API_FORM_CACHE_USER_ROLE_ENTRIES : MAX_ENTRIES,
     },
     form: {
-      maxAge: API_FORM_CACHE_FORM_MAX_AGE ? +API_FORM_CACHE_FORM_MAX_AGE : +TWO_MINUTES,
+      maxAge: API_FORM_CACHE_FORM_MAX_AGE ? +API_FORM_CACHE_FORM_MAX_AGE : +FIFTY_EIGHT_SECONDS,
       maxEntries: API_FORM_CACHE_FORM_MAX_ENTRIES ?
                 +API_FORM_CACHE_USER_FORM_ENTRIES : MAX_ENTRIES,
     },
     user: {
-      maxAge: API_FORM_CACHE_USER_MAX_AGE ? +API_FORM_CACHE_USER_MAX_AGE : +TWO_MINUTES,
+      maxAge: API_FORM_CACHE_USER_MAX_AGE ? +API_FORM_CACHE_USER_MAX_AGE : +FIFTY_EIGHT_SECONDS,
       maxEntries: API_FORM_CACHE_USER_MAX_ENTRIES ?
                 +API_FORM_CACHE_USER_MAX_ENTRIES : MAX_ENTRIES,
     },
