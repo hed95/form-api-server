@@ -1,18 +1,21 @@
 import {expect} from "chai";
 import {ValidationService} from "../../../src/service/ValidationService";
 import {FormService} from "../../../src/service/FormService";
-import {Arg, Substitute} from "@fluffy-spoon/substitute";
+import {Arg, Substitute, SubstituteOf} from "@fluffy-spoon/substitute";
 import {User} from "../../../src/auth/User";
 import {FormVersion} from "../../../src/model/FormVersion";
 import {basicForm, dataGridForm, emailForm, numberForm} from "../../form";
+import {KeycloakService} from "../../../src/auth/KeycloakService";
 
 describe('Validation Service', () => {
-    let formService: FormService;
+    let formService: SubstituteOf<FormService>;
     let underTest: ValidationService;
+    let keycloakService: SubstituteOf<KeycloakService>;
 
     beforeEach(() => {
         formService = Substitute.for<FormService>();
-        underTest = new ValidationService(formService);
+        keycloakService = Substitute.for<KeycloakService>()
+        underTest = new ValidationService(formService, keycloakService);
 
     });
     it('can validate simple text field', async () => {
@@ -20,7 +23,7 @@ describe('Validation Service', () => {
         Object.assign(FormVersion, {});
         const version: FormVersion = Object.assign(FormVersion.prototype, {});
         version.schema = basicForm;
-        // @ts-ignore
+        keycloakService.token().returns('token');
         formService.findLatestForm(Arg.any(), Arg.any()).returns(Promise.resolve(version));
 
         const result = await underTest.validate("formId", {
@@ -38,7 +41,6 @@ describe('Validation Service', () => {
         Object.assign(FormVersion, {});
         const version: FormVersion = Object.assign(FormVersion.prototype, {});
         version.schema = basicForm;
-        // @ts-ignore
         formService.findLatestForm(Arg.any(), Arg.any()).returns(Promise.resolve(version));
 
         const result = await underTest.validate("formId", {
@@ -55,7 +57,6 @@ describe('Validation Service', () => {
         Object.assign(FormVersion, {});
         const version: FormVersion = Object.assign(FormVersion.prototype, {});
         version.schema = numberForm;
-        // @ts-ignore
         formService.findLatestForm(Arg.any(), Arg.any()).returns(Promise.resolve(version));
 
         const result = await underTest.validate("formId", {
@@ -72,7 +73,6 @@ describe('Validation Service', () => {
         Object.assign(FormVersion, {});
         const version: FormVersion = Object.assign(FormVersion.prototype, {});
         version.schema = emailForm;
-        // @ts-ignore
         formService.findLatestForm(Arg.any(), Arg.any()).returns(Promise.resolve(version));
 
         const result = await underTest.validate("formId", {
@@ -89,7 +89,6 @@ describe('Validation Service', () => {
         Object.assign(FormVersion, {});
         const version: FormVersion = Object.assign(FormVersion.prototype, {});
         version.schema = dataGridForm;
-        // @ts-ignore
         formService.findLatestForm(Arg.any(), Arg.any()).returns(Promise.resolve(version));
 
         const result = await underTest.validate("formId", {

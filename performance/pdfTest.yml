@@ -1,8 +1,8 @@
 config:
   target: 'http://localhost:4000'
   phases:
-    - duration: 60
-      arrivalCount: 20
+    - duration: 1
+      arrivalCount: 1
 scenarios:
   - name: 'Generate PDF'
     flow:
@@ -27,154 +27,184 @@ scenarios:
             {
               "submission": {
                 "data": {
-                  "firstName":"TEST",
-                  "familyName":"TEST",
-                  "phoneNumber":"+555555555",
-                  "email":"xxx@xxxx.com",
-                  "eventTypeId":"27",
-                  "shifthistoryid":"",
-                  "themeModeContainer":{
-                    "businessKey":"BF-190903-373",
-                    "goodsCheck":{
-                      "goodsFound":true
+                  "businessKey": "BF-190909-76",
+                  "firstName": "Mark",
+                  "familyName": "Olliver",
+                  "phoneNumber": "+447870808487",
+                  "email": "mark.olliver@homeoffice.gov.uk",
+                  "eventTypeId": "27",
+                  "shifthistoryid": "da273d81-6e82-48e3-949d-187cbb562b32",
+                  "themeModeContainer": {
+                    "goodsCheck": "",
+                    "peopleCheck": {
+                      "peopleFound": true
                     },
-                    "peopleCheck":{
-                      "peopleFound":false
-                    },
-                    "selectTheMode":"generalAviation"
+                    "selectTheMode": "generalAviation"
                   },
-                  "controlContainer":{
-                    "HCode":"Lawful",
-                    "controlGrid":[
+                  "controlContainer": {
+                    "print": true,
+                    "HCode": "L",
+                    "controlGrid": [
                     {
-                      "controlStrategy":""
+                      "controlStrategy": 1
                     }
                     ],
-                    "adoptionCheck":{
-                      "hmrc":false,
-                      "nca":false,
-                      "defra":false,
-                      "cfi":false,
-                      "other":false
+                    "adoptionCheck": {
+                      "hmrc": true,
+                      "nca": false,
+                      "defra": false,
+                      "cfi": false,
+                      "other": false
                     },
-                    "unadopted":{
-                      "yes":false
-                    },
-                    "civilPenaltyCheck":false
+                    "unadopted": "false"
                   },
-                  "shiftDetailsContainer":{
-                    "shiftLocation":"belgium",
-                    "DetectionDetails_locationName":"jkyguy",
-                    "portDecDMS":"",
-                    "DetectionDetails_timeDate":"",
-                    "DetectionDetails_detectionNotes":""
+                  "shiftDetailsContainer": {
+                    "print": false,
+                    "shiftLocation": "uk",
+                    "DetectionDetails_locationName": "Heathrow",
+                    "portDecDMS": "",
+                    "DetectionDetails_timeDate": "2019-09-09T12:00:00",
+                    "DetectionDetails_detectionNotes": ""
                   },
-                  "peopleMOContainer":{
-                    "peopleConcealmentFilter":"filter=air=eq.TRUE"
-                  },
-                  "itemMOcontainer":{
-                    "itemConcealmentFilter":"filter=air=eq.TRUE",
-                    "moItems_detectionTechRad":"",
-                    "moItem_Grid":[
+                  "peopleMOContainer": {
+                    "print": false,
+                    "peopleConcealmentFilter": "filter=air=eq.TRUE",
+                    "moPeople_detectionTechRad": "yes",
+                    "moPeople_Grid": [
                     {
-                      "moItem_concealmentMethod":""
+                      "moPeople_concealmentMethod": 1
                     }
                     ],
-                    "moItems_furtherDetails":""
+                    "moPeople_furtherDetails": "",
+                    "moPeople_detectionTechnology": 2
                   },
-                  "profileIndicatorContainer":{
-                    "profileIndicator_prePostRad":"pa",
-                    "profileIndicator_scannedRad":"",
-                    "profileIndicator_furtherDetails":"",
-                    "profileIndicatorGrid_notRoRo":[
+                  "itemMOcontainer": {
+                    "print": false,
+                    "itemConcealmentFilter": "filter=air=eq.TRUE"
+                  },
+                  "profileIndicatorContainer": {
+                    "print": true,
+                    "profileFilter": "",
+                    "profileIndicator_prePostRad": "paO",
+                    "profileIndicator_scannedRad": false,
+                    "profileIndicator_furtherDetails": "",
+                    "profileIndicatorGrid_notRoRo": [
                     {
-                      "profileIndicator":""
+                      "profileIndicator": 4
                     }
                     ]
                   },
-                  "officerContainer":{
-                    "OfficerDetails_ROID":"af4601db-1640-4ff2-a4cc-da44bce99226",
-                    "OfficerDetails_ROteam":"737674f3-6fc2-413e-aca3-ce06b42e4a7a",
-                    "OfficerDetails_IOID":"",
-                    "OfficerDetails_IOteam":"",
-                    "OfficerDetails_IOemail":""
+                  "officerContainer": {
+                    "print": false,
+                    "OfficerDetails_ROID": "af4601db-1640-4ff2-a4cc-da44bce99226",
+                    "OfficerDetails_ROName": "Mark Olliver",
+                    "OfficerDetails_ROteam": "737674f3-6fc2-413e-aca3-ce06b42e4a7a",
+                    "OfficerDetails_IOID": "",
+                    "OfficerDetails_IOteam": "",
+                    "OfficerDetails_IOemail": ""
                   },
-                  "summary":"af4601db-1640-4ff2-a4cc-da44bce99226",
-                  "summary4":"",
-                  "itemContainer":{
-                    "centaurNumber":"",
-                    "itemBdGrid":[
+                  "summary_ROName": "Mark Olliver",
+                  "summary4": "",
+                  "peopleDetectionContainer": {
+                    "print": false,
+                    "nationalityBreakdownGrid": [
                     {
-                      "item_itemBd":3,
-                      "item_unitBd":1,
-                      "item_quantityBd":1
-                    }
-                    ]
-                  },
-                  "aviationContainer":{
-                    "aviationTravelDetails_aircraftReg":"sdcsdf",
-                    "aviationTravelDetails_flightNo":"",
-                    "aviationTravelDetails_departureTime":"",
-                    "aviationTravelDetails_departureCountry":"",
-                    "aviationTravelDetails_departurePort":"",
-                    "aviationTravelDetails_portDecDMSDep":"",
-                    "aviationTravelDetails_arrivalTime":"",
-                    "aviationTravelDetails_destinationCountry":"",
-                    "aviationTravelDetails_destinationPort":"",
-                    "aviationTravelDetails_portDecDMSArr":"",
-                    "aviationTravelDetails_specificPortArr":"",
-                    "aviationTravelDetails_legBdGrid":[
-                    {
-                      "aviationTravelDetails_legDepPort":"",
-                      "aviationTravelDetails_legDepDate":"00/00/0000",
-                      "aviationTravelDetails_legArrPort":"",
-                      "aviationTravelDetails_legArrDate":"00/00/0000",
-                      "aviationTravelDetails_legPayment":""
+                      "people_nationalityBd": 1,
+                      "people_typeBd": 1,
+                      "people_numberBd": 1
                     }
                     ],
-                    "aviationTravelDetails_aircraftType":"",
-                    "aviationTravelDetails_aircraftTypeUse":"",
-                    "aviationTravelDetails_brokerSchool":""
+                    "PeopleDetection_docFound": false
                   },
-                  "generalAviationContainer":{
-                    "aviationAircraftOwner_companyName":"",
-                    "aviationAircraftOwner_surname":"",
-                    "aviationAircraftOwner_forename":"",
-                    "aviationAircraftOwner_addressLine1":"",
-                    "aviationAircraftOwner_addressLine2":"",
-                    "aviationAircraftOwner_addressLine3":"",
-                    "aviationAircraftOwner_townCity":"",
-                    "aviationAircraftOwner_postcode":"",
-                    "aviationAircraftOwner_country":"",
-                    "aviationAircraftOwner_phoneNumber":""
+                  "SAMScontainer": {
+                    "print": true
                   },
-                  "commercialAviationContainer":{
-
+                  "sponsorContainer": {
+                    "print": false,
+                    "sponsor_company": "",
+                    "sponsor_surname": "",
+                    "sponsor_forename": "",
+                    "sponsor_dob": "00/00/0000",
+                    "sponsor_sex": "",
+                    "sponsor_passportIDNum": "",
+                    "sponsor_nationality": "",
+                    "sponsor_addressLine1": "",
+                    "sponsor_addressLine2": "",
+                    "sponsor_addressLine3": "",
+                    "sponsor_townCity": "",
+                    "sponsor_country": "",
+                    "sponsor_postcode": "",
+                    "sponsor_PhoneNum": ""
                   },
-                  "aviationPassengerCrewContainer":{
-                    "checkbox":false,
-                    "aviationPassengerCrewGrid":[
+                  "aviationContainer": {
+                    "print": false,
+                    "aviationTravelDetails_aircraftReg": "EASY",
+                    "aviationTravelDetails_flightNo": "EY1",
+                    "aviationTravelDetails_departureTime": "",
+                    "aviationTravelDetails_departureCountry": "",
+                    "aviationTravelDetails_departurePort": "",
+                    "aviationTravelDetails_portDecDMSDep": "",
+                    "aviationTravelDetails_arrivalTime": "",
+                    "aviationTravelDetails_destinationCountry": "",
+                    "aviationTravelDetails_destinationPort": "",
+                    "aviationTravelDetails_portDecDMSArr": "",
+                    "aviationTravelDetails_specificPortArr": "",
+                    "aviationTravelDetails_legBdGrid": [
                     {
-                      "aviationPassengerCrew_crewRole":"",
-                      "aviationPassengerCrew_surname":"",
-                      "aviationPassengerCrew_forename":"",
-                      "aviationPassengerCrew_dob":"00/00/0000",
-                      "aviationPassengerCrew_sex":"",
-                      "aviationPassengerCrew_passportIDNum":"",
-                      "aviationPassengerCrew_nationality":"",
-                      "aviationPassengerCrew_addressLine1":"",
-                      "aviationPassengerCrew_addressLine2":"",
-                      "aviationPassengerCrew_addressLine3":"",
-                      "aviationPassengerCrew_townCity":"",
-                      "aviationPassengerCrew_postcode":"",
-                      "aviationPassengerCrew_country":"",
-                      "aviationPassengerCrew_phoneNumber":"",
-                      "aviationPassengerCrew_validVisaRad":""
+                      "aviationTravelDetails_legDepPort": "",
+                      "aviationTravelDetails_legDepDate": "00/00/0000",
+                      "aviationTravelDetails_legArrPort": "",
+                      "aviationTravelDetails_legArrDate": "00/00/0000",
+                      "aviationTravelDetails_legPayment": {}
+                    }
+                    ],
+                    "aviationTravelDetails_aircraftType": "",
+                    "aviationTravelDetails_aircraftTypeUse": "",
+                    "aviationTravelDetails_brokerSchool": ""
+                  },
+                  "generalAviationContainer": {
+                    "print": false,
+                    "aviationAircraftOwner_companyName": "",
+                    "aviationAircraftOwner_surname": "",
+                    "aviationAircraftOwner_forename": "",
+                    "aviationAircraftOwner_addressLine1": "",
+                    "aviationAircraftOwner_addressLine2": "",
+                    "aviationAircraftOwner_addressLine3": "",
+                    "aviationAircraftOwner_townCity": "",
+                    "aviationAircraftOwner_postcode": "",
+                    "aviationAircraftOwner_country": {},
+                    "aviationAircraftOwner_phoneNumber": ""
+                  },
+                  "commercialAviationContainer": {
+                    "print": false
+                  },
+                  "aviationPassengerCrewContainer": {
+                    "checkbox": false,
+                    "aviationPassengerCrewGrid": [
+                    {
+                      "aviationPassengerCrew_crewRole": {},
+                      "aviationPassengerCrew_surname": "",
+                      "aviationPassengerCrew_forename": "",
+                      "aviationPassengerCrew_dob": "00/00/0000",
+                      "aviationPassengerCrew_sex": {},
+                      "aviationPassengerCrew_passportIDNum": "",
+                      "aviationPassengerCrew_nationality": {},
+                      "aviationPassengerCrew_addressLine1": "",
+                      "aviationPassengerCrew_addressLine2": "",
+                      "aviationPassengerCrew_addressLine3": "",
+                      "aviationPassengerCrew_townCity": "",
+                      "aviationPassengerCrew_postcode": "",
+                      "aviationPassengerCrew_country": {},
+                      "aviationPassengerCrew_phoneNumber": "",
+                      "aviationPassengerCrew_validVisaRad": ""
                     }
                     ]
+                  },
+                  "_encryptionMetaData": {
+                    "iv": "ZtjS06A/hob3DSGJrS/iLQ==",
+                    "publicKey": "BBlBKlQmWa58ngJoSAKQ/+ut21qUf/8RCYqIATiGaeXcfnjskyATqGT+iRVnJKohjnA9zbiq4fxIbdCQ9AknYr0Bpd1iG726ajXwWDddETHSKltqiK/KjSxE/64N3miGZ4wAm4EETtXVnQjck7d+ypVUnsLnl0np1bEMR0UKnuB8"
                   }
                 }
-
               },
               "webhookUrl": "http://localhost:9001/webhook",
               "formUrl": "http://localhost:4000/form/89685cec-a3e0-4c8a-be7c-b3e7aab53290"

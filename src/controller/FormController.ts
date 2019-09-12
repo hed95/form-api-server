@@ -33,7 +33,6 @@ import {ValidationService} from '../service/ValidationService';
 import {FormResourceAssembler} from './FormResourceAssembler';
 import logger from '../util/logger';
 import _ from 'lodash';
-import {ValidationError} from '@hapi/joi';
 import HttpStatus from 'http-status-codes';
 import {CommentService} from '../service/CommentService';
 import ResourceNotFoundError from '../error/ResourceNotFoundError';
@@ -124,7 +123,7 @@ export class FormController extends BaseHttpController {
                                     @response() res: express.Response,
                                     @principal() currentUser: User): Promise<void> {
         logger.info(`Initiating a submission for validation`);
-        const validationErrors: ValidationError[] = await this.validationService.validate(id,
+        const validationErrors: Error[] = await this.validationService.validate(id,
             submission,
             currentUser);
         if (validationErrors.length !== 0) {
@@ -205,6 +204,7 @@ export class FormController extends BaseHttpController {
                           @request() req: express.Request,
                           @response() res: express.Response,
                           @queryParam('name') name?: string,
+                          @queryParam('title') title?: string,
                           @queryParam('full') full?: boolean): Promise<{ total: number, forms: object[] }> {
 
         if (full) {
@@ -212,6 +212,10 @@ export class FormController extends BaseHttpController {
         }
         if (name) {
             filter = filter + `,name__eq__${name}`;
+        }
+
+        if (title) {
+            filter += `,title__iLike__%${title}%`;
         }
         const filterQuery: object = filter && filter.split(',').length !== 0 ?
             this.queryParser.parse(filter.split(',')) : null;
@@ -523,6 +527,16 @@ export class FormController extends BaseHttpController {
         res.json(formVersion);
     }
 
+    @httpGet('/:formId/v/:versionId', TYPE.ProtectMiddleware)
+    public async getVersionByFormIdAndVersion(@requestParam('versionId') versionId: string,
+                                              @requestParam('formId') formId: string,
+                                              @request() req: express.Request,
+                                              @response() res: express.Response,
+                                              @principal() currentUser: User): Promise<void> {
+        const formVersion: FormVersion = await this.formService.findByFormAndVersion(formId, versionId, currentUser);
+        res.json(this.formResourceAssembler.toResource(formVersion, req));
+    }
+
     @ApiOperationPost({
         path: '/restore',
         description: 'Restore a specific form version to latest',
@@ -531,11 +545,11 @@ export class FormController extends BaseHttpController {
             body: {
                 description: 'Data that contains the form id and the version that needs to be made latest',
                 properties: {
-                    formId : {
+                    formId: {
                         type: 'string',
                         required: true,
                     },
-                    versionId : {
+                    versionId: {
                         type: 'string',
                         required: true,
                     },

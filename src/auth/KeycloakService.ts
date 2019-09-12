@@ -8,10 +8,11 @@ import KcAdminClient from 'keycloak-admin';
 import logger from '../util/logger';
 import {User} from './User';
 import {Role} from '../model/Role';
-import {getToken} from 'keycloak-admin/lib/utils/auth';
 import LRUCache from 'lru-cache';
 import {EventEmitter} from 'events';
 import {ApplicationConstants} from '../constant/ApplicationConstants';
+import HttpStatus from 'http-status-codes';
+import {getToken} from 'keycloak-admin/lib/utils/auth';
 
 @provide(TYPE.KeycloakService)
 export class KeycloakService {
@@ -21,26 +22,30 @@ export class KeycloakService {
 
     private readonly userCache: LRUCache<string, User>;
     private intervalId: any;
+    private readonly keycloakBaseUrl: string;
+    private readonly credentials: any;
+    private readonly realmName: string;
 
     constructor(@inject(TYPE.AppConfig) private readonly appConfig: AppConfig,
                 @inject(TYPE.EventEmitter) private readonly eventEmitter: EventEmitter) {
         const keycloak: any = appConfig.keycloak;
-        const keycloakBaseUrl = keycloak.protocol.concat(keycloak.url);
+        this.keycloakBaseUrl = keycloak.protocol.concat(keycloak.url);
+        this.realmName = keycloak.realm;
         this.keycloak = new Keycloak({}, {
-            'auth-server-url': keycloakBaseUrl,
+            'auth-server-url': this.keycloakBaseUrl,
             'bearer-only': keycloak.bearerOnly,
             'enable-cors': true,
-            'realm': keycloak.realm,
+            'realm': this.realmName,
             'resource': keycloak.resource,
             'sslRequired': keycloak.sslRequired,
             'confidentialPort': keycloak.confidentialPort,
         });
         this.kcAdminClient = new KcAdminClient({
-            baseUrl: keycloakBaseUrl,
+            baseUrl: this.keycloakBaseUrl,
             realmName: keycloak.realm,
         });
         const admin: { clientId: string, username: string, password: string } = keycloak.admin;
-        const credentials = {
+        this.credentials = {
             username: admin.username,
             password: admin.password,
             grantType: 'password',
@@ -50,13 +55,13 @@ export class KeycloakService {
             max: appConfig.cache.user.maxEntries,
             maxAge: appConfig.cache.user.maxAge,
         });
-        this.kcAdminClient.auth(credentials).then(() => {
+        this.kcAdminClient.auth(this.credentials).then(() => {
             logger.info('kcAdminClient successfully initialised');
             this.intervalId = setInterval(async () => {
                 getToken({
-                    baseUrl: keycloakBaseUrl,
-                    realmName: keycloak.realm,
-                    credentials,
+                    baseUrl: this.keycloakBaseUrl,
+                    realmName: this.realmName,
+                    credentials: this.credentials,
                 }).then((token: any) => {
                     this.kcAdminClient.setAccessToken(token.accessToken);
                     logger.debug(`Pruning user cache for stale objects`);
@@ -72,6 +77,10 @@ export class KeycloakService {
             this.userCache.reset();
             this.clearTimer();
         });
+    }
+
+    public token(): string {
+        return this.kcAdminClient.accessToken;
     }
 
     public middleware(): RequestHandler {
@@ -153,10 +162,21 @@ export class KeycloakService {
             logger.warn(`Failed to find user details for ${email}`);
             return Promise.resolve(null);
         } catch (e) {
-            logger.error('Failed to get user details', {
-                error: e.message,
-            });
-            return Promise.resolve(null);
+            if (e.response && e.response.status === HttpStatus.UNAUTHORIZED) {
+                logger.warn('Admin token expired...retrying');
+                const token = await getToken({
+                    baseUrl: this.keycloakBaseUrl,
+                    realmName: this.realmName,
+                    credentials: this.credentials,
+                });
+                this.kcAdminClient.setAccessToken(token.accessToken);
+                return this.loadUser(email);
+            } else {
+                logger.error('Failed to get user details', {
+                    error: e.message,
+                });
+                return Promise.resolve(null);
+            }
         }
 
     }

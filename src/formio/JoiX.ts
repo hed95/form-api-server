@@ -2,9 +2,22 @@ import * as Joi from '@hapi/joi';
 import vm from 'vm';
 import _ from 'lodash';
 import {util} from './Util';
+import request from 'request-promise-native';
+import cache from 'memory-cache';
 import logger from '../util/logger';
+const DEFAULT_CACHE_TIME = (3 * 60) * 60 * 1000;
+/*
+ * Returns true or false based on visibility.
+ *
+ * @param {Object} component
+ *   The form component to check.
+ * @param {Object} row
+ *   The local data to check.
+ * @param {Object} data
+ *   The full submission data.
+ */
 
-const checkConditional = (component: any, row: any, data: any, recurse: boolean = false): boolean => {
+export const checkConditional = (component, row, data, recurse = false) => {
     let isVisible = true;
 
     if (!component || !component.hasOwnProperty('key')) {
@@ -41,21 +54,21 @@ const checkConditional = (component: any, row: any, data: any, recurse: boolean 
     }
 
     // If visible and recurse, continue down tree to check parents.
-    if (isVisible && recurse && component.parent && component.parent.type !== 'form') {
+    if (isVisible && recurse && component.parent.type !== 'form') {
         return !component.parent || checkConditional(component.parent, row, data, true);
     } else {
         return isVisible;
     }
 };
 
-const custom = (type: string) => {
-    return {
+const getRules = (type) => [
+    {
         name: 'custom',
         params: {
             component: Joi.any(),
             data: Joi.any(),
         },
-        validate(params: any, value: any, state: any, options: any) {
+        validate(params, value, state, options) {
             const component = params.component;
             const data = params.data;
             let row = state.parent;
@@ -65,19 +78,23 @@ const custom = (type: string) => {
                 row = [row];
             }
 
-            for (const rowValue of row) {
+            // If a component has multiple rows of data,
+            // e.g. Datagrids, validate each row of data on the backend.
+            for (let b = 0; b < row.length; b++) {
+                const _row = row[b];
+
                 // Try a new sandboxed validation.
                 try {
                     // Replace with variable substitutions.
                     const replace = /({{\s{0,}(.*[^\s]){1}\s{0,}}})/g;
-                    component.validate.custom = component.validate.custom.replace(replace,
-                        (match: any, $1: any, $2: any) => _.get(data, $2));
+                    component.validate.custom = component
+                        .validate.custom.replace(replace, (match, $1, $2) => _.get(data, $2));
 
                     // Create the sandbox.
                     const sandbox = vm.createContext({
-                        input: _.isObject(rowValue) ? util.getValue({data: rowValue}, component.key) : rowValue,
+                        input: _.isObject(_row) ? util.getValue({data: _row}, component.key) : _row,
                         data,
-                        row: rowValue,
+                        row: _row,
                         scope: {data},
                         component,
                         valid,
@@ -102,17 +119,14 @@ const custom = (type: string) => {
 
             return value; // Everything is OK
         },
-    };
-};
-
-const json = (type: string) =>  {
-    return {
+    },
+    {
         name: 'json',
         params: {
             component: Joi.any(),
             data: Joi.any(),
         },
-        validate(params: any, value: any, state: any, options: any) {
+        validate(params, value, state, options) {
             const component = params.component;
             const data = params.data;
             let row = state.parent;
@@ -122,11 +136,14 @@ const json = (type: string) =>  {
                 row = [row];
             }
 
-            for (const rowValue of row) {
+            // If a component has multiple rows of data, e.g. Datagrids, validate each row of data on the backend.
+            for (let b = 0; b < row.length; b++) {
+                const _row = row[b];
+
                 try {
                     valid = util.jsonLogic.apply(component.validate.json, {
                         data,
-                        row: rowValue,
+                        row: _row,
                     });
                 } catch (err) {
                     valid = err.message;
@@ -140,17 +157,14 @@ const json = (type: string) =>  {
 
             return value; // Everything is OK
         },
-    };
-};
-
-const hidden = (type: string) => {
-    return {
+    },
+    {
         name: 'hidden',
         params: {
             component: Joi.any(),
             data: Joi.any(),
         },
-        validate(params: any, value: any, state: any, options: any) {
+        validate(params, value, state, options) {
             // If we get here than the field has thrown an error.
             // If we are hidden, sanitize the data and return true to override the error.
             // If not hidden, return an error so the original error remains on the field.
@@ -167,16 +181,13 @@ const hidden = (type: string) => {
 
             return this.createError(`${type}.hidden`, {message: 'hidden with value'}, state, options);
         },
-    };
-};
-
-const maxWords = (type: string) => {
-    return {
+    },
+    {
         name: 'maxWords',
         params: {
             maxWords: Joi.any(),
         },
-        validate(params: any, value: any, state: any, options: any) {
+        validate(params, value, state, options) {
             if (value.trim().split(/\s+/).length <= parseInt(params.maxWords, 10)) {
                 return value;
             }
@@ -184,16 +195,13 @@ const maxWords = (type: string) => {
             return this.createError(`${type}.maxWords`,
                 {message: 'exceeded maximum words.'}, state, options);
         },
-    };
-};
-
-const minWords = (type: string) => {
-    return {
+    },
+    {
         name: 'minWords',
         params: {
             minWords: Joi.any(),
         },
-        validate(params: any, value: any, state: any, options: any) {
+        validate(params, value, state, options) {
             if (value.trim().split(/\s+/).length >= parseInt(params.minWords, 10)) {
                 return value;
             }
@@ -201,15 +209,225 @@ const minWords = (type: string) => {
             return this.createError(`${type}.minWords`,
                 {message: 'does not have enough words.'}, state, options);
         },
-    };
-};
+    },
+    {
+        name: 'select',
+        params: {
+            component: Joi.any(),
+            submission: Joi.any(),
+            token: Joi.any(),
+            async: Joi.any(),
+            requests: Joi.any(),
+        },
+        /* eslint-disable no-unused-vars */
+        validate(params, value, state, options) {
+            /* eslint-enable no-unused-vars */
+            // Empty values are fine.
+            if (!value) {
+                return value;
+            }
 
-const getRules = (type: string) => [
-    custom(type),
-    json(type),
-    hidden(type),
-    maxWords(type),
-    minWords(type),
+            const component = params.component;
+            const submission = params.submission;
+            const token = params.token;
+            const async = params.async;
+            const requests = params.requests;
+
+            // Initialize the request options.
+            const requestOptions = {
+                url: _.get(component, 'validate.select'),
+                method: 'GET',
+                qs: {},
+                json: true,
+                headers: {},
+            };
+
+            // If the url is a boolean value.
+            if (util.isBoolean(requestOptions.url)) {
+                requestOptions.url = util.boolean(requestOptions.url);
+                if (!requestOptions.url) {
+                    return value;
+                }
+
+                if (component.dataSrc !== 'url') {
+                    return value;
+                }
+
+                if (!component.data.url || !component.searchField) {
+                    return value;
+                }
+
+                // Get the validation url.
+                requestOptions.url = component.data.url;
+
+                // Add the search field.
+                requestOptions.qs[component.searchField] = value;
+
+                // Add the filters.
+                if (component.filter) {
+                    requestOptions.url += (!requestOptions.url.includes('?') ? '?' : '&') + component.filter;
+                }
+
+                // If they only wish to return certain fields.
+                if (component.selectFields) {
+                    // @ts-ignore
+                    requestOptions.qs.select = component.selectFields;
+                }
+            }
+
+            if (!requestOptions.url) {
+                return value;
+            }
+
+            // Make sure to interpolate.
+            requestOptions.url = util.interpolate(requestOptions.url, {
+                data: submission.data,
+            });
+
+            // Set custom headers.
+            if (component.data && component.data.headers) {
+                _.each(component.data.headers, (header) => {
+                    if (header.key) {
+                        requestOptions.headers[header.key] = header.value;
+                    }
+                });
+            }
+
+            if (component.authenticate && token) {
+                // @ts-ignore
+                requestOptions.headers.Authorization = 'Bearer '.concat(token);
+            }
+
+            async.push(new Promise((resolve) => {
+                /* eslint-disable prefer-template */
+                const cacheKey = `${requestOptions.method}:${requestOptions.url}?` +
+                    Object.keys(requestOptions.qs).map((key) => key + '=' + requestOptions.qs[key]).join('&');
+                /* eslint-enable prefer-template */
+                // @ts-ignore
+                const cacheTime = (+process.env.VALIDATOR_CACHE_TIME || DEFAULT_CACHE_TIME);
+
+                // Check if this request was cached
+                const result = cache.get(cacheKey);
+                if (result !== null) {
+                    // Null means no cache hit
+                    // but is also used as a success callback which we are faking with true here.
+                    if (result === true) {
+                        return resolve(null);
+                    } else {
+                        return resolve(result);
+                    }
+                }
+
+                // Us an existing promise or create a new one.
+                requests[cacheKey] = requests[cacheKey] || request(requestOptions);
+
+                requests[cacheKey]
+                    .then((body) => {
+                        if (!body || !body.length) {
+                            const error = {
+                                message: `"${value}" for "${component.label
+                                    || component.key}" is not a valid selection.`,
+                                path: state.path,
+                                type: 'any.select',
+                            };
+                            cache.put(cacheKey, error, cacheTime);
+                            return resolve(error);
+                        }
+
+                        cache.put(cacheKey, true, cacheTime);
+                        return resolve(null);
+                    })
+                    .catch((errorResult) => {
+                        const error = {
+                            message: `Select validation error: ${errorResult.error}`,
+                            path: state.path,
+                            type: 'any.select',
+                        };
+                        cache.put(cacheKey, error, cacheTime);
+                        return resolve(error);
+                    });
+            }));
+
+            return value;
+        },
+    },
+    {
+        name: 'distinct',
+        params: {
+            component: Joi.any(),
+            submission: Joi.any(),
+            model: Joi.any(),
+            async: Joi.any(),
+        },
+        /* eslint-disable no-unused-vars */
+        validate(params, value, state, options) {
+            /* eslint-enable no-unused-vars */
+            const component = params.component;
+            const submission = params.submission;
+            const model = params.model;
+            const async = params.async;
+
+            const path = `data.${state.path.join('.')}`;
+
+            // Allow empty.
+            if (!value) {
+                return value;
+            }
+            if (_.isEmpty(value)) {
+                return value;
+            }
+
+            // Get the query.
+            const query = {form: util.idToBson(submission.form)};
+            if (_.isString(value)) {
+                query[path] = {$regex: new RegExp(`^${util.escapeRegExp(value)}$`), $options: 'i'};
+            } else if (
+                !_.isString(value) &&
+                value.hasOwnProperty('address_components') &&
+                value.hasOwnProperty('place_id')
+            ) {
+                query[`${path}.place_id`] = {
+                    $regex: new RegExp(`^${util.escapeRegExp(value.place_id)}$`),
+                    $options: 'i',
+                };
+            } else if (_.isArray(value)) {
+                query[path] = {$all: value};
+            } else if (_.isObject(value)) {
+                query[path] = {$eq: value};
+            }
+
+            // Only search for non-deleted items.
+            if (!query.hasOwnProperty('deleted')) {
+                // @ts-ignore
+                query.deleted = {$eq: null};
+            }
+
+            async.push(new Promise((resolve) => {
+                // Try to find an existing value within the form.
+                model.findOne(query, (err, result) => {
+                    if (err) {
+                        return resolve({
+                            message: err,
+                            path: state.path,
+                            type: 'any.unique',
+                        });
+                    } else if (result && submission._id && (result._id.toString() === submission._id)) {
+                        // This matches the current submission which is allowed.
+                        return resolve(null);
+                    } else if (result) {
+                        return resolve({
+                            message: `"${component.label}" must be unique.`,
+                            path: state.path,
+                            type: 'any.unique',
+                        });
+                    }
+                    return resolve(null);
+                });
+            }));
+
+            return value; // Everything is OK
+        },
+    },
 ];
 
 export const JoiX = Joi.extend([

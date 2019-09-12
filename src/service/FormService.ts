@@ -1,7 +1,7 @@
 import {ValidationErrorItem, ValidationResult} from '@hapi/joi';
 import {inject} from 'inversify';
 import {provide} from 'inversify-binding-decorators';
-import {FindAndCountOptions, Op, OptimisticLockError, WhereOptions} from 'sequelize';
+import {and, FindAndCountOptions, Op, OptimisticLockError, WhereOptions} from 'sequelize';
 import {User} from '../auth/User';
 import TYPE from '../constant/TYPE';
 import ResourceNotFoundError from '../error/ResourceNotFoundError';
@@ -675,4 +675,39 @@ export class FormService {
         return true;
     }
 
+    public async findByFormAndVersion(formId: string, versionId: string, user: User): Promise<FormVersion> {
+        const defaultRole = await this.roleService.getDefaultRole();
+        const version = await this.formVersionRepository.findOne({
+            where: {
+                [Op.and]: [
+                    {
+                        formId: {
+                            [Op.eq]: formId,
+                        },
+                    },
+                    {
+                        versionId: {
+                            [Op.eq]: versionId,
+                        },
+                    },
+                ],
+            },
+            include: [{
+                model: Form, include: [{
+                    model: Role,
+                    as: 'roles',
+                    attributes: this.roleAttributes,
+                    through: {
+                        attributes: [],
+                    },
+                    where: FormService.roleWhereClause(user, defaultRole),
+                }],
+            }],
+        });
+
+        if (!version) {
+            throw new ResourceNotFoundError(`Version with id ${versionId} does not exist`);
+        }
+        return version;
+    }
 }

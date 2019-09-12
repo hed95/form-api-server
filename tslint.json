@@ -39,5 +39,8 @@
       "always"
     ]
   },
-  "rulesDirectory": []
+  "rulesDirectory": [],
+  "linterOptions" : {
+    "exclude": ["src/formio/**"]
+  }
 }

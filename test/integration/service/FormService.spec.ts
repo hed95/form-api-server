@@ -1230,6 +1230,20 @@ describe("FormService", () => {
 
     });
 
+    it('can find by version id and form id', async() => {
+        const user = new User("id", "test", [role]);
+        basicForm.name = "newFormXYZ";
+        basicForm.path = "newFormXYZ";
+        basicForm.title = "newFormXYZ";
+        const formId = await formService.create(user, basicForm);
+
+        const versionLoaded = await formService.findForm(formId, user);
+
+        const loaded = await formService.findByFormAndVersion(formId, versionLoaded.versionId, user);
+        expect(loaded).to.be.not.null;
+        expect(loaded.versionId).to.be.eq(versionLoaded.versionId);
+    })
+
 
 });
 
