@@ -8,4 +8,4 @@ coverage/
 coverage-unit/
 coverage-int/
 performance/submission.json
-.env
+.env*

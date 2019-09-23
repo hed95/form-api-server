@@ -401,6 +401,7 @@ export class FormController extends BaseHttpController {
         logger.info(`Creating new form`);
         const formVersion = await this.formService.create(currentUser, form);
         res.setHeader('Location', `${req.baseUrl}${req.path}/${formVersion}`);
+        res.setHeader('x-form-id', `${formVersion}`);
         res.sendStatus(HttpStatus.CREATED);
     }
 
