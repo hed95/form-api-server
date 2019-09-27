@@ -160,7 +160,7 @@ export class KeycloakService {
                 return Promise.resolve(null);
             }
             logger.warn(`Failed to find user details for ${email}`);
-            return Promise.resolve(null);
+            return null;
         } catch (e) {
             if (e.response && e.response.status === HttpStatus.UNAUTHORIZED) {
                 logger.warn('Admin token expired...retrying');
@@ -175,7 +175,7 @@ export class KeycloakService {
                 logger.error('Failed to get user details', {
                     error: e.message,
                 });
-                return Promise.resolve(null);
+                return null;
             }
         }
 

@@ -43,19 +43,18 @@ export class KeycloakAuthProvider implements interfaces.AuthProvider {
                     const roles = grant.access_token.content.realm_access.roles.map((role: string) => {
                         return new Role({name: role});
                     });
-                    const user = new User(email, email, roles);
-                    return Promise.resolve(user);
+                    return new User(email, email, roles);
                 } catch (err) {
                     logger.warn('Failed to get user details', {
                         error: err.toString(),
                         url: req.url,
                         method: req.method,
                     });
-                    return Promise.resolve(null);
+                    return null;
                 }
             }
         } else {
-            return Promise.resolve(null);
+            return null;
         }
     }
 }

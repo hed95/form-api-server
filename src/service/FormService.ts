@@ -432,14 +432,12 @@ export class FormService {
 
         const result: { rows: FormVersion[], count: number } = await this.formVersionRepository.findAndCountAll(query);
         try {
-            return Promise.resolve(
-                {
-                    offset,
-                    limit,
-                    versions: result.rows,
-                    total: result.count,
-                },
-            );
+            return {
+                offset,
+                limit,
+                versions: result.rows,
+                total: result.count,
+            };
         } finally {
             profiler.done({message: 'completed get all versions operation', user: user.details.email});
         }
