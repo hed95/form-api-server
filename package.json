@@ -154,6 +154,7 @@
     "puppeteer": "^1.19.0",
     "redis": "^2.8.0",
     "reflect-metadata": "^0.1.13",
+    "request": "^2.88.0",
     "request-promise-native": "^1.0.7",
     "sequelize": "^5.8.12",
     "sequelize-cli": "^5.5.0",
