@@ -12,6 +12,7 @@ import ResourceNotFoundError from "../../../src/error/ResourceNotFoundError";
 import ResourceValidationError from "../../../src/error/ResourceValidationError";
 import {basicForm} from "../../form";
 import {QueryParser} from "../../../src/util/QueryParser";
+// @ts-ignore
 import _ from 'lodash';
 import logger from "../../../src/util/logger";
 import {FormRoles} from "../../../src/model/FormRoles";

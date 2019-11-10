@@ -178,20 +178,23 @@ export class FormController extends BaseHttpController {
                     required: false,
                     name: 'name',
                 },
+                title: {
+                    type: SwaggerDefinitionConstant.Parameter.Type.STRING,
+                    description: 'Find forms by title',
+                    required: false,
+                    name: 'title',
+                },
                 full: {
                     type: SwaggerDefinitionConstant.Parameter.Type.BOOLEAN,
                     description: 'Load full form schema and any nested forms',
                     required: false,
                     name: 'full',
-                },
+                }
             },
         },
-
         responses: {
             403: {description: 'Access denied'},
             200: {description: 'Success', type: SwaggerDefinitionConstant.Response.Type.OBJECT},
-            400: {description: 'Submission failed validation'},
-            404: {description: 'Form does not exist'},
         },
     })
     @httpGet('/', TYPE.ProtectMiddleware)
@@ -330,8 +333,8 @@ export class FormController extends BaseHttpController {
     public async update(@requestParam('id') id: string,
                         @requestBody() form: object, @response() res: express.Response,
                         @principal() currentUser: User): Promise<void> {
-
-        await this.formService.update(id, form, currentUser);
+        const version = await this.formService.update(id, form, currentUser);
+        logger.info(`Version id created ${version.versionId}`);
         res.sendStatus(HttpStatus.OK);
     }
 

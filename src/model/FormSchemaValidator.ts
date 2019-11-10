@@ -1,7 +1,7 @@
 import * as Joi from '@hapi/joi';
 import {provide} from 'inversify-binding-decorators';
 import TYPE from '../constant/TYPE';
-import util from 'formiojs/utils';
+import * as formUtils from 'formiojs/utils/formUtils';
 import _ from 'lodash';
 
 @provide(TYPE.FormSchemaValidator)
@@ -36,7 +36,7 @@ export class FormSchemaValidator {
 
     private componentPaths(components: object[]): any {
         const paths: string[] = [];
-        util.eachComponent(components, (component: object, path: string) => {
+        formUtils.eachComponent(components, (component: object, path: string) => {
             // @ts-ignore
             if (component.input && !_.isUndefined(component.key) && !_.isNull(component.key)) {
                 paths.push(path);

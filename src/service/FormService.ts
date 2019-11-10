@@ -1,7 +1,7 @@
 import {ValidationErrorItem, ValidationResult} from '@hapi/joi';
 import {inject} from 'inversify';
 import {provide} from 'inversify-binding-decorators';
-import {and, FindAndCountOptions, Op, OptimisticLockError, WhereOptions} from 'sequelize';
+import { FindAndCountOptions, Op, OptimisticLockError, WhereOptions} from 'sequelize';
 import {User} from '../auth/User';
 import TYPE from '../constant/TYPE';
 import ResourceNotFoundError from '../error/ResourceNotFoundError';
@@ -13,7 +13,7 @@ import {Role} from '../model/Role';
 import {FormRepository, FormVersionRepository} from '../types/repository';
 import logger from '../util/logger';
 import _ from 'lodash';
-import {Sequelize} from 'sequelize-typescript';
+import {Model, Sequelize} from 'sequelize-typescript';
 import {RoleService} from './RoleService';
 import Validator from 'validator';
 import {Cacheable, CacheClear} from 'type-cacheable';
@@ -152,8 +152,8 @@ export class FormService {
         const validationResult: ValidationResult<object> = this.formSchemaValidator.validate(payload);
         if (validationResult.error) {
             logger.error('Failed validation on create', validationResult.error.details);
-            return Promise.reject(new ResourceValidationError('Failed to validate form',
-                validationResult.error.details));
+            throw new ResourceValidationError('Failed to validate form',
+                validationResult.error.details)
         }
         logger.info('Structure of the form looks ok...checking if this form already exists');
         const title: string = payload.title;
@@ -446,60 +446,62 @@ export class FormService {
 
     @CacheClear({cacheKey: FormService.setCacheKey})
     public async update(id: string, form: any, currentUser: User) {
-
-        form = FormService.sanitize(form);
-
-        const latestVersion = await this.findLatestForm(id, currentUser);
-
-        if (!latestVersion) {
-            throw new ResourceNotFoundError(`FormVersion with ${id} does not exist for update`);
-        }
-        const validationResult: ValidationResult<object> = this.formSchemaValidator.validate(form);
-        if (validationResult.error) {
-            logger.error('Failed to update from', validationResult.error.details);
-            throw new ResourceValidationError('Failed to validate form',
-                validationResult.error.details);
-        }
-        return this.formVersionRepository.sequelize.transaction(async () => {
-            const currentDate = new Date();
-            const userId = currentUser.details.email;
-            const formId = latestVersion.form.id;
-            const formReloaded: Form = await this.formRepository.findByPk(formId);
-
-            if (formReloaded.updatedOn.getTime() !== latestVersion.form.updatedOn.getTime()) {
-                throw new OptimisticLockError({
-                    message: `Form with ${formId} has already been updated`,
-                    modelName: 'Form',
-                });
-            }
-            form.id = formId;
+        const profiler = logger.startTimer();
+        try {
             form = FormService.sanitize(form);
-            const newVersion = await new FormVersion({
-                schema: form,
-                formId,
-                validFrom: currentDate,
-                validTo: null,
-                latest: true,
-                createdOn: currentDate,
-                createdBy: userId,
-            }).save({});
+            const validationResult: ValidationResult<object> = this.formSchemaValidator.validate(form);
+            if (validationResult.error) {
+                logger.error('Failed to update from', validationResult.error.details);
+                throw new ResourceValidationError('Failed to validate form',
+                    validationResult.error.details);
+            }
+            const latestVersion = await this.findLatestForm(id, currentUser);
+            if (!latestVersion) {
+                throw new ResourceNotFoundError(`FormVersion with ${id} does not exist for update`);
+            }
+            return this.formVersionRepository.sequelize.transaction(async () => {
+                const currentDate = new Date();
+                const userId = currentUser.details.email;
+                const formId = latestVersion.form.id;
+                const formReloaded: Form = await this.formRepository.findByPk(formId);
 
-            logger.info(`New version created. New version id ${newVersion.versionId} `
-                + `for form id ${formReloaded.id}`);
+                if (formReloaded.updatedOn.getTime() !== latestVersion.form.updatedOn.getTime()) {
+                    throw new OptimisticLockError({
+                        message: `Form with ${formId} has already been updated`,
+                        modelName: 'Form',
+                    });
+                }
+                form.id = formId;
+                form = FormService.sanitize(form);
+                const newVersion = await new FormVersion({
+                    schema: form,
+                    formId,
+                    validFrom: currentDate,
+                    validTo: null,
+                    latest: true,
+                    createdOn: currentDate,
+                    createdBy: userId,
+                }).save({});
 
-            await formReloaded.update({
-                updatedOn: currentDate,
-                updatedBy: userId,
+                logger.info(`New version created. New version id ${newVersion.versionId} `
+                    + `for form id ${formReloaded.id}`);
+
+                await formReloaded.update({
+                    updatedOn: currentDate,
+                    updatedBy: userId,
+                });
+                await latestVersion.update({
+                    validTo: currentDate,
+                    latest: false,
+                    updatedBy: userId,
+                });
+
+                return newVersion;
+
             });
-            await latestVersion.update({
-                validTo: currentDate,
-                latest: false,
-                updatedBy: userId,
-            });
-
-            return newVersion;
-
-        });
+        } finally {
+            profiler.done({message: 'updated form', user: currentUser.details.email, formId: id});
+        }
     }
 
     @CacheClear({cacheKey: FormService.setCacheKey})
@@ -707,5 +709,77 @@ export class FormService {
             throw new ResourceNotFoundError(`Version with id ${versionId} does not exist`);
         }
         return version;
+    }
+
+    async getDeletedForms(user: User, limit: number = 20, offset: number = 0): Promise<{
+        offset: number,
+        limit: number,
+        versions: FormVersion[],
+        total: number
+    }> {
+        const defaultRole = await this.roleService.getDefaultRole();
+        const result = await this.formVersionRepository.findAndCountAll({
+            where: {
+                validTo: {
+                    [Op.not]: null
+                }
+            },
+            order: [['validTo', 'DESC']],
+            distinct: true,
+            col: 'formid',
+            limit: limit,
+            offset: offset,
+            group: 'formid',
+            include: [{
+                model: Form,
+                include: [{
+                    model: Role,
+                    as: 'roles',
+                    attributes: this.roleAttributes,
+                    through: {
+                        attributes: [],
+                    },
+                    where: FormService.roleWhereClause(user, defaultRole),
+                }],
+            }]
+        });
+
+        return {
+            offset: offset,
+            limit: limit,
+            versions: result.rows,
+            total: result.count
+        };
+    }
+
+    async resurrect(formId: string, user: User): Promise<FormVersion> {
+        return this.formRepository.sequelize.transaction(async () => {
+            const form: Form = await this.getForm(formId, user);
+            if (form) {
+                const formVersion = await this.formVersionRepository.findOne({
+                    where: {
+                        formId: {
+                            [Op.eq]: form.id
+                        }
+                    },
+                    order: [['validTo', 'DESC']],
+                });
+                const userId = user.details.email;
+                await formVersion.update({
+                    latest: true,
+                    validTo: null,
+                    updatedBy: userId
+                });
+                logger.info(`formVersion with id ${formVersion.versionId} restored to latest`);
+
+                await form.update({
+                    updatedOn: new Date(),
+                    updatedBy: userId,
+                });
+                logger.info(`Form with id ${formId} restored`);
+                return formVersion;
+            }
+            throw new ResourceNotFoundError(`Form with id ${formId} does not exist`);
+        });
     }
 }
