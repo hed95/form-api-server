@@ -153,7 +153,7 @@ export class FormService {
         if (validationResult.error) {
             logger.error('Failed validation on create', validationResult.error.details);
             throw new ResourceValidationError('Failed to validate form',
-                validationResult.error.details)
+                validationResult.error.details);
         }
         logger.info('Structure of the form looks ok...checking if this form already exists');
         const title: string = payload.title;
@@ -711,24 +711,24 @@ export class FormService {
         return version;
     }
 
-    async getDeletedForms(user: User, limit: number = 20, offset: number = 0): Promise<{
+    public async getDeletedForms(user: User, limit: number = 20, offset: number = 0): Promise<{
         offset: number,
         limit: number,
         versions: FormVersion[],
-        total: number
+        total: number,
     }> {
         const defaultRole = await this.roleService.getDefaultRole();
         const result = await this.formVersionRepository.findAndCountAll({
             where: {
                 validTo: {
-                    [Op.not]: null
-                }
+                    [Op.not]: null,
+                },
             },
             order: [['validTo', 'DESC']],
             distinct: true,
             col: 'formid',
-            limit: limit,
-            offset: offset,
+            limit,
+            offset,
             group: 'formid',
             include: [{
                 model: Form,
@@ -741,26 +741,26 @@ export class FormService {
                     },
                     where: FormService.roleWhereClause(user, defaultRole),
                 }],
-            }]
+            }],
         });
 
         return {
-            offset: offset,
-            limit: limit,
+            offset,
+            limit,
             versions: result.rows,
-            total: result.count
+            total: result.count,
         };
     }
 
-    async resurrect(formId: string, user: User): Promise<FormVersion> {
+    public async resurrect(formId: string, user: User): Promise<FormVersion> {
         return this.formRepository.sequelize.transaction(async () => {
             const form: Form = await this.getForm(formId, user);
             if (form) {
                 const formVersion = await this.formVersionRepository.findOne({
                     where: {
                         formId: {
-                            [Op.eq]: form.id
-                        }
+                            [Op.eq]: form.id,
+                        },
                     },
                     order: [['validTo', 'DESC']],
                 });
@@ -768,7 +768,7 @@ export class FormService {
                 await formVersion.update({
                     latest: true,
                     validTo: null,
-                    updatedBy: userId
+                    updatedBy: userId,
                 });
                 logger.info(`formVersion with id ${formVersion.versionId} restored to latest`);
 
