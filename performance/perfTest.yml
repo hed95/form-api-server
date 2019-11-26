@@ -8,14 +8,14 @@ scenarios:
     flow:
       - log: "Get access token"
       - post:
-          url: "https://keycloak.elf79.dev/auth/realms/elf/protocol/openid-connect/token"
+          url: "http://192.168.86.22:8080/auth/realms/elf/protocol/openid-connect/token"
           headers:
             Content-Type: "application/x-www-form-urlencoded"
           form:
             username: "{{ $processEnvironment.USERNAME }}"
             password: "{{ $processEnvironment.PASSWORD }}"
             grant_type: "password"
-            client_id: "platform-ui"
+            client_id: "www"
           capture:
             json: "$.access_token"
             as: "accessToken"

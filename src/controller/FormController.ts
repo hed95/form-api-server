@@ -189,7 +189,7 @@ export class FormController extends BaseHttpController {
                     description: 'Load full form schema and any nested forms',
                     required: false,
                     name: 'full',
-                }
+                },
             },
         },
         responses: {
