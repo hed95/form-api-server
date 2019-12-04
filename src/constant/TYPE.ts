@@ -18,4 +18,5 @@ export default {
     PDFService: Symbol.for('PDFService'),
     PDFQueue: Symbol.for('PDFQueue'),
     CacheManager: Symbol.for('CacheManager'),
+    JsonPathEvaluator: Symbol.for('JsonPathEvaluator'),
 };

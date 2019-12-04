@@ -1,15 +1,16 @@
 import 'reflect-metadata';
-import {FormSchemaValidator} from "../../../src/model/FormSchemaValidator";
-import {expect} from "chai";
-import {ValidationResult} from "@hapi/joi";
+import {FormSchemaValidator} from '../../../src/model/FormSchemaValidator';
+// tslint:disable-next-line:no-implicit-dependencies
+import {expect} from 'chai';
+import {ValidationResult} from '@hapi/joi';
 
-describe("FormSchemaValidator", () => {
+describe('FormSchemaValidator', () => {
     const validator = new FormSchemaValidator();
     it('can validate', () => {
-        const payload : object = {
+        const payload: object = {
             name: null,
             path: null,
-            title: null
+            title: null,
         };
 
         const result: ValidationResult<object> = validator.validate(payload);
@@ -17,23 +18,23 @@ describe("FormSchemaValidator", () => {
         expect(result.error.details.length).to.be.eq(3);
     });
 
-    it('invalid if keys are same', () =>{
-        const payload : object = {
-            name: "A",
-            path: "A",
-            title: "A",
+    it('invalid if keys are same', () => {
+        const payload: object = {
+            name: 'A',
+            path: 'A',
+            title: 'A',
             components: [{
                 input: 'textField',
-                key:'A'
+                key: 'A',
             }, {
                 input: 'textField',
-                key: 'A'
-            }]
+                key: 'A',
+            }],
         };
 
         const result: ValidationResult<object> = validator.validate(payload);
         expect(result.error).to.be.not.null;
         expect(result.error.details.length).to.be.eq(1);
-        expect(result.error.details[0].message).to.be.eq('Component keys must be unique: A')
+        expect(result.error.details[0].message).to.be.eq('Component keys must be unique: A');
     });
 });
