@@ -5,7 +5,7 @@ import TYPE from '../constant/TYPE';
 
 @provide(TYPE.JsonPathEvaluator)
 export default class JsonPathEvaluator {
-    private static REG_EXP: RegExp = new RegExp('\\{(\\$.+?)\\}', 'g');
+    public static REG_EXP: RegExp = new RegExp('\\{(\\$.+?)\\}', 'g');
 
     public performJsonPathEvaluation({key, value}: Record<string, string>,
                                      dataContext: any, intercept = (parsedValue: string) => {

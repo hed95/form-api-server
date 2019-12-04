@@ -19,4 +19,5 @@ export default {
     PDFQueue: Symbol.for('PDFQueue'),
     CacheManager: Symbol.for('CacheManager'),
     JsonPathEvaluator: Symbol.for('JsonPathEvaluator'),
+    FormTranslator: Symbol.for('FormTranslator'),
 };

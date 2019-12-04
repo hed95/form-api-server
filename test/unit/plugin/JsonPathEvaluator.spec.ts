@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import JsonPathEvaluator from '../../../src/plugin/JsonPathEvaluator';
 // tslint:disable-next-line:no-implicit-dependencies
 import {expect} from 'chai';
@@ -20,4 +21,5 @@ describe('Json Path Evaluator', () => {
         }, dataContext);
         expect(result).to.be.eq('Joe Bloggs is not here');
     });
+
 });
