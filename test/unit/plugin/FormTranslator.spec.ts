@@ -19,6 +19,7 @@ describe('Form Translator ', () => {
     const formTranslator = new FormTranslator(jsonPathEvaluator);
     const form = {
         name: 'form',
+        title: '{$.processContext.businessKey} Title',
         display: 'form',
         components: [{
             key: 'test',
@@ -31,6 +32,7 @@ describe('Form Translator ', () => {
     };
     const dataContext: Record<any, any> = {
         processContext: {
+            businessKey: 'businessKey',
             variable: {
                 firstName: 'Joe',
                 surname: 'Bloggs',
@@ -47,8 +49,8 @@ describe('Form Translator ', () => {
 
     it('can parse expression', () => {
         version.schema = form;
-
         const result = formTranslator.translate(version, dataContext);
+        expect(result.schema.title).to.be.eq('businessKey Title');
         expect(result.schema.components[0].defaultValue).to.be.eq('Joe');
         expect(result.schema.components[1].defaultValue).to.be.eq('Bloggs');
     });

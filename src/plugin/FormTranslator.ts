@@ -12,6 +12,11 @@ export default class FormTranslator {
     }
 
     public translate(form: FormVersion, dataContext: any): FormVersion {
+        form.schema.title = this.jsonPathEvaluator.performJsonPathEvaluation({
+            key: 'Form title',
+            value: form.schema.title,
+        }, dataContext);
+
         util.eachComponent(form.schema.components, (component: any) => {
             const parsed = this.jsonPathEvaluator.performJsonPathEvaluation({
                 key: component.key,
