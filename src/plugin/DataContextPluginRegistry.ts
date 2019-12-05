@@ -19,17 +19,17 @@ export default class DataContextPluginRegistry {
         return null;
     }
 
-    public async getDataContext(kauth: any, {processInstanceId, taskId}): Promise<any> {
-        if (!this.dataContextPlugin) {
-            return null;
-        }
+    public async getDataContext(kauth: any, processInstanceId?: string, taskId?: string): Promise<any> {
         try {
+            if (!this.dataContextPlugin) {
+                return null;
+            }
             const keycloakContext = new KeycloakContext(kauth);
             const [dataContext] = await Promise.all(
                 [this.dataContextPlugin.createDataContext(keycloakContext, {
-                    processInstanceId,
-                    taskId,
+                    processInstanceId, taskId,
                 })]);
+
             logger.info(`Data context resolved = ${dataContext !== null}`);
             return dataContext;
         } catch (e) {

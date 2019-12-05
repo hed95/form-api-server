@@ -47,9 +47,9 @@ describe('Form Translator ', () => {
         version.schema = null;
     });
 
-    it('can parse expression', () => {
+    it('can parse expression', async () => {
         version.schema = form;
-        const result = formTranslator.translate(version, dataContext);
+        const result = await formTranslator.translate(version, dataContext);
         expect(result.schema.title).to.be.eq('businessKey Title');
         expect(result.schema.components[0].defaultValue).to.be.eq('Joe');
         expect(result.schema.components[1].defaultValue).to.be.eq('Bloggs');
@@ -67,9 +67,9 @@ describe('Form Translator ', () => {
         userDetailsContextForm,
         noContextData,
     ].forEach((formToTest: any) => {
-        it(`it can parse ${formToTest.name}`, () => {
+        it(`it can parse ${formToTest.name}`, async () => {
             version.schema = formToTest;
-            const result = formTranslator.translate(version, {
+            const result = await formTranslator.translate(version, {
                 environmentContext: {
                     referenceDataUrl: 'http://localhost:8000',
                 },

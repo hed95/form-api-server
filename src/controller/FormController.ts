@@ -103,19 +103,20 @@ export class FormController extends BaseHttpController {
                      @request() req: express.Request,
                      @response() res: express.Response,
                      @principal() currentUser: User,
-                     @queryParam() live?: number,
-                     @queryParam() processInstanceId?: string,
-                     @queryParam() taskId?: string): Promise<void> {
+                     @queryParam('live') live?: number,
+                     @queryParam('processInstanceId') processInstanceId: string = null,
+                     @queryParam('taskId') taskId: string = null): Promise<void> {
 
         // @ts-ignore
-        const dataContext = await this.dataContextPluginRegistry.getDataContext(req.kauth, {processInstanceId, taskId});
+        const dataContext = await this.dataContextPluginRegistry.getDataContext(req.kauth, processInstanceId, taskId);
         let formVersion = await this.formService.findForm(id, currentUser);
         if (!formVersion) {
             throw new ResourceNotFoundError(`Form with id ${id} does not exist. Check id or access controls`);
         }
         logger.info('Performing data context resolution');
         if (dataContext) {
-            formVersion = this.formTranslator.translate(formVersion, dataContext);
+            formVersion = await this.formTranslator.translate(formVersion, dataContext,
+                this.dataContextPluginRegistry.getPlugin().postProcess);
         }
         const form = this.formResourceAssembler.toResource(formVersion, req);
         res.json(form);

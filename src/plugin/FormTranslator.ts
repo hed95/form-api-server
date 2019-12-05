@@ -12,7 +12,9 @@ export default class FormTranslator {
     constructor(@inject(TYPE.JsonPathEvaluator) private readonly jsonPathEvaluator: JsonPathEvaluator) {
     }
 
-    public translate(form: FormVersion, dataContext: any): FormVersion {
+    public async translate(form: FormVersion,
+                           dataContext: any,
+                           postProcess?: (passedDataContext: any, schema: any) => Promise<any>): Promise<FormVersion> {
         try {
             form.schema.title = this.jsonPathEvaluator.performJsonPathEvaluation({
                 key: 'Form title',
@@ -27,6 +29,9 @@ export default class FormTranslator {
                 form.schema.components = _.reject(form.schema.components, {key: component.key});
                 form.schema.components.push(JSON.parse(parsed));
             });
+            if (postProcess) {
+                form.schema = await postProcess(dataContext, form);
+            }
             return form;
         } catch (e) {
             logger.error(`Failed to perform translation`, e);
