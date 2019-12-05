@@ -30,7 +30,7 @@ import CacheManager from 'type-cacheable/dist/CacheManager';
 import JsonPathEvaluator from '../plugin/JsonPathEvaluator';
 import DataContextPluginRegistry from '../plugin/DataContextPluginRegistry';
 import FormTranslator from '../plugin/FormTranslator';
-import PromiseTimeoutHandler from "../plugin/PromiseTimeoutHandler";
+import PromiseTimeoutHandler from '../plugin/PromiseTimeoutHandler';
 
 export class ApplicationContext {
     private readonly container: Container;
