@@ -10,12 +10,12 @@ export default class DataContextPluginRegistry {
 
     public register(plugin: any): void {
         if (!plugin.createDataContext && typeof plugin.createDataContext !== 'function') {
-            logger.warn(`Plugin ${plugin.constructor.name} does not` +
+            logger.warn(`Plugin does not` +
                 ` have createDataContext method...so ignoring registration`);
             return;
         }
         this.dataContextPlugin = plugin;
-        logger.info(`Plugin ${plugin.constructor.name} registered`);
+        logger.info(`Data context plugin registered`);
         return null;
     }
 

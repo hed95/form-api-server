@@ -86,7 +86,6 @@ expressApp.use(httpContext.middleware);
 const keycloakService: KeycloakService = container.get(TYPE.KeycloakService);
 
 if (appConfig.dataContextPluginLocation) {
-
     try {
         // tslint:disable-next-line:no-var-requires
         const plugin = require(appConfig.dataContextPluginLocation);
@@ -94,6 +93,8 @@ if (appConfig.dataContextPluginLocation) {
             logger.info('Data context plugin found');
             const pluginRegistry: DataContextPluginRegistry = container.get(TYPE.DataContextPluginRegistry);
             pluginRegistry.register(plugin);
+        } else {
+            logger.warn('A plugin was set up but could not be found. Please check configuration');
         }
     } catch (e) {
         logger.warn(e.message);
