@@ -33,9 +33,11 @@ const {
   REDIS_URI,
   REDIS_TOKEN,
   API_FORM_CORRELATION_ID_REQUEST_HEADER,
+  DATA_CONTEXT_FACTORY_LOCATION,
 } = process.env;
 
 const defaultAppConfig: AppConfig = {
+  dataContextPluginLocation: DATA_CONTEXT_FACTORY_LOCATION,
   keycloak: {
     protocol: KEYCLOAK_PROTOCOL || 'http://',
     url: KEYCLOAK_URL || 'localhost',

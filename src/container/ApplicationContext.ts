@@ -28,6 +28,8 @@ import {PdfJob} from '../model/PdfJob';
 import cacheManager, {useRedisAdapter} from 'type-cacheable';
 import CacheManager from 'type-cacheable/dist/CacheManager';
 import JsonPathEvaluator from '../plugin/JsonPathEvaluator';
+import DataContextPluginRegistry from '../plugin/DataContextPluginRegistry';
+import FormTranslator from '../plugin/FormTranslator';
 
 export class ApplicationContext {
     private readonly container: Container;
@@ -56,7 +58,8 @@ export class ApplicationContext {
         this.container.bind<CommentService>(TYPE.CommentService).to(CommentService);
         this.container.bind<PDFService>(TYPE.PDFService).to(PDFService);
         this.container.bind<JsonPathEvaluator>(TYPE.JsonPathEvaluator).to(JsonPathEvaluator);
-
+        this.container.bind<DataContextPluginRegistry>(TYPE.DataContextPluginRegistry).to(DataContextPluginRegistry);
+        this.container.bind<FormTranslator>(TYPE.FormTranslator).to(FormTranslator);
         const pdfQueue: Queue<PdfJob> = createQueue(defaultAppConfig, ApplicationConstants.PDF_QUEUE_NAME);
         this.container.bind<Queue>(TYPE.PDFQueue).toConstantValue(pdfQueue);
 

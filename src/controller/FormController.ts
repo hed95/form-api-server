@@ -37,6 +37,8 @@ import HttpStatus from 'http-status-codes';
 import {CommentService} from '../service/CommentService';
 import ResourceNotFoundError from '../error/ResourceNotFoundError';
 import {RestoreData} from '../model/RestoreData';
+import DataContextPluginRegistry from '../plugin/DataContextPluginRegistry';
+import FormTranslator from '../plugin/FormTranslator';
 
 @ApiPath({
     path: '/form',
@@ -53,6 +55,9 @@ export class FormController extends BaseHttpController {
                 @inject(TYPE.ValidationService) private readonly validationService: ValidationService,
                 @inject(TYPE.FormResourceAssembler) private readonly formResourceAssembler: FormResourceAssembler,
                 @inject(TYPE.CommentService) private readonly commentService: CommentService,
+                @inject(TYPE.DataContextPluginRegistry) private readonly dataContextPluginRegistry:
+                    DataContextPluginRegistry,
+                @inject(TYPE.FormTranslator) private readonly formTranslator: FormTranslator,
     ) {
         super();
     }
@@ -62,6 +67,22 @@ export class FormController extends BaseHttpController {
         description: 'Get latest form schema for a given id',
         summary: 'Get latest form schema for a given id',
         parameters: {
+            query: {
+                processInstanceId: {
+                    type: SwaggerDefinitionConstant.Parameter.Type.STRING,
+                    default: 20,
+                    description: 'Process instance id associated with the form.This will be passed on the data context',
+                    required: false,
+                    name: 'processInstanceId',
+                },
+                taskId: {
+                    type: SwaggerDefinitionConstant.Parameter.Type.STRING,
+                    default: 20,
+                    description: 'Task id associated with the form.This will be passed on the data context',
+                    required: false,
+                    name: 'taskId',
+                },
+            },
             path: {
                 id: {
                     name: 'id',
@@ -82,10 +103,19 @@ export class FormController extends BaseHttpController {
                      @request() req: express.Request,
                      @response() res: express.Response,
                      @principal() currentUser: User,
-                     @queryParam() live?: number): Promise<void> {
-        const formVersion = await this.formService.findForm(id, currentUser);
+                     @queryParam() live?: number,
+                     @queryParam() processInstanceId?: string,
+                     @queryParam() taskId?: string): Promise<void> {
+
+        // @ts-ignore
+        const dataContext = await this.dataContextPluginRegistry.getDataContext(req.kauth, {processInstanceId, taskId});
+        let formVersion = await this.formService.findForm(id, currentUser);
         if (!formVersion) {
             throw new ResourceNotFoundError(`Form with id ${id} does not exist. Check id or access controls`);
+        }
+        logger.info('Performing data context resolution');
+        if (dataContext) {
+            formVersion = this.formTranslator.translate(formVersion, dataContext);
         }
         const form = this.formResourceAssembler.toResource(formVersion, req);
         res.json(form);

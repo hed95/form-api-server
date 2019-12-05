@@ -14,7 +14,7 @@ export default class JsonPathEvaluator {
         if (JsonPathEvaluator.REG_EXP.test(value)) {
             const updatedValue = value.replace(JsonPathEvaluator.REG_EXP, (match, capture) => {
                 const val = JSONPath.value(dataContext, capture);
-                logger.info(`JSON path \'${capture}\' detected for \'${key}\'` +
+                logger.debug(`JSON path \'${capture}\' detected for \'${key}\'` +
                     ` with parsed value \'${(val ? val : 'no match')}\'`);
                 return intercept(val);
             });

@@ -20,4 +20,5 @@ export default {
     CacheManager: Symbol.for('CacheManager'),
     JsonPathEvaluator: Symbol.for('JsonPathEvaluator'),
     FormTranslator: Symbol.for('FormTranslator'),
+    DataContextPluginRegistry: Symbol.for('DataContextPluginRegistry'),
 };

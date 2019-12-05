@@ -24,6 +24,7 @@ import {OptimisticLockError} from 'sequelize';
 import {ApplicationConstants} from './constant/ApplicationConstants';
 import {ConfigValidator} from './config/ConfigValidator';
 import {EventEmitter} from 'events';
+import DataContextPluginRegistry from './plugin/DataContextPluginRegistry';
 
 const defaultPort: number = 3000;
 
@@ -83,6 +84,20 @@ if (corsOrigins.length !== 0) {
 }
 expressApp.use(httpContext.middleware);
 const keycloakService: KeycloakService = container.get(TYPE.KeycloakService);
+
+if (appConfig.dataContextPluginLocation) {
+    try {
+        // tslint:disable-next-line:no-var-requires
+        const plugin = require(appConfig.dataContextPluginLocation);
+        if (plugin) {
+            const pluginRegistry: DataContextPluginRegistry = container.get(TYPE.DataContextPluginRegistry);
+            pluginRegistry.register(plugin.default);
+        }
+    } catch (e) {
+        logger.warn(e.message);
+    }
+}
+
 expressApp.use('/api-docs/swagger', express.static('swagger'));
 expressApp.use('/api-docs/swagger/assets', express.static('node_modules/swagger-ui-dist'));
 expressApp.use(swagger.express(

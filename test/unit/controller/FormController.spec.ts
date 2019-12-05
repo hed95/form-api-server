@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+// tslint:disable-next-line:no-implicit-dependencies
 import {expect} from 'chai';
 import {FormService} from '../../../src/service/FormService';
 
@@ -6,6 +7,7 @@ import {FormController} from '../../../src/controller';
 import {MockResponse} from '../../MockResponse';
 import {User} from '../../../src/auth/User';
 import {FormVersion} from '../../../src/model/FormVersion';
+// tslint:disable-next-line:no-implicit-dependencies
 import {Arg, Substitute} from '@fluffy-spoon/substitute';
 import {Form} from '../../../src/model/Form';
 import {FormComment} from '../../../src/model/FormComment';
@@ -16,6 +18,8 @@ import {FormResourceAssembler} from '../../../src/controller/FormResourceAssembl
 import {CommentService} from '../../../src/service/CommentService';
 import ResourceNotFoundError from '../../../src/error/ResourceNotFoundError';
 import {RestoreData} from '../../../src/model/RestoreData';
+import DataContextPluginRegistry from '../../../src/plugin/DataContextPluginRegistry';
+import FormTranslator from '../../../src/plugin/FormTranslator';
 
 describe('FormController', () => {
 
@@ -26,6 +30,8 @@ describe('FormController', () => {
     let validationService: ValidationService;
     let formResourceAssembler: FormResourceAssembler;
     let commentService: CommentService;
+    let dataContextRegistry: DataContextPluginRegistry;
+    let formTranslator: FormTranslator;
 
     beforeEach(() => {
         mockResponse = new MockResponse();
@@ -34,7 +40,10 @@ describe('FormController', () => {
         validationService = Substitute.for<ValidationService>();
         formResourceAssembler = Substitute.for<FormResourceAssembler>();
         commentService = Substitute.for<CommentService>();
-        formController = new FormController(formService, validationService, formResourceAssembler, commentService);
+        dataContextRegistry = Substitute.for<DataContextPluginRegistry>();
+        formTranslator = Substitute.for<FormTranslator>();
+        formController = new FormController(formService, validationService,
+            formResourceAssembler, commentService, dataContextRegistry, formTranslator);
 
     });
 
@@ -47,7 +56,7 @@ describe('FormController', () => {
         const version: FormVersion = Object.assign(FormVersion.prototype, {});
         version.schema = {
             display: 'form',
-            components: []
+            components: [],
         };
         // @ts-ignore
         formService.findForm(Arg.any(), Arg.any()).returns(Promise.resolve(version));
@@ -55,13 +64,12 @@ describe('FormController', () => {
         // @ts-ignore
         formResourceAssembler.toResource(Arg.any(), Arg.any()).returns({
             display: 'form',
-            components: []
+            components: [],
         });
 
         await formController.get('ea1ddad5-aec3-44a4-a730-07b50b8be752', mockRequest, mockResponse, user);
         expect(JSON.stringify(mockResponse.getJsonData())).to.be.eq(JSON.stringify(version.schema));
     });
-
 
     it('returns all versions', async () => {
 
@@ -71,7 +79,7 @@ describe('FormController', () => {
         const version: FormVersion = Object.assign(FormVersion.prototype, {});
         version.schema = {
             display: 'form',
-            components: []
+            components: [],
         };
         const versions = [version];
 
@@ -79,8 +87,8 @@ describe('FormController', () => {
         formService.findAllVersions(Arg.any(), Arg.any(), Arg.any(), Arg.any()).returns(Promise.resolve({
             offset: 0,
             limit: 10,
-            versions: versions,
-            total: 1
+            versions,
+            total: 1,
         }));
 
         await formController.allVersions('id', 0, 20, mockRequest, mockResponse, user);
@@ -98,7 +106,7 @@ describe('FormController', () => {
         form.id = 'formId';
         version.schema = {
             display: 'form',
-            components: []
+            components: [],
         };
         version.form = form;
         // @ts-ignore
@@ -110,7 +118,6 @@ describe('FormController', () => {
         expect(mockResponse.getLocation()).to.eq('/form/formId');
 
     });
-
 
     it('can create a comment', async () => {
         const user = new User('id', 'email');
@@ -125,7 +132,6 @@ describe('FormController', () => {
         expect(mockResponse.getStatus()).to.eq(201);
 
     });
-
 
     it('can update form roles', async () => {
         const user = new User('id', 'email');
@@ -149,13 +155,13 @@ describe('FormController', () => {
         form.id = 'formId';
         version.schema = {
             display: 'form',
-            components: []
+            components: [],
         };
         version.form = form;
         // @ts-ignore
         formService.getAllForms(Arg.any(), Arg.any(), Arg.any(), Arg.any(), Arg.any(), Arg.any()).returns(Promise.resolve({
             total: 1,
-            forms: [version]
+            forms: [version],
         }));
 
         const result: { total: number, forms: object[] }
@@ -173,7 +179,7 @@ describe('FormController', () => {
         const version: FormVersion = Object.assign({}, FormVersion.prototype);
         version.schema = {
             display: 'form',
-            components: []
+            components: [],
         };
         // @ts-ignore
         formService.findByVersionId(Arg.any(), Arg.any()).returns(Promise.resolve(version));
@@ -198,12 +204,11 @@ describe('FormController', () => {
         const user = new User('id', 'email');
         const restoreData = new RestoreData('formId', 'formVersionId');
 
-
         Object.assign(FormVersion, {});
         const version: FormVersion = Object.assign({}, FormVersion.prototype);
         version.schema = {
             display: 'form',
-            components: []
+            components: [],
         };
         // @ts-ignore
         formService.restore('formId', 'formVersionId', user).returns(Promise.resolve(version));
@@ -211,23 +216,22 @@ describe('FormController', () => {
         // @ts-ignore
         formResourceAssembler.toResource(version, mockRequest).returns({
             display: 'form',
-            components: []
+            components: [],
         });
 
         await formController.restore(restoreData, mockRequest, mockResponse, user);
 
-        expect(JSON.stringify(mockResponse.getJsonData())).to.eq(JSON.stringify(version.schema))
+        expect(JSON.stringify(mockResponse.getJsonData())).to.eq(JSON.stringify(version.schema));
 
     });
 
     it('can get comments', async () => {
         const user = new User('id', 'email');
 
-
         // @ts-ignore
         commentService.comments('formId', user, 0, 20).returns(Promise.resolve({
             total: 10,
-            comments: []
+            comments: [],
         }));
 
         await formController.comments('formId', 20, 0, mockResponse, user);

@@ -5,6 +5,7 @@ import JsonPathEvaluator from './JsonPathEvaluator';
 import {FormVersion} from '../model/FormVersion';
 import * as util from 'formiojs/utils/formUtils';
 import _ from 'lodash';
+import logger from '../util/logger';
 
 @provide(TYPE.FormTranslator)
 export default class FormTranslator {
@@ -12,19 +13,24 @@ export default class FormTranslator {
     }
 
     public translate(form: FormVersion, dataContext: any): FormVersion {
-        form.schema.title = this.jsonPathEvaluator.performJsonPathEvaluation({
-            key: 'Form title',
-            value: form.schema.title,
-        }, dataContext);
-
-        util.eachComponent(form.schema.components, (component: any) => {
-            const parsed = this.jsonPathEvaluator.performJsonPathEvaluation({
-                key: component.key,
-                value: JSON.stringify(component),
+        try {
+            form.schema.title = this.jsonPathEvaluator.performJsonPathEvaluation({
+                key: 'Form title',
+                value: form.schema.title,
             }, dataContext);
-            form.schema.components = _.reject(form.schema.components, {key: component.key});
-            form.schema.components.push(JSON.parse(parsed));
-        });
-        return form;
+
+            util.eachComponent(form.schema.components, (component: any) => {
+                const parsed = this.jsonPathEvaluator.performJsonPathEvaluation({
+                    key: component.key,
+                    value: JSON.stringify(component),
+                }, dataContext);
+                form.schema.components = _.reject(form.schema.components, {key: component.key});
+                form.schema.components.push(JSON.parse(parsed));
+            });
+            return form;
+        } catch (e) {
+            logger.error(`Failed to perform translation`, e);
+            return form;
+        }
     }
 }

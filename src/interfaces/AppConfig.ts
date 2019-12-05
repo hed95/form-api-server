@@ -1,4 +1,5 @@
 interface AppConfig {
+    dataContextPluginLocation: string;
     keycloak: {
         protocol: string,
         url: string,
