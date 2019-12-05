@@ -91,9 +91,9 @@ if (appConfig.dataContextPluginLocation) {
         // tslint:disable-next-line:no-var-requires
         const plugin = require(appConfig.dataContextPluginLocation);
         if (plugin) {
-            logger.info('Plugin found');
+            logger.info('Data context plugin found');
             const pluginRegistry: DataContextPluginRegistry = container.get(TYPE.DataContextPluginRegistry);
-            pluginRegistry.register(plugin.default);
+            pluginRegistry.register(plugin);
         }
     } catch (e) {
         logger.warn(e.message);

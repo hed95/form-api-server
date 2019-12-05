@@ -30,7 +30,7 @@ export default class FormTranslator {
                 form.schema.components.push(JSON.parse(parsed));
             });
             if (postProcess) {
-                form.schema = await postProcess(dataContext, form);
+                form.schema = await postProcess(dataContext, form.schema);
             }
             return form;
         } catch (e) {

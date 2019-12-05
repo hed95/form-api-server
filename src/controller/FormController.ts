@@ -117,6 +117,7 @@ export class FormController extends BaseHttpController {
         if (dataContext) {
             formVersion = await this.formTranslator.translate(formVersion, dataContext,
                 this.dataContextPluginRegistry.getPlugin().postProcess);
+
         }
         const form = this.formResourceAssembler.toResource(formVersion, req);
         res.json(form);
