@@ -2,12 +2,17 @@ import 'reflect-metadata';
 // tslint:disable-next-line:no-implicit-dependencies
 import {expect} from 'chai';
 import DataContextPluginRegistry from '../../../src/plugin/DataContextPluginRegistry';
+import PromiseTimeoutHandler from '../../../src/plugin/PromiseTimeoutHandler';
+import defaultAppConfig from '../../../src/config/defaultAppConfig';
 
 describe('DataContextPluginRegistry', () => {
     let dataContextPluginRegistry;
 
     beforeEach(() => {
-        dataContextPluginRegistry = new DataContextPluginRegistry();
+        dataContextPluginRegistry = new DataContextPluginRegistry(
+            new PromiseTimeoutHandler(),
+            defaultAppConfig,
+        );
     });
 
     it('can register plugin', () => {

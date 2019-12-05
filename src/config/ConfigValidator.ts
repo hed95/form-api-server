@@ -7,6 +7,7 @@ export class ConfigValidator {
     constructor() {
         this.schema = Joi.object().keys({
             dataContextPluginLocation: Joi.string().optional(),
+            dataContextPluginExecutionTimeout: Joi.string().optional(),
             keycloak: Joi.object({
                 protocol: Joi.string().required(),
                 url: Joi.string().required(),

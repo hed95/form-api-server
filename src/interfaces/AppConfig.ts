@@ -1,5 +1,6 @@
 interface AppConfig {
     dataContextPluginLocation: string;
+    dataContextPluginExecutionTimeout: string;
     keycloak: {
         protocol: string,
         url: string,

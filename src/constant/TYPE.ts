@@ -21,4 +21,5 @@ export default {
     JsonPathEvaluator: Symbol.for('JsonPathEvaluator'),
     FormTranslator: Symbol.for('FormTranslator'),
     DataContextPluginRegistry: Symbol.for('DataContextPluginRegistry'),
+    PromiseTimeoutHandler: Symbol.for('PromiseTimeoutHandler'),
 };

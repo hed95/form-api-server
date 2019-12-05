@@ -34,10 +34,12 @@ const {
   REDIS_TOKEN,
   API_FORM_CORRELATION_ID_REQUEST_HEADER,
   DATA_CONTEXT_FACTORY_LOCATION,
+  DATA_CONTEXT_PLUGIN_EXECUTION_TIMEOUT,
 } = process.env;
 
 const defaultAppConfig: AppConfig = {
   dataContextPluginLocation: DATA_CONTEXT_FACTORY_LOCATION,
+  dataContextPluginExecutionTimeout: DATA_CONTEXT_PLUGIN_EXECUTION_TIMEOUT || '20000',
   keycloak: {
     protocol: KEYCLOAK_PROTOCOL || 'http://',
     url: KEYCLOAK_URL || 'localhost',
