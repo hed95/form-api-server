@@ -20,6 +20,7 @@ import ResourceNotFoundError from '../../../src/error/ResourceNotFoundError';
 import {RestoreData} from '../../../src/model/RestoreData';
 import DataContextPluginRegistry from '../../../src/plugin/DataContextPluginRegistry';
 import FormTranslator from '../../../src/plugin/FormTranslator';
+import defaultAppConfig from '../../../src/config/defaultAppConfig';
 
 describe('FormController', () => {
 
@@ -43,7 +44,7 @@ describe('FormController', () => {
         dataContextRegistry = Substitute.for<DataContextPluginRegistry>();
         formTranslator = Substitute.for<FormTranslator>();
         formController = new FormController(formService, validationService,
-            formResourceAssembler, commentService, dataContextRegistry, formTranslator);
+            formResourceAssembler, commentService, dataContextRegistry, formTranslator, defaultAppConfig);
 
     });
 

@@ -22,6 +22,7 @@ import {
     ApiPath,
     SwaggerDefinitionConstant,
 } from 'swagger-express-ts';
+import httpContext from 'express-http-context';
 import {User} from '../auth/User';
 import TYPE from '../constant/TYPE';
 import {FormComment} from '../model/FormComment';
@@ -40,6 +41,7 @@ import {RestoreData} from '../model/RestoreData';
 import DataContextPluginRegistry from '../plugin/DataContextPluginRegistry';
 import FormTranslator from '../plugin/FormTranslator';
 import KeycloakContext from '../plugin/KeycloakContext';
+import AppConfig from "../interfaces/AppConfig";
 
 @ApiPath({
     path: '/form',
@@ -59,6 +61,7 @@ export class FormController extends BaseHttpController {
                 @inject(TYPE.DataContextPluginRegistry) private readonly dataContextPluginRegistry:
                     DataContextPluginRegistry,
                 @inject(TYPE.FormTranslator) private readonly formTranslator: FormTranslator,
+                @inject(TYPE.AppConfig) private readonly appConfig: AppConfig,
     ) {
         super();
     }
@@ -120,7 +123,9 @@ export class FormController extends BaseHttpController {
         if (!(disableDataContext === 'true')) {
             logger.info('Performing data context resolution');
             // @ts-ignore
-            formVersion = await this.formTranslator.translate(formVersion, new KeycloakContext(req.kauth),
+            const keycloakContext = new KeycloakContext(req.kauth);
+            keycloakContext.setCorrelationId(httpContext.get(this.appConfig.correlationIdRequestHeader));
+            formVersion = await this.formTranslator.translate(formVersion, keycloakContext,
                 {
                 processInstanceId,
                 taskId,

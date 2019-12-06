@@ -8,6 +8,7 @@ export default class KeycloakContext {
     private readonly userName: string;
     private readonly givenName: string;
     private readonly familyName: string;
+    private  correlationId: string;
 
     constructor(kauth: any) {
         this.accessToken = kauth.grant.access_token.token;
@@ -18,5 +19,13 @@ export default class KeycloakContext {
         this.userName = content.preferred_username;
         this.givenName = content.given_name;
         this.familyName = content.family_name;
+    }
+
+    public setCorrelationId(correlationId: string): void {
+        this.correlationId = correlationId;
+    }
+
+    public getCorrelationId() {
+        return this.correlationId;
     }
 }
