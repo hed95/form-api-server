@@ -41,7 +41,7 @@ import {RestoreData} from '../model/RestoreData';
 import DataContextPluginRegistry from '../plugin/DataContextPluginRegistry';
 import FormTranslator from '../plugin/FormTranslator';
 import KeycloakContext from '../plugin/KeycloakContext';
-import AppConfig from "../interfaces/AppConfig";
+import AppConfig from '../interfaces/AppConfig';
 
 @ApiPath({
     path: '/form',
