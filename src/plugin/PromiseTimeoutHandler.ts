@@ -10,16 +10,16 @@ export default class PromiseTimeoutHandler {
 
     }
 
-    public async timeoutPromise(promise: Promise<any>,
+    public async timeoutPromise(promiseId: string, promise: Promise<any>,
                                 defaultOperation?: any,
                                 timeoutInMs?: number): Promise<any> {
         const timeoutInMilliseconds = timeoutInMs ? timeoutInMs
             : +this.appConfig.dataContextPluginExecutionTimeout;
 
+        let id;
         const timeout = new Promise((resolve, reject) => {
-            const id = setTimeout(() => {
-                clearTimeout(id);
-                const message = `Request timed out after ${timeoutInMilliseconds} ms`;
+            id = setTimeout(() => {
+                const message = `Request ${promiseId} timed out after ${timeoutInMilliseconds} ms`;
                 logger.warn(message);
                 if (defaultOperation) {
                     resolve(defaultOperation());
@@ -31,6 +31,9 @@ export default class PromiseTimeoutHandler {
         return Promise.race([
             promise,
             timeout,
-        ]);
+        ]).then((result) => {
+            clearTimeout(id);
+            return result;
+        });
     }
 }

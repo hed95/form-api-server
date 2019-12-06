@@ -26,7 +26,7 @@ describe('PromiseTimeoutHandler', () => {
         const handler: PromiseTimeoutHandler = new PromiseTimeoutHandler(defaultAppConfig);
 
         // tslint:disable-next-line:no-magic-numbers
-        const result = await handler.timeoutPromise(new Promise((resolve) =>
+        const result = await handler.timeoutPromise('id', new Promise((resolve) =>
             // tslint:disable-next-line:no-magic-numbers
             timeoutId = setTimeout(resolve, 10000)), defaultOperation);
 
@@ -37,11 +37,11 @@ describe('PromiseTimeoutHandler', () => {
         const handler: PromiseTimeoutHandler = new PromiseTimeoutHandler(defaultAppConfig);
         // tslint:disable-next-line:no-magic-numbers
         try {
-            await handler.timeoutPromise(new Promise((resolve) =>
+            await handler.timeoutPromise('id', new Promise((resolve) =>
                 // tslint:disable-next-line:no-magic-numbers
                 timeoutId = setTimeout(resolve, 10000)));
         } catch (e) {
-            expect(e.message).to.be.eq('Request timed out after 1 ms');
+            expect(e.message).to.be.eq('Request id timed out after 1 ms');
         }
 
     });

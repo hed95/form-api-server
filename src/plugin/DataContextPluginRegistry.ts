@@ -33,14 +33,14 @@ export default class DataContextPluginRegistry {
             if (!this.dataContextPlugin) {
                 return null;
             }
-            const [dataContext] = await this.promiseTimeoutHandler.timeoutPromise(Promise.all(
+            const [dataContext] = await this.promiseTimeoutHandler.timeoutPromise('dataContext', Promise.all(
                 [this.dataContextPlugin.createDataContext(keycloakContext, {
                     processInstanceId, taskId,
                 })]));
             logger.info(`Data context resolved = ${dataContext !== null}`);
             return dataContext;
         } catch (e) {
-            logger.error(`Unable to get data context due ${e.message ? e.message : e}`, e);
+            logger.error(`Unable to get data context due ${e.message ? e.message : e}`);
             return null;
         }
     }
