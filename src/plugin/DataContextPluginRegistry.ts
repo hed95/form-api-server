@@ -27,14 +27,13 @@ export default class DataContextPluginRegistry {
         return null;
     }
 
-    public async getDataContext(kauth: any, processInstanceId?: string, taskId?: string): Promise<any> {
+    public async getDataContext(keycloakContext: KeycloakContext, processInstanceId?: string,
+                                taskId?: string): Promise<any> {
         try {
             if (!this.dataContextPlugin) {
                 return null;
             }
-            const keycloakContext = new KeycloakContext(kauth);
-            const [dataContext] = await this.promiseTimeoutHandler.timeoutPromise(
-                +this.appConfig.dataContextPluginExecutionTimeout, Promise.all(
+            const [dataContext] = await this.promiseTimeoutHandler.timeoutPromise(Promise.all(
                 [this.dataContextPlugin.createDataContext(keycloakContext, {
                     processInstanceId, taskId,
                 })]));

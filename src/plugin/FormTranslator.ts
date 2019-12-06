@@ -6,15 +6,30 @@ import {FormVersion} from '../model/FormVersion';
 import * as util from 'formiojs/utils/formUtils';
 import _ from 'lodash';
 import logger from '../util/logger';
+import PromiseTimeoutHandler from './PromiseTimeoutHandler';
+import DataContextPluginRegistry from './DataContextPluginRegistry';
+import KeycloakContext from './KeycloakContext';
+import ProcessPointers from './ProcessPointers';
 
 @provide(TYPE.FormTranslator)
 export default class FormTranslator {
-    constructor(@inject(TYPE.JsonPathEvaluator) private readonly jsonPathEvaluator: JsonPathEvaluator) {
+    constructor(@inject(TYPE.JsonPathEvaluator) private readonly jsonPathEvaluator: JsonPathEvaluator,
+                @inject(TYPE.PromiseTimeoutHandler) private readonly promiseTimeoutHandler: PromiseTimeoutHandler,
+                @inject(TYPE.DataContextPluginRegistry) private readonly dataContextPluginRegistry:
+                    DataContextPluginRegistry) {
     }
 
     public async translate(form: FormVersion,
-                           dataContext: any,
-                           postProcess?: (passedDataContext: any, schema: any) => Promise<any>): Promise<FormVersion> {
+                           keycloakContext: KeycloakContext,
+                           processPointers: ProcessPointers = {}): Promise<FormVersion> {
+
+        const postProcess = this.dataContextPluginRegistry.getPlugin().postProcess;
+        const dataContext = await this.dataContextPluginRegistry.getDataContext(keycloakContext,
+            processPointers.processInstanceId, processPointers.taskId);
+        if (!dataContext) {
+            logger.info('No data context found...so returning original form');
+            return form;
+        }
         try {
             form.schema.title = this.jsonPathEvaluator.performJsonPathEvaluation({
                 key: 'Form title',
@@ -30,7 +45,10 @@ export default class FormTranslator {
                 form.schema.components.push(JSON.parse(parsed));
             });
             if (postProcess) {
-                form.schema = await postProcess(dataContext, form.schema);
+                form.schema = await this.promiseTimeoutHandler.timeoutPromise(postProcess(dataContext, form.schema),
+                    () => {
+                        return form.schema;
+                    });
             }
             return form;
         } catch (e) {

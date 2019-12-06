@@ -10,15 +10,15 @@ describe('DataContextPluginRegistry', () => {
 
     beforeEach(() => {
         dataContextPluginRegistry = new DataContextPluginRegistry(
-            new PromiseTimeoutHandler(),
+            new PromiseTimeoutHandler(defaultAppConfig),
             defaultAppConfig,
         );
     });
 
     it('can register plugin', () => {
         const plugin = {
-            createDataContext: () => {
-                return null;
+            createDataContext: async () => {
+                return Promise.resolve(null);
             },
         };
         dataContextPluginRegistry.register(plugin);

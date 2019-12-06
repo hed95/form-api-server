@@ -39,6 +39,7 @@ import ResourceNotFoundError from '../error/ResourceNotFoundError';
 import {RestoreData} from '../model/RestoreData';
 import DataContextPluginRegistry from '../plugin/DataContextPluginRegistry';
 import FormTranslator from '../plugin/FormTranslator';
+import KeycloakContext from '../plugin/KeycloakContext';
 
 @ApiPath({
     path: '/form',
@@ -70,15 +71,19 @@ export class FormController extends BaseHttpController {
             query: {
                 processInstanceId: {
                     type: SwaggerDefinitionConstant.Parameter.Type.STRING,
-                    default: 20,
                     description: 'Process instance id associated with the form.This will be passed on the data context',
                     required: false,
                     name: 'processInstanceId',
                 },
                 taskId: {
                     type: SwaggerDefinitionConstant.Parameter.Type.STRING,
-                    default: 20,
                     description: 'Task id associated with the form.This will be passed on the data context',
+                    required: false,
+                    name: 'taskId',
+                },
+                disableDataContext: {
+                    type: SwaggerDefinitionConstant.Parameter.Type.BOOLEAN,
+                    description: 'Disable any data context processing. Just return the form',
                     required: false,
                     name: 'taskId',
                 },
@@ -104,21 +109,24 @@ export class FormController extends BaseHttpController {
                      @response() res: express.Response,
                      @principal() currentUser: User,
                      @queryParam('live') live?: number,
+                     @queryParam('disableDataContext') disableDataContext: string = 'false',
                      @queryParam('processInstanceId') processInstanceId: string = null,
                      @queryParam('taskId') taskId: string = null): Promise<void> {
 
-        // @ts-ignore
-        const dataContext = await this.dataContextPluginRegistry.getDataContext(req.kauth, processInstanceId, taskId);
         let formVersion = await this.formService.findForm(id, currentUser);
         if (!formVersion) {
             throw new ResourceNotFoundError(`Form with id ${id} does not exist. Check id or access controls`);
         }
-        logger.info('Performing data context resolution');
-        if (dataContext) {
-            formVersion = await this.formTranslator.translate(formVersion, dataContext,
-                this.dataContextPluginRegistry.getPlugin().postProcess);
-
+        if (!(disableDataContext === 'true')) {
+            logger.info('Performing data context resolution');
+            // @ts-ignore
+            formVersion = await this.formTranslator.translate(formVersion, new KeycloakContext(req.kauth),
+                {
+                processInstanceId,
+                taskId,
+            });
         }
+
         const form = this.formResourceAssembler.toResource(formVersion, req);
         res.json(form);
     }

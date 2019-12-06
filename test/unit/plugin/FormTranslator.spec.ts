@@ -12,11 +12,53 @@ import {
     simpleFormWithoutBusinessKey,
     imgForm, iframeForm, shiftForm, taskContextForm, userDetailsContextForm, noContextData,
 } from './formsFixtures';
-import _ = require('lodash');
+import defaultAppConfig from '../../../src/config/defaultAppConfig';
+import PromiseTimeoutHandler from '../../../src/plugin/PromiseTimeoutHandler';
+import DataContextPluginRegistry from '../../../src/plugin/DataContextPluginRegistry';
+import KeycloakContext from '../../../src/plugin/KeycloakContext';
 
 describe('Form Translator ', () => {
     const jsonPathEvaluator = new JsonPathEvaluator();
-    const formTranslator = new FormTranslator(jsonPathEvaluator);
+    let dataContextRegistory;
+    let formTranslator;
+    const dataContext: Record<any, any> = {
+        processContext: {
+            businessKey: 'businessKey',
+            variable: {
+                firstName: 'Joe',
+                surname: 'Bloggs',
+            },
+        },
+    };
+    const kAuth = {
+        grant: {
+            access_token: {
+                content: {
+                    session_state: 'state',
+                    email: 'email',
+                    preferred_username: 'preferred_username',
+                    given_name: 'given_name',
+                    family_name: 'family_name',
+                },
+                token: 'token',
+            },
+            refresh_token: {
+                token: 'token',
+            },
+        },
+    };
+    beforeEach(() => {
+        defaultAppConfig.dataContextPluginLocation = '10';
+        const promiseTimeoutHandler = new PromiseTimeoutHandler(defaultAppConfig);
+        dataContextRegistory = new DataContextPluginRegistry(promiseTimeoutHandler, defaultAppConfig);
+        dataContextRegistory.register({
+            createDataContext: async () => {
+                return Promise.resolve(dataContext);
+            },
+        });
+        formTranslator = new FormTranslator(jsonPathEvaluator, promiseTimeoutHandler, dataContextRegistory);
+    });
+
     const form = {
         name: 'form',
         title: '{$.processContext.businessKey} Title',
@@ -30,15 +72,7 @@ describe('Form Translator ', () => {
                 defaultValue: '{$.processContext.variable.surname}',
             }],
     };
-    const dataContext: Record<any, any> = {
-        processContext: {
-            businessKey: 'businessKey',
-            variable: {
-                firstName: 'Joe',
-                surname: 'Bloggs',
-            },
-        },
-    };
+
     Object.assign(FormVersion, {});
     // @ts-ignore
     const version: FormVersion = {...FormVersion.prototype};
@@ -49,7 +83,7 @@ describe('Form Translator ', () => {
 
     it('can parse expression', async () => {
         version.schema = form;
-        const result = await formTranslator.translate(version, dataContext);
+        const result = await formTranslator.translate(version, new KeycloakContext(kAuth));
         expect(result.schema.title).to.be.eq('businessKey Title');
         expect(result.schema.components[0].defaultValue).to.be.eq('Joe');
         expect(result.schema.components[1].defaultValue).to.be.eq('Bloggs');
@@ -69,28 +103,9 @@ describe('Form Translator ', () => {
     ].forEach((formToTest: any) => {
         it(`it can parse ${formToTest.name}`, async () => {
             version.schema = formToTest;
-            const result = await formTranslator.translate(version, {
-                environmentContext: {
-                    referenceDataUrl: 'http://localhost:8000',
-                },
-                processContext: {
-                    person: {
-                        id: 'id',
-                        firstName: 'Joe',
-                        lastName: 'Bloggs',
-                    },
-                },
-                keycloakContext: {
-                    givenName: 'apples',
-                    familyName: 'test',
-                    sessionId: 'sessionId1234',
-                },
-            });
+            const result = await formTranslator.translate(version, new KeycloakContext(kAuth));
             expect(JsonPathEvaluator.REG_EXP.test(JSON.stringify(result.schema))).to.be.false;
         });
     });
 
-    const componentValue = (components, componentKey) => {
-        return _.find(components, {key: componentKey}).defaultValue;
-    };
 });
