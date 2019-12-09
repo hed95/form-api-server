@@ -74,6 +74,8 @@ http://localhost:3000/api-docs/swagger/#/
 |API_FORM_LOG_ENABLE_QUERY             |boolean     | false             |
 |API_FORM_PORT                         |number      | 3000              |
 |API_FORM_CORRELATION_ID_REQUEST_HEADER|string      | x-request-id      |
+|DATA_CONTEXT_FACTORY_LOCATION         |string      | *OPTIONAL*        |
+|DATA_CONTEXT_PLUGIN_EXECUTION_TIMEOUT |string      | 20000             |
 
 
                                      
@@ -182,3 +184,15 @@ Clears internal in memory user cache
 
 ### DELETE /cache/form
 Clears internal in memory form cache
+
+
+# Translation Plugin
+
+With the latest release of the Form API server it is now possible to translate a form before returned to the callers.
+This enables custom users to pre and post process the form schema being returned. The plugin requires the location of the code or 
+a webpacked version of the file. Once present the api server will call the function
+
+```js
+createDataContext()
+```
+The api will inject the keycloakContext and optional process and task ids. The createDataContext is async and requires the implementors to return a promise with the data context object fully populated.
