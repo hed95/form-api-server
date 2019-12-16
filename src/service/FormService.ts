@@ -241,10 +241,8 @@ export class FormService {
         if (filterQuery) {
             const keys: string[] = Object.keys(filterQuery);
             if (keys.length > 0) {
-                _.forEach(keys, (key) => {
-                    // @ts-ignore
-                    baseQueryOptions[key] = filterQuery[key];
-                });
+                // @ts-ignore
+                baseQueryOptions[Op.or] = filterQuery;
             }
         }
 
