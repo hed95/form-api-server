@@ -9,6 +9,7 @@ export class QueryParser {
 
     private readonly operators: symbol[] = [
         Op.eq,
+        Op.or,
         Op.ne,
         Op.in,
         Op.gt,
@@ -26,7 +27,12 @@ export class QueryParser {
     ];
 
     public parse(filters: string[]): object {
-        const reg: RegExp = new RegExp('(\\w+)__(.*?)__(.*)');
+
+        const lhs = '[\\w|.]+';
+        const opEx = '\\w+';
+        const rhs = '(.*)';
+
+        const reg: RegExp = new RegExp(`(${lhs})__(${opEx})__(${rhs})`);
         const convertedFilter: object = {};
         _.forEach(filters, (filter) => {
             if (reg.test(filter)) {
@@ -62,7 +68,7 @@ export class QueryParser {
                     }]);
                 }
 
-                if (operator === Op.in) {
+                if (operator === Op.in || operator === Op.or) {
                     // @ts-ignore
                     convertedFilter[field] = {
                         [operator]: value.split('|'),

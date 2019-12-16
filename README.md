@@ -171,7 +171,7 @@ By the default the log level is set at DEBUG. You change the log level using thi
 }
 ```
 If you do not want this feature enabled then set this environment variable to false ENABLE_LOG_CHANGE
-If you have configured LOG_CHANGE_TIMEOUT with a non -1 number then after the specified timeout the log level will revert back to DEBUG. This is to ensure you don't leave the logging at INFO level indefinitely causing you log files to fill up.
+If you have configured LOG_CHANGE_TIMEOUT with a non -1 number then after the specified timeout the log level will revert back to DEBUG. This is to ensure you don't leave the logging at INFO level indefinitely causing your log files to fill up.
 
 ### POST /query-log
 This endpoint enables SQL query logging at INFO level. Body not required
@@ -193,6 +193,8 @@ This enables custom users to pre and post process the form schema being returned
 a webpacked version of the file. Once present the api server will call the function
 
 ```js
-createDataContext()
+createDataContext(
+    keycloakContext, { processInstanceId, taskId}
+) : Promise
 ```
 The api will inject the keycloakContext and optional process and task ids. The createDataContext is async and requires the implementors to return a promise with the data context object fully populated.
