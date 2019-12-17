@@ -205,5 +205,10 @@ The api will inject the keycloakContext and optional process and task ids. The c
 filterOperator=and&filter=title__eq__apples,title__eq__oranges
 ```
 breaks downs to 
-title__eq__apples AND title__eq__oranges
+title equals apples and oranges
 
+```js
+filter=title__or__apples|carrots
+```
+breaks down to
+title is apples or oranges
