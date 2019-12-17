@@ -235,6 +235,12 @@ export class FormController extends BaseHttpController {
                     required: false,
                     name: 'full',
                 },
+                filterOperator: {
+                    type: SwaggerDefinitionConstant.Parameter.Type.STRING,
+                    description: 'Used to join filter operators, for example AND or OR. Default it OR',
+                    required: false,
+                    name: 'filterOperator',
+                },
             },
         },
         responses: {
@@ -253,7 +259,9 @@ export class FormController extends BaseHttpController {
                           @response() res: express.Response,
                           @queryParam('name') name?: string,
                           @queryParam('title') title?: string,
-                          @queryParam('full') full?: boolean): Promise<{ total: number, forms: object[] }> {
+                          @queryParam('full') full?: boolean,
+                          @queryParam('filterOperator') filterOperator?: string):
+        Promise<{ total: number, forms: object[] }> {
 
         if (full) {
             logger.warn('Nested forms is not currently supported as yet');
@@ -265,7 +273,7 @@ export class FormController extends BaseHttpController {
         if (title) {
             filter += `,title__iLike__%${title}%`;
         }
-        const filterQuery: object = filter && filter.split(',').length !== 0 ?
+        const filterQuery: [] = filter && filter.split(',').length !== 0 ?
             this.queryParser.parse(filter.split(',')) : null;
 
         const fieldAttributes: string[] = attributes ? attributes.split(',') : [];
@@ -275,7 +283,7 @@ export class FormController extends BaseHttpController {
                 limit,
                 offset,
                 filterQuery,
-                fieldAttributes, countOnly);
+                fieldAttributes, countOnly, filterOperator);
         const forms: { total: number, forms: object[] } = {
             total: 0,
             forms: [],

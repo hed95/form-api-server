@@ -26,14 +26,14 @@ export class QueryParser {
         Op.startsWith,
     ];
 
-    public parse(filters: string[]): object {
+    public parse(filters: string[]): [] {
 
         const lhs = '[\\w|.]+';
         const opEx = '\\w+';
         const rhs = '(.*)';
 
         const reg: RegExp = new RegExp(`(${lhs})__(${opEx})__(${rhs})`);
-        const convertedFilter: object = {};
+        const convertedFilter: [] = [];
         _.forEach(filters, (filter) => {
             if (reg.test(filter)) {
 
@@ -67,18 +67,12 @@ export class QueryParser {
                         context: {},
                     }]);
                 }
-
-                if (operator === Op.in || operator === Op.or) {
-                    // @ts-ignore
-                    convertedFilter[field] = {
-                        [operator]: value.split('|'),
-                    };
-                } else {
-                    // @ts-ignore
-                    convertedFilter[field] = {
-                        [operator]: value,
-                    };
-                }
+                // @ts-ignore
+                convertedFilter.push({
+                    [field] : {
+                        [operator]: (operator === Op.in || operator === Op.or) ? value.split('|') : value,
+                    },
+                });
             }
         });
         return convertedFilter;

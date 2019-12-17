@@ -198,3 +198,12 @@ createDataContext(
 ) : Promise
 ```
 The api will inject the keycloakContext and optional process and task ids. The createDataContext is async and requires the implementors to return a promise with the data context object fully populated.
+
+# Query example
+
+```js
+filterOperator=and&filter=title__eq__apples,title__eq__oranges
+```
+breaks downs to 
+title__eq__apples AND title__eq__oranges
+

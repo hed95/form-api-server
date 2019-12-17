@@ -221,9 +221,10 @@ export class FormService {
     public async getAllForms(user: User,
                              limit: number = 20,
                              offset: number = 0,
-                             filterQuery: object = null,
+                             filterQuery: [] = null,
                              attributes: string[] = [],
-                             countOnly: boolean = false):
+                             countOnly: boolean = false,
+                             filterOperator: string = 'or'):
         Promise<{ total: number, forms: FormVersion[] }> {
 
         const profiler = logger.startTimer();
@@ -237,13 +238,10 @@ export class FormService {
                 [Op.eq]: null,
             },
         };
-
-        if (filterQuery) {
-            const keys: string[] = Object.keys(filterQuery);
-            if (keys.length > 0) {
-                // @ts-ignore
-                baseQueryOptions[Op.or] = filterQuery;
-            }
+        // @ts-ignore
+        if (filterQuery && filterQuery.length > 0) {
+            // @ts-ignore
+            baseQueryOptions[Symbol.for(filterOperator)] = filterQuery;
         }
 
         const query: FindAndCountOptions = {

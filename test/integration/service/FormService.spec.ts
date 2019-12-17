@@ -809,21 +809,20 @@ describe('FormService', () => {
             }).save();
         });
 
-        const query: object = new QueryParser().parse(['title__eq__Test form X', 'name__eq__Test Form ABC11']);
+        const query: [] = new QueryParser().parse(['title__eq__Test form X', 'name__eq__Test Form ABC11']);
 
         // tslint:disable-next-line:max-line-length
-        const results: { total: number, forms: FormVersion[] } = await formService.getAllForms(new User('id', 'test', [role]), 20, 0, {
-            'schema.title': {
-                [Op.eq]: 'Test form X',
-            },
-            'schema.name': {
-                [Op.eq]: 'Test Form ABC11',
-            },
-        }, []);
+        const results: { total: number, forms: FormVersion[] } = await formService.getAllForms(new User('id', 'test', [role]), 20, 0,
+            // @ts-ignore
+            [{
+                'schema.title': {
+                    [Op.eq]: 'Test form X',
+                }}, {'schema.name': {
+                    [Op.eq]: 'Test Form ABC11',
+                }}], []);
 
         expect(results.total).to.be.gte(1);
         expect(results.forms.length).to.be.gte(1);
-
 
         // tslint:disable-next-line:max-line-length
         const resultsWithRaw: { total: number, forms: FormVersion[] } = await formService.getAllForms(new User('id', 'test', [role]), 20, 0, query, []);
@@ -855,7 +854,7 @@ describe('FormService', () => {
                 validTo: null,
             }).save();
         });
-        const query: object = new QueryParser().parse(['title__or__Apple|Carrots']);
+        const query: [] = new QueryParser().parse(['title__or__Apple|Carrots']);
 
         // tslint:disable-next-line:max-line-length
         const results: { total: number, forms: FormVersion[] } = await formService.getAllForms(new User('id', 'test', [role]), 20, 0, query, []);
@@ -886,8 +885,9 @@ describe('FormService', () => {
                 validTo: null,
             }).save();
         });
-        const query: object = new QueryParser().parse(['title__startsWith__Apple']);
+        const query: [] = new QueryParser().parse(['title__startsWith__Apple']);
 
+        // tslint:disable-next-line:max-line-length
         const results: { total: number, forms: FormVersion[] } = await formService.getAllForms(new User('id', 'test', [role]), 20, 0, query, []);
 
         expect(results.total).to.be.eq(1);
