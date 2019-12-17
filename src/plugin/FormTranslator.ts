@@ -23,6 +23,9 @@ export default class FormTranslator {
                            keycloakContext: KeycloakContext,
                            processPointers: ProcessPointers = {}): Promise<FormVersion> {
 
+        if (!this.dataContextPluginRegistry.getPlugin()) {
+            return form;
+        }
         const postProcess = this.dataContextPluginRegistry.getPlugin().postProcess;
         const dataContext = await this.dataContextPluginRegistry.getDataContext(keycloakContext,
             processPointers.processInstanceId, processPointers.taskId);
