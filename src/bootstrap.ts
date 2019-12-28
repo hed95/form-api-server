@@ -25,6 +25,7 @@ import {ApplicationConstants} from './constant/ApplicationConstants';
 import {ConfigValidator} from './config/ConfigValidator';
 import {EventEmitter} from 'events';
 import DataContextPluginRegistry from './plugin/DataContextPluginRegistry';
+import {GrantedRequest} from 'keycloak-connect';
 
 const defaultPort: number = 3000;
 
@@ -133,7 +134,7 @@ expressApp.use((req: express.Request, res: express.Response, next: express.NextF
 
 expressApp.use(keycloakService.middleware());
 
-expressApp.use(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+expressApp.use(async (req: GrantedRequest, res: express.Response, next: express.NextFunction) => {
     httpContext.ns.bindEmitter(req);
     httpContext.ns.bindEmitter(res);
     let userId;
@@ -159,7 +160,6 @@ expressApp.use(morgan((tokens: TokenIndexer, req: express.Request, res: express.
         return request.headers.referer;
     });
     morgan.token('response-time-ms', (request: express.Request, response: express.Response) => {
-        // @ts-ignore
         return `${tokens['response-time'](request, response)} ms`;
     });
     morgan.token(appConfig.correlationIdRequestHeader,

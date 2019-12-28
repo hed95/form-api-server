@@ -6,6 +6,7 @@ import UnauthorizedError from '../error/UnauthorizedError';
 import _ from 'lodash';
 import {inject} from 'inversify';
 import AppConfig from '../interfaces/AppConfig';
+import {GrantedRequest} from "keycloak-connect";
 
 @provide(TYPE.AdminProtectMiddleware)
 export class AdminProtectMiddleware extends BaseMiddleware {
@@ -17,8 +18,7 @@ export class AdminProtectMiddleware extends BaseMiddleware {
         this.adminRoles = appConfig.admin.roles;
     }
 
-    public handler(req: express.Request, res: express.Response, next: express.NextFunction): void {
-        // @ts-ignore
+    public handler(req: GrantedRequest, res: express.Response, next: express.NextFunction): void {
         const roles: string[] = req.kauth.grant.access_token.content.realm_access.roles;
         const hasAuthorization: boolean = _.intersectionWith(this.adminRoles, roles).length >= 1;
         if (!hasAuthorization) {

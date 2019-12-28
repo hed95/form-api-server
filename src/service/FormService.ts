@@ -336,7 +336,7 @@ export class FormService {
         });
     }
 
-    @Cacheable({cacheKey: FormService.setCacheKey, ttlSeconds: 120})
+    @Cacheable({cacheKey: FormService.setCacheKey, ttlSeconds: 1800})
     public async findForm(formId: string, user: User): Promise<FormVersion> {
         return this.findLatestForm(formId, user);
     }

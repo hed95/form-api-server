@@ -42,6 +42,7 @@ import DataContextPluginRegistry from '../plugin/DataContextPluginRegistry';
 import FormTranslator from '../plugin/FormTranslator';
 import KeycloakContext from '../plugin/KeycloakContext';
 import AppConfig from '../interfaces/AppConfig';
+import {GrantedRequest} from 'keycloak-connect';
 
 @ApiPath({
     path: '/form',
@@ -108,7 +109,7 @@ export class FormController extends BaseHttpController {
     })
     @httpGet('/:id', TYPE.ProtectMiddleware)
     public async get(@requestParam('id') id: string,
-                     @request() req: express.Request,
+                     @request() req: GrantedRequest,
                      @response() res: express.Response,
                      @principal() currentUser: User,
                      @queryParam('live') live?: number,
@@ -122,7 +123,6 @@ export class FormController extends BaseHttpController {
         }
         if (!(disableDataContext === 'true')) {
             logger.info('Performing data context resolution');
-            // @ts-ignore
             const keycloakContext = new KeycloakContext(req.kauth);
             keycloakContext.setCorrelationId(httpContext.get(this.appConfig.correlationIdRequestHeader));
             formVersion = await this.formTranslator.translate(formVersion, keycloakContext,
