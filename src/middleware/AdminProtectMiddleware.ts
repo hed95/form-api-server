@@ -6,7 +6,7 @@ import UnauthorizedError from '../error/UnauthorizedError';
 import _ from 'lodash';
 import {inject} from 'inversify';
 import AppConfig from '../interfaces/AppConfig';
-import {GrantedRequest} from "keycloak-connect";
+import {GrantedRequest} from 'keycloak-connect';
 
 @provide(TYPE.AdminProtectMiddleware)
 export class AdminProtectMiddleware extends BaseMiddleware {

@@ -27,6 +27,8 @@ import {EventEmitter} from 'events';
 import DataContextPluginRegistry from './plugin/DataContextPluginRegistry';
 import {GrantedRequest} from 'keycloak-connect';
 
+import promMid from 'express-prometheus-middleware';
+
 const defaultPort: number = 3000;
 
 const port = process.env.API_FORM_PORT || defaultPort;
@@ -104,6 +106,13 @@ if (appConfig.dataContextPluginLocation) {
 
 expressApp.use('/api-docs/swagger', express.static('swagger'));
 expressApp.use('/api-docs/swagger/assets', express.static('node_modules/swagger-ui-dist'));
+expressApp.use(promMid({
+    prefix: 'form_api_server_',
+    metricsPath: '/metrics',
+    collectDefaultMetrics: true,
+    // tslint:disable-next-line:no-magic-numbers
+    requestDurationBuckets: [0.1, 0.5, 1, 1.5],
+}));
 expressApp.use(swagger.express(
     {
         definition: {

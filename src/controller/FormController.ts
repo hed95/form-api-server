@@ -113,7 +113,7 @@ export class FormController extends BaseHttpController {
                      @response() res: express.Response,
                      @principal() currentUser: User,
                      @queryParam('live') live?: number,
-                     @queryParam('disableDataContext') disableDataContext: string = 'false',
+                     @queryParam('disableDataContext') disableDataContext: string = 'true',
                      @queryParam('processInstanceId') processInstanceId: string = null,
                      @queryParam('taskId') taskId: string = null): Promise<void> {
 

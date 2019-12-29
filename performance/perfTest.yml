@@ -65,7 +65,7 @@ scenarios:
       - think: 1
       - log: "Getting form that was posted"
       - get:
-          url: "{{ formId }}"
+          url: "{{ formId }}?disableDataContext=true"
           headers:
             Authorization: "Bearer {{ accessToken }}"
       - log: "Updating the form"
