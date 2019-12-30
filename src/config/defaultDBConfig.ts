@@ -17,10 +17,10 @@ const defaultDBConfig: DBConfig = {
         ssl: process.env.DB_FORM_SSL ? process.env.DB_FORM_SSL === 'true' : false,
       },
     pool: {
-        max: 5,
+        max: 100,
         min: 0,
-        acquire: 30000,
-        idle: 10000,
+        acquire: 1000000,
+        idle: 200000,
       },
   },
 };
