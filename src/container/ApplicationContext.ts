@@ -31,8 +31,8 @@ import JsonPathEvaluator from '../plugin/JsonPathEvaluator';
 import DataContextPluginRegistry from '../plugin/DataContextPluginRegistry';
 import FormTranslator from '../plugin/FormTranslator';
 import PromiseTimeoutHandler from '../plugin/PromiseTimeoutHandler';
-import Prometheus from "prom-client";
-import {getFormCountGenerator} from "../util/metrics";
+import Prometheus, {register} from 'prom-client';
+import {getFormCountGenerator} from '../util/metrics';
 
 export class ApplicationContext {
     private readonly container: Container;
@@ -73,10 +73,10 @@ export class ApplicationContext {
         this.container.bind<Prometheus.Counter>(TYPE.GetFormCountGenerator)
             .toConstantValue(getFormCountGenerator('form_api_server_'));
 
-
         logger.info('Application context initialised');
 
         eventEmitter.on(ApplicationConstants.SHUTDOWN_EVENT, () => {
+            register.clear();
             this.container.unbindAll();
             logger.info('Container unbindAll activated');
         });

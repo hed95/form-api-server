@@ -138,7 +138,7 @@ export class FormController extends BaseHttpController {
 
         if (this.getFormCountGenerator) {
             // @ts-ignore
-            this.getFormCountGenerator.inc({'name': form.name});
+            this.getFormCountGenerator.inc({name: form.name});
         }
 
         res.json(form);
