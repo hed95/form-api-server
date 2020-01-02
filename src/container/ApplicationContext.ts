@@ -32,7 +32,7 @@ import DataContextPluginRegistry from '../plugin/DataContextPluginRegistry';
 import FormTranslator from '../plugin/FormTranslator';
 import PromiseTimeoutHandler from '../plugin/PromiseTimeoutHandler';
 import Prometheus, {register} from 'prom-client';
-import {getFormCountGenerator} from '../util/metrics';
+import {getFormCountGenerator, updateFormCounter} from '../util/metrics';
 
 export class ApplicationContext {
     private readonly container: Container;
@@ -72,6 +72,9 @@ export class ApplicationContext {
 
         this.container.bind<Prometheus.Counter>(TYPE.GetFormCountGenerator)
             .toConstantValue(getFormCountGenerator('form_api_server_'));
+
+        this.container.bind<Prometheus.Counter>(TYPE.UpdateFormCountGenerator)
+            .toConstantValue(updateFormCounter('form_api_server_'));
 
         logger.info('Application context initialised');
 

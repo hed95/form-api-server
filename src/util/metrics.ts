@@ -8,6 +8,15 @@ const getFormCountGenerator = (prefix: string = '') => {
     });
 };
 
+const updateFormCounter = (prefix: string = '') => {
+    return new Prometheus.Counter({
+        name: `${prefix}update_form_counter`,
+        help: 'Total number form updated',
+        labelNames: ['name'],
+    });
+};
+
 export {
     getFormCountGenerator,
+    updateFormCounter
 };

@@ -65,6 +65,7 @@ export class FormController extends BaseHttpController {
                 @inject(TYPE.FormTranslator) private readonly formTranslator: FormTranslator,
                 @inject(TYPE.AppConfig) private readonly appConfig: AppConfig,
                 @inject(TYPE.GetFormCountGenerator) private readonly getFormCountGenerator: Prometheus.Counter,
+                @inject(TYPE.UpdateFormCountGenerator) private readonly updateFormCountGenerator: Prometheus.Counter,
     ) {
         super();
     }
@@ -396,6 +397,11 @@ export class FormController extends BaseHttpController {
                         @principal() currentUser: User): Promise<void> {
         const version = await this.formService.update(id, form, currentUser);
         logger.info(`Version id created ${version.versionId}`);
+
+        if (this.updateFormCountGenerator) {
+            // @ts-ignore
+            this.updateFormCountGenerator.inc({name: version.schema.name});
+        }
         res.sendStatus(HttpStatus.OK);
     }
 

@@ -23,4 +23,5 @@ export default {
     DataContextPluginRegistry: Symbol.for('DataContextPluginRegistry'),
     PromiseTimeoutHandler: Symbol.for('PromiseTimeoutHandler'),
     GetFormCountGenerator: Symbol.for('GetFormCountGenerator'),
+    UpdateFormCountGenerator: Symbol.for('UpdateFormCountGenerator')
 };

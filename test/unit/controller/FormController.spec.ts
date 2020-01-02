@@ -36,6 +36,7 @@ describe('FormController', () => {
     let commentService: CommentService;
     let dataContextRegistry: DataContextPluginRegistry;
     let getFormCounterGenerator: Prometheus.Counter;
+    let updateFormCountGenerator: Prometheus.Counter;
     let formTranslator: FormTranslator;
 
     beforeEach(() => {
@@ -48,9 +49,10 @@ describe('FormController', () => {
         dataContextRegistry = Substitute.for<DataContextPluginRegistry>();
         formTranslator = Substitute.for<FormTranslator>();
         getFormCounterGenerator = Substitute.for<Prometheus.Counter>();
+        updateFormCountGenerator =  Substitute.for<Prometheus.Counter>();
         formController = new FormController(formService, validationService,
             formResourceAssembler, commentService, dataContextRegistry, formTranslator,
-            defaultAppConfig, getFormCounterGenerator);
+            defaultAppConfig, getFormCounterGenerator, updateFormCountGenerator);
 
     });
 
