@@ -43,6 +43,7 @@ import FormTranslator from '../plugin/FormTranslator';
 import KeycloakContext from '../plugin/KeycloakContext';
 import AppConfig from '../interfaces/AppConfig';
 import {GrantedRequest} from 'keycloak-connect';
+import Prometheus from 'prom-client';
 
 @ApiPath({
     path: '/form',
@@ -63,6 +64,7 @@ export class FormController extends BaseHttpController {
                     DataContextPluginRegistry,
                 @inject(TYPE.FormTranslator) private readonly formTranslator: FormTranslator,
                 @inject(TYPE.AppConfig) private readonly appConfig: AppConfig,
+                @inject(TYPE.GetFormCountGenerator) private readonly getFormCountGenerator: Prometheus.Counter,
     ) {
         super();
     }
@@ -133,6 +135,12 @@ export class FormController extends BaseHttpController {
         }
 
         const form = this.formResourceAssembler.toResource(formVersion, req);
+
+        if (this.getFormCountGenerator) {
+            // @ts-ignore
+            this.getFormCountGenerator.inc({'name': form.name});
+        }
+
         res.json(form);
     }
 

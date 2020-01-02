@@ -22,6 +22,9 @@ import DataContextPluginRegistry from '../../../src/plugin/DataContextPluginRegi
 import FormTranslator from '../../../src/plugin/FormTranslator';
 import defaultAppConfig from '../../../src/config/defaultAppConfig';
 
+// @ts-ignore
+import Prometheus from 'prom-client';
+
 describe('FormController', () => {
 
     let mockResponse: any;
@@ -32,6 +35,7 @@ describe('FormController', () => {
     let formResourceAssembler: FormResourceAssembler;
     let commentService: CommentService;
     let dataContextRegistry: DataContextPluginRegistry;
+    let getFormCounterGenerator: Prometheus.Counter;
     let formTranslator: FormTranslator;
 
     beforeEach(() => {
@@ -43,8 +47,10 @@ describe('FormController', () => {
         commentService = Substitute.for<CommentService>();
         dataContextRegistry = Substitute.for<DataContextPluginRegistry>();
         formTranslator = Substitute.for<FormTranslator>();
+        getFormCounterGenerator = Substitute.for<Prometheus.Counter>();
         formController = new FormController(formService, validationService,
-            formResourceAssembler, commentService, dataContextRegistry, formTranslator, defaultAppConfig);
+            formResourceAssembler, commentService, dataContextRegistry, formTranslator,
+            defaultAppConfig, getFormCounterGenerator);
 
     });
 

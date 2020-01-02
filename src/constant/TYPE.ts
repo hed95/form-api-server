@@ -22,4 +22,5 @@ export default {
     FormTranslator: Symbol.for('FormTranslator'),
     DataContextPluginRegistry: Symbol.for('DataContextPluginRegistry'),
     PromiseTimeoutHandler: Symbol.for('PromiseTimeoutHandler'),
+    GetFormCountGenerator: Symbol.for('GetFormCountGenerator'),
 };
