@@ -18,5 +18,5 @@ const updateFormCounter = (prefix: string = '') => {
 
 export {
     getFormCountGenerator,
-    updateFormCounter
+    updateFormCounter,
 };
