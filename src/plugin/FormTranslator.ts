@@ -33,6 +33,7 @@ export default class FormTranslator {
             logger.info('No data context found...so returning original form');
             return form;
         }
+        logger.info('Data context', dataContext);
         try {
             form.schema.title = this.jsonPathEvaluator.performJsonPathEvaluation({
                 key: 'Form title',
