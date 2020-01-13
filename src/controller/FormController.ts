@@ -70,15 +70,14 @@ export class FormController extends BaseHttpController {
         super();
     }
 
-
     @httpGet('/name/:name', TYPE.ProtectMiddleware)
     public async getByName(@requestParam('name') name: string,
-                     @request() req: GrantedRequest,
-                     @response() res: express.Response,
-                     @principal() currentUser: User,
-                     @queryParam('disableDataContext') disableDataContext: string = 'false',
-                     @queryParam('processInstanceId') processInstanceId: string = null,
-                     @queryParam('taskId') taskId: string = null): Promise<void> {
+                           @request() req: GrantedRequest,
+                           @response() res: express.Response,
+                           @principal() currentUser: User,
+                           @queryParam('disableDataContext') disableDataContext: string = 'false',
+                           @queryParam('processInstanceId') processInstanceId: string = null,
+                           @queryParam('taskId') taskId: string = null): Promise<void> {
 
         const filter = `name__eq__${name}`;
         const filterQuery: [] = filter && filter.split(',').length !== 0 ?
