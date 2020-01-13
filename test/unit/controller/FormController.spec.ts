@@ -59,6 +59,32 @@ describe('FormController', () => {
     afterEach(() => {
     });
 
+    it ('can get form by name', async() => {
+        const user = new User('id', 'email');
+        Object.assign(FormVersion, {});
+        const version: FormVersion = Object.assign(FormVersion.prototype, {});
+        version.schema = {
+            display: 'form',
+            name: 'test',
+            components: [],
+        };
+        // @ts-ignore
+        formService.getAllForms(user, 1, 0, Arg.any()).returns(Promise.resolve({
+            total : 1,
+            forms: [version]
+        }));
+
+        // @ts-ignore
+        formResourceAssembler.toResource(Arg.any(), Arg.any()).returns({
+            display: 'form',
+            name: 'test',
+            components: [],
+        });
+
+        await formController.getByName('test', mockRequest, mockResponse, user, 'false');
+        expect(JSON.stringify(mockResponse.getJsonData())).to.be.eq(JSON.stringify(version.schema));
+    });
+
     it('can get a form', async () => {
         const user = new User('id', 'email');
         Object.assign(FormVersion, {});
