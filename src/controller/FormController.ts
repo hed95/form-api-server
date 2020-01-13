@@ -70,6 +70,46 @@ export class FormController extends BaseHttpController {
         super();
     }
 
+
+    @httpGet('/name/:name', TYPE.ProtectMiddleware)
+    public async getByName(@requestParam('name') name: string,
+                     @request() req: GrantedRequest,
+                     @response() res: express.Response,
+                     @principal() currentUser: User,
+                     @queryParam('disableDataContext') disableDataContext: string = 'false',
+                     @queryParam('processInstanceId') processInstanceId: string = null,
+                     @queryParam('taskId') taskId: string = null): Promise<void> {
+
+        const filter = `name__eq__${name}`;
+        const filterQuery: [] = filter && filter.split(',').length !== 0 ?
+            this.queryParser.parse(filter.split(',')) : null;
+
+        const formVersions = await this.formService.getAllForms(currentUser, 1, 0,  filterQuery);
+        if (formVersions.total === 0) {
+            throw new ResourceNotFoundError(`Form with name ${name} does not exist. Check id or access controls`);
+        }
+        if (formVersions.total > 1) {
+            throw new ResourceNotFoundError(`More than one form with name ${name} detected`);
+        }
+        let formVersion = formVersions.forms[0];
+        if (!(disableDataContext === 'true')) {
+            logger.info('Performing data context resolution');
+            const keycloakContext = new KeycloakContext(req.kauth);
+            keycloakContext.setCorrelationId(httpContext.get(this.appConfig.correlationIdRequestHeader));
+            formVersion = await this.formTranslator.translate(formVersion, keycloakContext,
+                {
+                    processInstanceId,
+                    taskId,
+                });
+        }
+        const form = this.formResourceAssembler.toResource(formVersion, req);
+        if (this.getFormCountGenerator) {
+            // @ts-ignore
+            this.getFormCountGenerator.inc({name: form.name});
+        }
+        res.json(form);
+    }
+
     @ApiOperationGet({
         path: '/{id}',
         description: 'Get latest form schema for a given id',
