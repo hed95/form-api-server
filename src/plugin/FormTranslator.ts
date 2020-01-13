@@ -26,7 +26,7 @@ export default class FormTranslator {
         if (!this.dataContextPluginRegistry.getPlugin()) {
             return form;
         }
-        const postProcess = this.dataContextPluginRegistry.getPlugin().postProcess;
+
         const dataContext = await this.dataContextPluginRegistry.getDataContext(keycloakContext,
             processPointers.processInstanceId, processPointers.taskId);
         if (!dataContext) {
@@ -49,9 +49,10 @@ export default class FormTranslator {
                 form.schema.components.push(JSON.parse(parsed));
             });
             try {
-                if (postProcess) {
+                if (this.dataContextPluginRegistry.postProcess
+                    && typeof this.dataContextPluginRegistry.postProcess === 'function') {
                     form.schema = await this.promiseTimeoutHandler.timeoutPromise('postProcess',
-                        postProcess(dataContext, form.schema),
+                        this.dataContextPluginRegistry.postProcess(dataContext, form.schema),
                         () => {
                             return form.schema;
                         });

@@ -44,8 +44,10 @@ export default class DataContextPluginRegistry {
         }
     }
 
+    public async postProcess(dataContext, form) {
+        return this.dataContextPlugin.postProcess(dataContext, form);
+    }
     public getPlugin() {
         return this.dataContextPlugin;
     }
-
 }
