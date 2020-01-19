@@ -1,7 +1,7 @@
 import {ValidationErrorItem, ValidationResult} from '@hapi/joi';
 import {inject} from 'inversify';
 import {provide} from 'inversify-binding-decorators';
-import { FindAndCountOptions, Op, OptimisticLockError, WhereOptions} from 'sequelize';
+import {FindAndCountOptions, Op, OptimisticLockError, WhereOptions} from 'sequelize';
 import {User} from '../auth/User';
 import TYPE from '../constant/TYPE';
 import ResourceNotFoundError from '../error/ResourceNotFoundError';
@@ -580,6 +580,33 @@ export class FormService {
         return version;
     }
 
+    public async getAllLatestFormVersions() {
+        const result: { rows: FormVersion[], count: number } = await this.formVersionRepository.findAndCountAll({
+            where: {
+                latest: {
+                    [Op.eq]: true,
+                },
+                validTo: {
+                    [Op.eq]: null,
+                },
+            },
+        });
+        return {
+            forms: result.rows,
+            total: result.count,
+        };
+    }
+
+    public async updateAllForms(forms: any[]): Promise<void> {
+        const updatedVersions = await this.formVersionRepository.bulkCreate(forms.map((form) => {
+            return form;
+        }), {
+            updateOnDuplicate: ['schema'],
+        });
+        logger.info(`Updated ${updatedVersions.length} instances`);
+        return null;
+    }
+
     public async allForms(limit: number = 20, offset: number = 0): Promise<{ total: number, versions: FormVersion[] }> {
 
         const result: { rows: FormVersion[], count: number } = await this.formVersionRepository.findAndCountAll({
@@ -707,75 +734,4 @@ export class FormService {
         return version;
     }
 
-    public async getDeletedForms(user: User, limit: number = 20, offset: number = 0): Promise<{
-        offset: number,
-        limit: number,
-        versions: FormVersion[],
-        total: number,
-    }> {
-        const defaultRole = await this.roleService.getDefaultRole();
-        const result = await this.formVersionRepository.findAndCountAll({
-            where: {
-                validTo: {
-                    [Op.not]: null,
-                },
-            },
-            order: [['validTo', 'DESC']],
-            distinct: true,
-            col: 'formid',
-            limit,
-            offset,
-            group: 'formid',
-            include: [{
-                model: Form,
-                include: [{
-                    model: Role,
-                    as: 'roles',
-                    attributes: this.roleAttributes,
-                    through: {
-                        attributes: [],
-                    },
-                    where: FormService.roleWhereClause(user, defaultRole),
-                }],
-            }],
-        });
-
-        return {
-            offset,
-            limit,
-            versions: result.rows,
-            total: result.count,
-        };
-    }
-
-    public async resurrect(formId: string, user: User): Promise<FormVersion> {
-        return this.formRepository.sequelize.transaction(async () => {
-            const form: Form = await this.getForm(formId, user);
-            if (form) {
-                const formVersion = await this.formVersionRepository.findOne({
-                    where: {
-                        formId: {
-                            [Op.eq]: form.id,
-                        },
-                    },
-                    order: [['validTo', 'DESC']],
-                });
-                const userId = user.details.email;
-                await formVersion.update({
-                    latest: true,
-                    validTo: null,
-                    updatedBy: userId,
-                });
-                logger.info(`formVersion with id ${formVersion.versionId} restored to latest`);
-
-                await form.update({
-                    updatedOn: new Date(),
-                    updatedBy: userId,
-                });
-                logger.info(`Form with id ${formId} restored`);
-                return formVersion;
-            }
-            throw new ResourceNotFoundError(`Form with id ${formId} does not exist`);
-        });
-    }
 }

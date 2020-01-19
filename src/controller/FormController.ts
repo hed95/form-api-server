@@ -83,24 +83,14 @@ export class FormController extends BaseHttpController {
         const filterQuery: [] = filter && filter.split(',').length !== 0 ?
             this.queryParser.parse(filter.split(',')) : null;
 
-        const formVersions = await this.formService.getAllForms(currentUser, 1, 0,  filterQuery);
+        const formVersions = await this.formService.getAllForms(currentUser, 1, 0, filterQuery);
         if (formVersions.total === 0) {
             throw new ResourceNotFoundError(`Form with name ${name} does not exist. Check id or access controls`);
         }
         if (formVersions.total > 1) {
             throw new ResourceNotFoundError(`More than one form with name ${name} detected`);
         }
-        let formVersion = formVersions.forms[0];
-        if (!(disableDataContext === 'true')) {
-            logger.info('Performing data context resolution');
-            const keycloakContext = new KeycloakContext(req.kauth);
-            keycloakContext.setCorrelationId(httpContext.get(this.appConfig.correlationIdRequestHeader));
-            formVersion = await this.formTranslator.translate(formVersion, keycloakContext,
-                {
-                    processInstanceId,
-                    taskId,
-                });
-        }
+        const formVersion = formVersions.forms[0];
         const form = this.formResourceAssembler.toResource(formVersion, req);
         if (this.getFormCountGenerator) {
             // @ts-ignore
@@ -159,19 +149,9 @@ export class FormController extends BaseHttpController {
                      @queryParam('processInstanceId') processInstanceId: string = null,
                      @queryParam('taskId') taskId: string = null): Promise<void> {
 
-        let formVersion = await this.formService.findForm(id, currentUser);
+        const formVersion = await this.formService.findForm(id, currentUser);
         if (!formVersion) {
             throw new ResourceNotFoundError(`Form with id ${id} does not exist. Check id or access controls`);
-        }
-        if (!(disableDataContext === 'true')) {
-            logger.info('Performing data context resolution');
-            const keycloakContext = new KeycloakContext(req.kauth);
-            keycloakContext.setCorrelationId(httpContext.get(this.appConfig.correlationIdRequestHeader));
-            formVersion = await this.formTranslator.translate(formVersion, keycloakContext,
-                {
-                processInstanceId,
-                taskId,
-            });
         }
 
         const form = this.formResourceAssembler.toResource(formVersion, req);

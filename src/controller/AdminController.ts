@@ -5,7 +5,7 @@ import {
     controller,
     httpDelete,
     httpGet,
-    httpPost,
+    httpPost, httpPut,
     principal,
     queryParam,
     request,
@@ -298,5 +298,44 @@ export class AdminController extends BaseHttpController {
         if (this.timeoutId) {
             clearTimeout(this.timeoutId);
         }
+    }
+
+    @ApiOperationGet({
+        path: '/forms/latest',
+        description: 'Gets all latest form versions',
+        summary: 'Gets all latest form versions',
+        parameters: {
+            path: {
+                id: {
+                    required: true,
+                },
+            },
+        },
+        responses: {
+            200: {
+                description: 'Successfully loaded all latest form versions',
+            },
+            403: {
+                description: 'Not allowed to perform this operation',
+            },
+            500: {description: 'Internal execution error'},
+        },
+    })
+    @httpGet('/forms/latest', TYPE.ProtectMiddleware, TYPE.AdminProtectMiddleware)
+    public async getAllLatestVersionForms(@response() res: express.Response, @principal() currentUser: User) {
+        logger.info(`${currentUser.details.email} requested all latest form versions`);
+        const result = await this.formService.getAllLatestFormVersions();
+        res.json(result);
+
+    }
+
+    @httpPut('/forms/latest', TYPE.ProtectMiddleware, TYPE.AdminProtectMiddleware)
+    public async updateLatestForms(@requestBody() forms: any[], @response() res: express.Response,
+                                   @principal() currentUser: User) {
+        logger.info(`${currentUser.details.email} is performing an update on forms`);
+        this.formService.updateAllForms(forms).then(() => {
+           logger.info('Forms updated');
+        });
+        res.sendStatus(HttpStatus.OK);
     }
 }

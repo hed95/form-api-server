@@ -1267,4 +1267,36 @@ describe('FormService', () => {
         expect(loaded.versionId).to.be.eq(versionLoaded.versionId);
     });
 
+    it('can get latest versions', async() => {
+        const user = new User('id', 'test', [role]);
+        basicForm.name = 'newFormXYZ';
+        basicForm.path = 'newFormXYZ';
+        basicForm.title = 'newFormXYZ';
+        await formService.create(user, basicForm);
+
+
+        const result = await formService.getAllLatestFormVersions();
+
+        expect(result.total).to.be.gte(1);
+
+    });
+
+    it ('can update all versions', async() => {
+        const user = new User('id', 'test', [role]);
+
+        basicForm.name = 'newFormXYZA';
+        basicForm.path = 'newFormXYZA';
+        basicForm.title = 'newFormXYZA';
+        const formId = await formService.create(user, basicForm);
+
+        let versionLoaded = await formService.findForm(formId, user);
+
+        versionLoaded.schema.components[0].label = 'APPLES';
+
+        await formService.updateAllForms([versionLoaded.toJSON()]);
+
+        versionLoaded = await formService.findLatestForm(formId, user);
+        expect(versionLoaded.schema.components[0].label).to.be.eq('APPLES')
+    });
+
 });
