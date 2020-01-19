@@ -29,7 +29,7 @@ import {SequelizeProvider} from '../model/SequelizeProvider';
 import {
     ApiOperationDelete,
     ApiOperationGet,
-    ApiOperationPost,
+    ApiOperationPost, ApiOperationPut,
     ApiPath,
     SwaggerDefinitionConstant,
 } from 'swagger-express-ts';
@@ -304,13 +304,6 @@ export class AdminController extends BaseHttpController {
         path: '/forms/latest',
         description: 'Gets all latest form versions',
         summary: 'Gets all latest form versions',
-        parameters: {
-            path: {
-                id: {
-                    required: true,
-                },
-            },
-        },
         responses: {
             200: {
                 description: 'Successfully loaded all latest form versions',
@@ -329,12 +322,34 @@ export class AdminController extends BaseHttpController {
 
     }
 
+    @ApiOperationPost({
+        path: '/forms/latest',
+        description: 'Asynchronously  updates a collection of latest forms. This update does not create a new version',
+        summary: 'Admin function to update a collection of latest forms',
+        parameters: {
+            body: {
+                description: 'A collection of raw form versions',
+                type: SwaggerDefinitionConstant.Parameter.Type.ARRAY,
+                allowEmptyValue: false,
+            },
+        },
+
+        responses: {
+            200: {
+                description: 'Successfully submitted request to process update',
+            },
+            403: {
+                description: 'Not allowed to perform this operation',
+            },
+            500: {description: 'Internal execution error'},
+        },
+    })
     @httpPut('/forms/latest', TYPE.ProtectMiddleware, TYPE.AdminProtectMiddleware)
     public async updateLatestForms(@requestBody() forms: any[], @response() res: express.Response,
                                    @principal() currentUser: User) {
         logger.info(`${currentUser.details.email} is performing an update on forms`);
         this.formService.updateAllForms(forms).then(() => {
-           logger.info('Forms updated');
+            logger.info('Forms updated');
         });
         res.sendStatus(HttpStatus.OK);
     }
