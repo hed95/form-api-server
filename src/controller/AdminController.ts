@@ -324,7 +324,7 @@ export class AdminController extends BaseHttpController {
 
     @ApiOperationPost({
         path: '/forms/latest',
-        description: 'Asynchronously  updates a collection of latest forms. This update does not create a new version',
+        description: 'Asynchronously  updates a collection of latest forms. New versions of the updated are created',
         summary: 'Admin function to update a collection of latest forms',
         parameters: {
             body: {

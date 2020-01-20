@@ -8,6 +8,10 @@ export class ConfigValidator {
         this.schema = Joi.object().keys({
             dataContextPluginLocation: Joi.string().optional(),
             dataContextPluginExecutionTimeout: Joi.string().optional(),
+            businessKey: Joi.object({
+                enabled: Joi.bool().default(false),
+                prefix: Joi.string().optional()
+            }),
             keycloak: Joi.object({
                 protocol: Joi.string().required(),
                 url: Joi.string().required(),

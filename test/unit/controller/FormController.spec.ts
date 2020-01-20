@@ -24,6 +24,7 @@ import defaultAppConfig from '../../../src/config/defaultAppConfig';
 
 // @ts-ignore
 import Prometheus from 'prom-client';
+import BusinessKeyGenerator from "../../../src/plugin/BusinessKeyGenerator";
 
 describe('FormController', () => {
 
@@ -38,6 +39,7 @@ describe('FormController', () => {
     let getFormCounterGenerator: Prometheus.Counter;
     let updateFormCountGenerator: Prometheus.Counter;
     let formTranslator: FormTranslator;
+    let businessKeyGenerator: BusinessKeyGenerator;
 
     beforeEach(() => {
         mockResponse = new MockResponse();
@@ -50,9 +52,10 @@ describe('FormController', () => {
         formTranslator = Substitute.for<FormTranslator>();
         getFormCounterGenerator = Substitute.for<Prometheus.Counter>();
         updateFormCountGenerator =  Substitute.for<Prometheus.Counter>();
+        businessKeyGenerator: Substitute.for<BusinessKeyGenerator>();
         formController = new FormController(formService, validationService,
             formResourceAssembler, commentService, dataContextRegistry, formTranslator,
-            defaultAppConfig, getFormCounterGenerator, updateFormCountGenerator);
+            defaultAppConfig, getFormCounterGenerator, updateFormCountGenerator,businessKeyGenerator);
 
     });
 

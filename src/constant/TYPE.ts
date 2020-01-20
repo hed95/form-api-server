@@ -24,4 +24,6 @@ export default {
     PromiseTimeoutHandler: Symbol.for('PromiseTimeoutHandler'),
     GetFormCountGenerator: Symbol.for('GetFormCountGenerator'),
     UpdateFormCountGenerator: Symbol.for('UpdateFormCountGenerator'),
+    BusinessKeyGenerator: Symbol.for('BusinessKeyGenerator'),
+    RedisKeyGeneratorClient: Symbol.for('RedisKeyGeneratorClient')
 };

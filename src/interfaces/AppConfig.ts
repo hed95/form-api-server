@@ -1,6 +1,10 @@
 interface AppConfig {
     dataContextPluginLocation: string;
     dataContextPluginExecutionTimeout: string;
+    businessKey: {
+        enabled: boolean,
+        prefix: string
+    }
     keycloak: {
         protocol: string,
         url: string,

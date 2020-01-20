@@ -33,6 +33,8 @@ import FormTranslator from '../plugin/FormTranslator';
 import PromiseTimeoutHandler from '../plugin/PromiseTimeoutHandler';
 import Prometheus, {register} from 'prom-client';
 import {getFormCountGenerator, updateFormCounter} from '../util/metrics';
+import BusinessKeyGenerator from "../plugin/BusinessKeyGenerator";
+import * as Redis from 'redis';
 
 export class ApplicationContext {
     private readonly container: Container;
@@ -66,6 +68,10 @@ export class ApplicationContext {
         const pdfQueue: Queue<PdfJob> = createQueue(defaultAppConfig, ApplicationConstants.PDF_QUEUE_NAME);
         this.container.bind<Queue>(TYPE.PDFQueue).toConstantValue(pdfQueue);
         this.container.bind<PromiseTimeoutHandler>(TYPE.PromiseTimeoutHandler).to(PromiseTimeoutHandler);
+
+        this.container.bind<Redis.RedisClient>(TYPE.RedisKeyGeneratorClient).toConstantValue(redis(defaultAppConfig));
+
+        this.container.bind<BusinessKeyGenerator>(TYPE.BusinessKeyGenerator).to(BusinessKeyGenerator);
         useRedisAdapter(redis(defaultAppConfig));
 
         this.container.bind<CacheManager>(TYPE.CacheManager).toConstantValue(cacheManager);

@@ -22,7 +22,6 @@ import {
     ApiPath,
     SwaggerDefinitionConstant,
 } from 'swagger-express-ts';
-import httpContext from 'express-http-context';
 import {User} from '../auth/User';
 import TYPE from '../constant/TYPE';
 import {FormComment} from '../model/FormComment';
@@ -40,10 +39,11 @@ import ResourceNotFoundError from '../error/ResourceNotFoundError';
 import {RestoreData} from '../model/RestoreData';
 import DataContextPluginRegistry from '../plugin/DataContextPluginRegistry';
 import FormTranslator from '../plugin/FormTranslator';
-import KeycloakContext from '../plugin/KeycloakContext';
 import AppConfig from '../interfaces/AppConfig';
 import {GrantedRequest} from 'keycloak-connect';
 import Prometheus from 'prom-client';
+import {util} from '../formio/Util';
+import BusinessKeyGenerator from "../plugin/BusinessKeyGenerator";
 
 @ApiPath({
     path: '/form',
@@ -66,6 +66,7 @@ export class FormController extends BaseHttpController {
                 @inject(TYPE.AppConfig) private readonly appConfig: AppConfig,
                 @inject(TYPE.GetFormCountGenerator) private readonly getFormCountGenerator: Prometheus.Counter,
                 @inject(TYPE.UpdateFormCountGenerator) private readonly updateFormCountGenerator: Prometheus.Counter,
+                @inject(TYPE.BusinessKeyGenerator) private readonly businessKeyGenerator: BusinessKeyGenerator
     ) {
         super();
     }
@@ -91,6 +92,9 @@ export class FormController extends BaseHttpController {
             throw new ResourceNotFoundError(`More than one form with name ${name} detected`);
         }
         const formVersion = formVersions.forms[0];
+        if (this.appConfig.businessKey.enabled) {
+            await this.applyBusinessKey(formVersion);
+        }
         const form = this.formResourceAssembler.toResource(formVersion, req);
         if (this.getFormCountGenerator) {
             // @ts-ignore
@@ -154,6 +158,9 @@ export class FormController extends BaseHttpController {
             throw new ResourceNotFoundError(`Form with id ${id} does not exist. Check id or access controls`);
         }
 
+        if (this.appConfig.businessKey.enabled) {
+            await this.applyBusinessKey(formVersion);
+        }
         const form = this.formResourceAssembler.toResource(formVersion, req);
 
         if (this.getFormCountGenerator) {
@@ -162,6 +169,16 @@ export class FormController extends BaseHttpController {
         }
 
         res.json(form);
+    }
+
+    private async applyBusinessKey(formVersion) {
+        logger.info('Applying business key');
+        const businessKeyComponent = util.getComponent(formVersion.schema.components, 'businessKey');
+        if (businessKeyComponent && (!businessKeyComponent.defaultValue || businessKeyComponent.defaultValue === '')) {
+            const businessKey = await this.businessKeyGenerator.newBusinessKey();
+            logger.info(`New business key ${businessKey}`);
+            businessKeyComponent.defaultValue = businessKey;
+        }
     }
 
     @ApiOperationPost({

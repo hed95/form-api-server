@@ -35,11 +35,17 @@ const {
   API_FORM_CORRELATION_ID_REQUEST_HEADER,
   DATA_CONTEXT_PLUGIN_LOCATION,
   DATA_CONTEXT_PLUGIN_EXECUTION_TIMEOUT,
+  API_FORM_BUSINESS_KEY_ENABLED,
+  API_FORM_BUSINESS_KEY_PREFIX
 } = process.env;
 
 const defaultAppConfig: AppConfig = {
   dataContextPluginLocation: DATA_CONTEXT_PLUGIN_LOCATION,
   dataContextPluginExecutionTimeout: DATA_CONTEXT_PLUGIN_EXECUTION_TIMEOUT || '20000',
+  businessKey: {
+    enabled: API_FORM_BUSINESS_KEY_ENABLED ? (API_FORM_BUSINESS_KEY_ENABLED === 'true') : false,
+    prefix: API_FORM_BUSINESS_KEY_PREFIX || 'DEV'
+  },
   keycloak: {
     protocol: KEYCLOAK_PROTOCOL || 'http://',
     url: KEYCLOAK_URL || 'localhost',
@@ -92,7 +98,7 @@ const defaultAppConfig: AppConfig = {
     ssl: REDIS_SSL ? REDIS_SSL === 'true' : false,
     port: REDIS_PORT ? +REDIS_PORT : DEFAULT_REDIS_PORT,
     host: REDIS_URI || '127.0.0.1',
-    token: REDIS_TOKEN,
+    token: "mypass",
   },
   correlationIdRequestHeader: API_FORM_CORRELATION_ID_REQUEST_HEADER
         || ApplicationConstants.DEFAULT_CORRELATION_REQUEST_ID,
