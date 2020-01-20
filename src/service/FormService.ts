@@ -19,6 +19,7 @@ import Validator from 'validator';
 import {Cacheable, CacheClear} from 'type-cacheable';
 import AppConfig from '../interfaces/AppConfig';
 import CacheManager from 'type-cacheable/dist/CacheManager';
+import moment from 'moment';
 
 @provide(TYPE.FormService)
 export class FormService {
@@ -597,13 +598,99 @@ export class FormService {
         };
     }
 
-    public async updateAllForms(forms: any[]): Promise<void> {
-        const updatedVersions = await this.formVersionRepository.bulkCreate(forms.map((form) => {
+    public async updateAllForms(forms: any[], currentUser: User): Promise<void> {
+        const today = moment().toISOString();
+        const formReferences = await this.formRepository.findAll({
+            where: {
+                id: {
+                    [Op.in]: forms.map((form) => {
+                        return form.formId;
+                    }),
+                },
+            },
+        });
+        const formsUpdated = await this.formRepository.bulkCreate(formReferences.map((f) => {
+            const form: any = f.toJSON();
+            form.updatedOn = today;
+            form.updatedBy = currentUser.details.email;
             return form;
         }), {
-            updateOnDuplicate: ['schema'],
+            updateOnDuplicate: [
+                'updatedOn',
+                'updatedBy',
+            ],
         });
-        logger.info(`Updated ${updatedVersions.length} instances`);
+
+        logger.info(`Form references updated ${formsUpdated.length}`);
+
+        const versions = await this.formVersionRepository.findAll({
+            attributes: {
+                include: ['validTo', 'versionId', 'latest', 'updatedBy'],
+            },
+            where: {
+                versionId: {
+
+                    [Op.in]: forms.map((form) => {
+                        return form.versionId;
+                    }),
+
+                },
+            },
+        });
+
+        const latestVersions =  _.filter(versions, (v) => {
+            return v.latest && v.validTo === null;
+        });
+
+        const nonLatestVersions = _.filter(versions, (v) => {
+            return !v.latest && v.validTo !== null;
+        }).map((v) => v.versionId);
+
+        if (nonLatestVersions.length !== 0) {
+            logger.warn(`Detected non latest version ids from payload...these will be ignored`, nonLatestVersions);
+        }
+
+        logger.info(`Loaded ${latestVersions.length} latest versions`);
+
+        const versionsAsJson = latestVersions.map((v) => {
+            const version: any = v.toJSON();
+            version.validTo = today;
+            version.updatedBy = currentUser.details.email;
+            version.latest  = false;
+            return version;
+        });
+
+        if (versionsAsJson.length !== 0) {
+            const versionsUpdated = await this.formVersionRepository.bulkCreate(versionsAsJson, {
+                updateOnDuplicate: [
+                    'latest',
+                    'updatedBy',
+                    'validTo',
+                ],
+            });
+            logger.info(`Latest versions marked as non-latest ${versionsUpdated.length}`);
+
+            const newFormsToCreate = _.intersectionWith(forms, versionsUpdated.map((v) => v.toJSON()),
+                (v1: any, v2: any) => {
+                return v1.versionId === v2.versionId;
+            });
+
+            logger.info('Creating new versions');
+            const newVersions = await this.formVersionRepository.bulkCreate(newFormsToCreate.map((form) => {
+                delete form.versionId;
+                form.validFrom = today;
+                form.createdOn = today;
+                form.updatedBy = null;
+                form.validTo  = null;
+                form.latest = true;
+                form.createdBy = currentUser.details.email;
+                return form;
+            }), {});
+            logger.info(`Created new ${newVersions.length} instances`);
+        } else {
+            logger.warn('No latest version forms found...please check version ids');
+        }
+
         return null;
     }
 

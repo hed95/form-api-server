@@ -344,11 +344,11 @@ export class AdminController extends BaseHttpController {
             500: {description: 'Internal execution error'},
         },
     })
-    @httpPut('/forms/latest', TYPE.ProtectMiddleware, TYPE.AdminProtectMiddleware)
+    @httpPost('/forms/latest', TYPE.ProtectMiddleware, TYPE.AdminProtectMiddleware)
     public async updateLatestForms(@requestBody() forms: any[], @response() res: express.Response,
                                    @principal() currentUser: User) {
         logger.info(`${currentUser.details.email} is performing an update on forms`);
-        this.formService.updateAllForms(forms).then(() => {
+        this.formService.updateAllForms(forms, currentUser).then(() => {
             logger.info('Forms updated');
         });
         res.sendStatus(HttpStatus.OK);

@@ -817,9 +817,12 @@ describe('FormService', () => {
             [{
                 'schema.title': {
                     [Op.eq]: 'Test form X',
-                }}, {'schema.name': {
+                }
+            }, {
+                'schema.name': {
                     [Op.eq]: 'Test Form ABC11',
-                }}], []);
+                }
+            }], []);
 
         expect(results.total).to.be.gte(1);
         expect(results.forms.length).to.be.gte(1);
@@ -1267,7 +1270,7 @@ describe('FormService', () => {
         expect(loaded.versionId).to.be.eq(versionLoaded.versionId);
     });
 
-    it('can get latest versions', async() => {
+    it('can get latest versions', async () => {
         const user = new User('id', 'test', [role]);
         basicForm.name = 'newFormXYZ';
         basicForm.path = 'newFormXYZ';
@@ -1281,7 +1284,7 @@ describe('FormService', () => {
 
     });
 
-    it ('can update all versions', async() => {
+    it('can update all versions', async () => {
         const user = new User('id', 'test', [role]);
 
         basicForm.name = 'newFormXYZA';
@@ -1293,10 +1296,30 @@ describe('FormService', () => {
 
         versionLoaded.schema.components[0].label = 'APPLES';
 
-        await formService.updateAllForms([versionLoaded.toJSON()]);
+        await formService.updateAllForms([versionLoaded.toJSON()], user);
 
-        versionLoaded = await formService.findLatestForm(formId, user);
-        expect(versionLoaded.schema.components[0].label).to.be.eq('APPLES')
+        let versions = await formService.findAllVersions(versionLoaded.formId, user, 0, 100);
+
+        expect(versions.total).to.be.eq(2);
+
+        const newVersion = await formService.findLatestForm(formId, user);
+        expect(newVersion.versionId).to.not.eq(versionLoaded.versionId);
+        expect(newVersion.schema.components[0].label).to.be.eq('APPLES');
+
+
+        newVersion.schema.components[0].label = 'BANANAS';
+
+        await formService.updateAllForms([newVersion.toJSON()], user);
+
+        versions = await formService.findAllVersions(versionLoaded.formId, user, 0, 100);
+
+        expect(versions.total).to.be.eq(3);
+
+        const uniqueLatestVersions = _.filter(versions.versions, (version) => {
+            return version.validTo === null && version.latest === true;
+        });
+        expect(uniqueLatestVersions.length).to.be.eq(1);
+
     });
 
 });

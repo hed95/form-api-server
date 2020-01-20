@@ -1,5 +1,5 @@
 config:
-  target: 'http://localhost:4000'
+  target: '{{ $processEnvironment.FORM_API_SERVER_URL }}'
   phases:
     - duration:
       arrivalCount: 1
