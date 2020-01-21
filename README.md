@@ -74,8 +74,8 @@ http://localhost:3000/api-docs/swagger/#/
 |API_FORM_LOG_ENABLE_QUERY             |boolean     | false             |
 |API_FORM_PORT                         |number      | 3000              |
 |API_FORM_CORRELATION_ID_REQUEST_HEADER|string      | x-request-id      |
-|GENERATE_BUSINESS_KEY                 |boolean     | false             |
-|BUSINESS_KEY_PREFIX                   |string      |  EMPTY            |
+|API_FORM_BUSINESS_KEY_ENABLED         |boolean     | false             |
+|API_FORM_BUSINESS_KEY_PREFIX          |string      |  'DEV'            |
 
 
                                      

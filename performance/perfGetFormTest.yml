@@ -4,11 +4,11 @@ config:
     - duration: 120
       arrivalRate: 100
 scenarios:
-  - name: 'Get all forms'
+  - name: 'Get a form'
     flow:
       - log: "Get a specific form"
       - get:
-          url: "/form/b3e38f87-a7f3-42ea-8893-a6bf2115b647"
+          url: "/form/ba5cfe58-a256-45d2-9eb5-c16f488e6f60"
           headers:
             Authorization: "Bearer {{ $processEnvironment.ACCESS_TOKEN }}"
 

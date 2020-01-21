@@ -3,8 +3,8 @@ interface AppConfig {
     dataContextPluginExecutionTimeout: string;
     businessKey: {
         enabled: boolean,
-        prefix: string
-    }
+        prefix: string,
+    };
     keycloak: {
         protocol: string,
         url: string,

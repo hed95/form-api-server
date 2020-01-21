@@ -43,7 +43,7 @@ import AppConfig from '../interfaces/AppConfig';
 import {GrantedRequest} from 'keycloak-connect';
 import Prometheus from 'prom-client';
 import {util} from '../formio/Util';
-import BusinessKeyGenerator from "../plugin/BusinessKeyGenerator";
+import BusinessKeyGenerator from '../plugin/BusinessKeyGenerator';
 
 @ApiPath({
     path: '/form',
@@ -66,7 +66,7 @@ export class FormController extends BaseHttpController {
                 @inject(TYPE.AppConfig) private readonly appConfig: AppConfig,
                 @inject(TYPE.GetFormCountGenerator) private readonly getFormCountGenerator: Prometheus.Counter,
                 @inject(TYPE.UpdateFormCountGenerator) private readonly updateFormCountGenerator: Prometheus.Counter,
-                @inject(TYPE.BusinessKeyGenerator) private readonly businessKeyGenerator: BusinessKeyGenerator
+                @inject(TYPE.BusinessKeyGenerator) private readonly businessKeyGenerator: BusinessKeyGenerator,
     ) {
         super();
     }
@@ -169,16 +169,6 @@ export class FormController extends BaseHttpController {
         }
 
         res.json(form);
-    }
-
-    private async applyBusinessKey(formVersion) {
-        logger.info('Applying business key');
-        const businessKeyComponent = util.getComponent(formVersion.schema.components, 'businessKey');
-        if (businessKeyComponent && (!businessKeyComponent.defaultValue || businessKeyComponent.defaultValue === '')) {
-            const businessKey = await this.businessKeyGenerator.newBusinessKey();
-            logger.info(`New business key ${businessKey}`);
-            businessKeyComponent.defaultValue = businessKey;
-        }
     }
 
     @ApiOperationPost({
@@ -678,5 +668,15 @@ export class FormController extends BaseHttpController {
         const formId = restoreData.formId;
         const version = await this.formService.restore(formId, versionId, currentUser);
         res.json(this.formResourceAssembler.toResource(version, req));
+    }
+
+    private async applyBusinessKey(formVersion) {
+        logger.info('Applying business key');
+        const businessKeyComponent = util.getComponent(formVersion.schema.components, 'businessKey');
+        if (businessKeyComponent && (!businessKeyComponent.defaultValue || businessKeyComponent.defaultValue === '')) {
+            const businessKey = await this.businessKeyGenerator.newBusinessKey();
+            logger.info(`New business key ${businessKey}`);
+            businessKeyComponent.defaultValue = businessKey;
+        }
     }
 }

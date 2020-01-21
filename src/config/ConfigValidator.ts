@@ -10,7 +10,7 @@ export class ConfigValidator {
             dataContextPluginExecutionTimeout: Joi.string().optional(),
             businessKey: Joi.object({
                 enabled: Joi.bool().default(false),
-                prefix: Joi.string().optional()
+                prefix: Joi.string().optional(),
             }),
             keycloak: Joi.object({
                 protocol: Joi.string().required(),

@@ -1,9 +1,9 @@
-import {provide} from "inversify-binding-decorators";
-import TYPE from "../constant/TYPE";
-import {inject} from "inversify";
-import AppConfig from "../interfaces/AppConfig";
+import {provide} from 'inversify-binding-decorators';
+import TYPE from '../constant/TYPE';
+import {inject} from 'inversify';
+import AppConfig from '../interfaces/AppConfig';
 import * as Redis from 'redis';
-import moment from "moment";
+import moment from 'moment';
 
 @provide(TYPE.BusinessKeyGenerator)
 export default class BusinessKeyGenerator {
@@ -14,8 +14,8 @@ export default class BusinessKeyGenerator {
 
     public async newBusinessKey() {
         const prefix = this.appConfig.businessKey.prefix;
-        let today = moment();
-        const currentDate = today.format("YYYYMMDD");
+        const today = moment();
+        const currentDate = today.format('YYYYMMDD');
         const key = `${prefix}-${currentDate}`;
         const expiryAt = today.add(1, 'day').unix();
         return new Promise((resolve, reject) => {
@@ -26,11 +26,10 @@ export default class BusinessKeyGenerator {
                     if (err) {
                         reject(err);
                     } else {
-                        resolve(`${key}-${reply[0]}`)
+                        resolve(`${key}-${reply[0]}`);
                     }
-                })
+                });
         });
     }
-
 
 }

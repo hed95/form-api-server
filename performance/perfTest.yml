@@ -1,8 +1,8 @@
 config:
   target: '{{ $processEnvironment.FORM_API_SERVER_URL }}'
   phases:
-    - duration: 1
-      arrivalRate: 1
+    - duration: 60
+      arrivalRate: 100
 scenarios:
   - name: 'Create, get and update form'
     flow:

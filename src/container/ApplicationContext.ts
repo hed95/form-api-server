@@ -33,7 +33,7 @@ import FormTranslator from '../plugin/FormTranslator';
 import PromiseTimeoutHandler from '../plugin/PromiseTimeoutHandler';
 import Prometheus, {register} from 'prom-client';
 import {getFormCountGenerator, updateFormCounter} from '../util/metrics';
-import BusinessKeyGenerator from "../plugin/BusinessKeyGenerator";
+import BusinessKeyGenerator from '../plugin/BusinessKeyGenerator';
 import * as Redis from 'redis';
 
 export class ApplicationContext {
