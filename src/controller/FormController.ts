@@ -671,9 +671,9 @@ export class FormController extends BaseHttpController {
     }
 
     private async applyBusinessKey(formVersion) {
-        logger.info('Applying business key');
         const businessKeyComponent = util.getComponent(formVersion.schema.components, 'businessKey');
         if (businessKeyComponent && (!businessKeyComponent.defaultValue || businessKeyComponent.defaultValue === '')) {
+            logger.info('Applying business key');
             const businessKey = await this.businessKeyGenerator.newBusinessKey();
             logger.info(`New business key ${businessKey}`);
             businessKeyComponent.defaultValue = businessKey;

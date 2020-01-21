@@ -26,4 +26,5 @@ export default {
     UpdateFormCountGenerator: Symbol.for('UpdateFormCountGenerator'),
     BusinessKeyGenerator: Symbol.for('BusinessKeyGenerator'),
     RedisKeyGeneratorClient: Symbol.for('RedisKeyGeneratorClient'),
+    FormRolesRepository: Symbol.for('FormRolesRepository'),
 };

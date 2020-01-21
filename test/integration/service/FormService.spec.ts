@@ -1321,5 +1321,42 @@ describe('FormService', () => {
         expect(uniqueLatestVersions.length).to.be.eq(1);
 
     });
+    it('creates new forms if does not exist', async () => {
+        const user = new User('id', 'test', [role]);
+
+        await formService.updateAllForms([{
+            "versionId": "0781e3a2-1f65-4993-acbc-4f2a187699ab",
+            "createdOn": "2020-01-20T15:02:15.241Z",
+            "createdBy": "user@user.com",
+            "updatedBy": null,
+            "schema": {
+                "id": "ba5cfe58-a256-45d2-9eb5-c16f488e6f60",
+                "name": "startShift",
+                "path": "startshift",
+                "tags": [
+                    "prod",
+                    "staging",
+                    "demo",
+                    "dev"
+                ],
+                "type": "form",
+                "title": "Start shift",
+                "latest": true,
+                "display": "wizard",
+                "components": [
+                ]
+            },
+            "validFrom": "2020-01-20T15:02:15.241Z",
+            "validTo": null,
+            "formId": "ba5cfe58-a256-45d2-9eb5-c16f488e6f60",
+            "latest": true
+        }], user);
+
+        const query: [] = new QueryParser().parse(['name__eq__startShift']);
+
+        const results: { total: number, forms: FormVersion[] } = await formService.getAllForms(user,100, 0, query);
+
+        expect(results.total).to.be.eq(1)
+    });
 
 });

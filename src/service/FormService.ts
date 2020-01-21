@@ -10,7 +10,7 @@ import {Form} from '../model/Form';
 import {FormSchemaValidator} from '../model/FormSchemaValidator';
 import {FormVersion} from '../model/FormVersion';
 import {Role} from '../model/Role';
-import {FormRepository, FormVersionRepository} from '../types/repository';
+import {FormRepository, FormRolesRepository, FormVersionRepository} from '../types/repository';
 import logger from '../util/logger';
 import _ from 'lodash';
 import {Model, Sequelize} from 'sequelize-typescript';
@@ -129,6 +129,7 @@ export class FormService {
     }
 
     public readonly formRepository: FormRepository;
+    public readonly formRolesRepository: FormRolesRepository;
     public readonly formVersionRepository: FormVersionRepository;
     private readonly roleAttributes: string[] = ['id', 'name', 'description', 'active'];
     private readonly formSchemaValidator: FormSchemaValidator;
@@ -137,6 +138,7 @@ export class FormService {
 
     constructor(@inject(TYPE.FormRepository) formRepository: FormRepository,
                 @inject(TYPE.FormVersionRepository) formVersionRepository: FormVersionRepository,
+                @inject(TYPE.FormRolesRepository) formRolesRepository: FormRolesRepository,
                 @inject(TYPE.FormSchemaValidator) formSchemaValidator: FormSchemaValidator,
                 @inject(TYPE.RoleService) roleService: RoleService,
                 @inject(TYPE.AppConfig) appConfig: AppConfig,
@@ -146,6 +148,7 @@ export class FormService {
         this.formSchemaValidator = formSchemaValidator;
         this.roleService = roleService;
         this.cacheManager = cacheManager;
+        this.formRolesRepository = formRolesRepository;
     }
 
     public async create(user: User, payload: any): Promise<string> {
@@ -609,88 +612,94 @@ export class FormService {
                 },
             },
         });
-        const formsUpdated = await this.formRepository.bulkCreate(formReferences.map((f) => {
-            const form: any = f.toJSON();
-            form.updatedOn = today;
-            form.updatedBy = currentUser.details.email;
-            return form;
-        }), {
-            updateOnDuplicate: [
-                'updatedOn',
-                'updatedBy',
-            ],
-        });
-
-        logger.info(`Form references updated ${formsUpdated.length}`);
-
-        const versions = await this.formVersionRepository.findAll({
-            attributes: {
-                include: ['validTo', 'versionId', 'latest', 'updatedBy'],
-            },
-            where: {
-                versionId: {
-
-                    [Op.in]: forms.map((form) => {
-                        return form.versionId;
-                    }),
-
-                },
-            },
-        });
-
-        const latestVersions =  _.filter(versions, (v) => {
-            return v.latest && v.validTo === null;
-        });
-
-        const nonLatestVersions = _.filter(versions, (v) => {
-            return !v.latest && v.validTo !== null;
-        }).map((v) => v.versionId);
-
-        if (nonLatestVersions.length !== 0) {
-            logger.warn(`Detected non latest version ids from payload...these will be ignored`, nonLatestVersions);
-        }
-
-        logger.info(`Loaded ${latestVersions.length} latest versions`);
-
-        const versionsAsJson = latestVersions.map((v) => {
-            const version: any = v.toJSON();
-            version.validTo = today;
-            version.updatedBy = currentUser.details.email;
-            version.latest  = false;
-            return version;
-        });
-
-        if (versionsAsJson.length !== 0) {
-            const versionsUpdated = await this.formVersionRepository.bulkCreate(versionsAsJson, {
+        if (formReferences.length === 0) {
+            logger.info('Creating');
+            const formVersions: FormVersion[]  = await this.createNewForms(forms, currentUser);
+            logger.info(`${formVersions.length} new forms created`);
+        } else {
+            logger.info('Updating');
+            const formsUpdated = await this.formRepository.bulkCreate(formReferences.map((f) => {
+                const form: any = f.toJSON();
+                form.updatedOn = today;
+                form.updatedBy = currentUser.details.email;
+                return form;
+            }), {
                 updateOnDuplicate: [
-                    'latest',
+                    'updatedOn',
                     'updatedBy',
-                    'validTo',
                 ],
             });
-            logger.info(`Latest versions marked as non-latest ${versionsUpdated.length}`);
 
-            const newFormsToCreate = _.intersectionWith(forms, versionsUpdated.map((v) => v.toJSON()),
-                (v1: any, v2: any) => {
-                return v1.versionId === v2.versionId;
+            logger.info(`Form references updated ${formsUpdated.length}`);
+
+            const versions = await this.formVersionRepository.findAll({
+                attributes: {
+                    include: ['validTo', 'versionId', 'latest', 'updatedBy'],
+                },
+                where: {
+                    versionId: {
+
+                        [Op.in]: forms.map((form) => {
+                            return form.versionId;
+                        }),
+
+                    },
+                },
             });
 
-            logger.info('Creating new versions');
-            const newVersions = await this.formVersionRepository.bulkCreate(newFormsToCreate.map((form) => {
-                delete form.versionId;
-                form.validFrom = today;
-                form.createdOn = today;
-                form.updatedBy = null;
-                form.validTo  = null;
-                form.latest = true;
-                form.createdBy = currentUser.details.email;
-                return form;
-            }), {});
-            logger.info(`Created new ${newVersions.length} instances`);
-        } else {
-            logger.warn('No latest version forms found...please check version ids');
-        }
+            const latestVersions =  _.filter(versions, (v) => {
+                return v.latest && v.validTo === null;
+            });
 
+            const nonLatestVersions = _.filter(versions, (v) => {
+                return !v.latest && v.validTo !== null;
+            }).map((v) => v.versionId);
+
+            if (nonLatestVersions.length !== 0) {
+                logger.warn(`Detected non latest version ids from payload...these will be ignored`, nonLatestVersions);
+            }
+
+            logger.info(`Loaded ${latestVersions.length} latest versions`);
+
+            const versionsAsJson = latestVersions.map((v) => {
+                const version: any = v.toJSON();
+                version.validTo = today;
+                version.updatedBy = currentUser.details.email;
+                version.latest  = false;
+                return version;
+            });
+
+            if (versionsAsJson.length !== 0) {
+                const versionsUpdated = await this.formVersionRepository.bulkCreate(versionsAsJson, {
+                    updateOnDuplicate: [
+                        'latest',
+                        'updatedBy',
+                        'validTo',
+                    ],
+                });
+                logger.info(`Latest versions marked as non-latest ${versionsUpdated.length}`);
+
+                const newFormsToCreate = _.intersectionWith(forms, versionsUpdated.map((v) => v.toJSON()),
+                    (v1: any, v2: any) => {
+                        return v1.versionId === v2.versionId;
+                    });
+
+                logger.info('Creating new versions');
+                const newVersions = await this.formVersionRepository.bulkCreate(newFormsToCreate.map((form) => {
+                    delete form.versionId;
+                    form.validFrom = today;
+                    form.createdOn = today;
+                    form.updatedBy = null;
+                    form.validTo  = null;
+                    form.latest = true;
+                    form.createdBy = currentUser.details.email;
+                    return form;
+                }), {});
+                logger.info(`Created new ${newVersions.length} instances`);
+            } else {
+                logger.warn('No latest version forms found...please check version ids');
+            }
+        }
         return null;
     }
 
@@ -819,6 +828,52 @@ export class FormService {
             throw new ResourceNotFoundError(`Version with id ${versionId} does not exist`);
         }
         return version;
+    }
+
+    private async createNewForms(forms: any[], currentUser: User): Promise<FormVersion[]> {
+
+        const defaultRole = await this.roleService.getDefaultRole();
+        const today = new Date();
+        const createdBy = currentUser.details.email;
+
+        const formsToCreate = forms.map(() => {
+            return {
+                createdBy,
+                createdOn: today,
+                updatedOn: today,
+                updatedBy: createdBy,
+            };
+        });
+        const formsCreated = await this.formRepository.bulkCreate(formsToCreate, {});
+        logger.info(`${formsCreated.length} form references created`);
+
+        const formRoles = formsCreated.map((form) => {
+            return {
+                formId: form.id,
+                roleId: defaultRole.id,
+            };
+        });
+
+        await this.formRolesRepository.bulkCreate(formRoles);
+        logger.info('Performed role association');
+
+        const formIds = formsCreated.map((form: Form) => {
+            return form.id;
+        });
+
+        _.each(formIds, (formId: string, index: number) => {
+           delete forms[index].versionId;
+           forms[index].schema.id = formId;
+           forms[index].formId = formId;
+           forms[index].validFrom = today;
+           forms[index].latest = true;
+           forms[index].createdBy = createdBy;
+           forms[index].createdOn = today;
+        });
+
+        const formVersions =  await this.formVersionRepository.bulkCreate(forms, {});
+        logger.info(`Created ${formVersions.length} versions`);
+        return formVersions;
     }
 
 }
