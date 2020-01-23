@@ -60,6 +60,35 @@ export class AdminController extends BaseHttpController {
         });
     }
 
+    @ApiOperationDelete({
+        path: '/forms/cache',
+        description: 'Deletes all form ids from cache',
+        summary: 'Deletes all form ids from cache',
+        parameters: {
+        },
+        responses: {
+            200: {
+                description: 'Cache cleard',
+            },
+            403: {
+                description: 'Not allowed to perform this operation',
+            },
+            500: {description: 'Internal execution error'},
+        },
+    })
+    @httpDelete('/forms/cache', TYPE.ProtectMiddleware, TYPE.AdminProtectMiddleware)
+    public async clearFormsCache(@response() res: express.Response, @principal() currentUser: User): Promise<void> {
+        const forms = await this.formService.getAllLatestFormVersions();
+        if (forms.total !== 0) {
+            const ids = forms.forms.map(form => form.formId);
+            logger.info(`Ids to clear ${ids.length}`);
+            const result = await Promise.all(ids.map(async id => {
+               return await this.cacheManager.client.del(id)
+            }));
+            logger.info(`Cache cleared ${result.length}`);
+        }
+    }
+
     @ApiOperationGet({
         path: '/forms',
         description: 'Returns all form versions without any pre processing',
