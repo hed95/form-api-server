@@ -80,10 +80,10 @@ export class AdminController extends BaseHttpController {
     public async clearFormsCache(@response() res: express.Response, @principal() currentUser: User): Promise<void> {
         const forms = await this.formService.getAllLatestFormVersions();
         if (forms.total !== 0) {
-            const ids = forms.forms.map(form => form.formId);
+            const ids = forms.forms.map((form) => form.formId);
             logger.info(`Ids to clear ${ids.length}`);
-            const result = await Promise.all(ids.map(async id => {
-               return await this.cacheManager.client.del(id)
+            const result = await Promise.all(ids.map(async (id) => {
+               return this.cacheManager.client.del(FormService.setCacheKey([id]));
             }));
             logger.info(`Cache cleared ${result.length}`);
         }
