@@ -76,6 +76,7 @@ export class FormController extends BaseHttpController {
                            @request() req: GrantedRequest,
                            @response() res: express.Response,
                            @principal() currentUser: User,
+                           @queryParam('noBusinessKey') noBusinessKey: string = 'false',
                            @queryParam('disableDataContext') disableDataContext: string = 'false',
                            @queryParam('processInstanceId') processInstanceId: string = null,
                            @queryParam('taskId') taskId: string = null): Promise<void> {
@@ -92,7 +93,7 @@ export class FormController extends BaseHttpController {
             throw new ResourceNotFoundError(`More than one form with name ${name} detected`);
         }
         const formVersion = formVersions.forms[0];
-        if (this.appConfig.businessKey.enabled) {
+        if (this.appConfig.businessKey.enabled && noBusinessKey === 'false') {
             await this.applyBusinessKey(formVersion);
         }
         const form = this.formResourceAssembler.toResource(formVersion, req);
@@ -149,6 +150,7 @@ export class FormController extends BaseHttpController {
                      @response() res: express.Response,
                      @principal() currentUser: User,
                      @queryParam('live') live?: number,
+                     @queryParam('noBusinessKey') noBusinessKey: string = 'false',
                      @queryParam('disableDataContext') disableDataContext: string = 'false',
                      @queryParam('processInstanceId') processInstanceId: string = null,
                      @queryParam('taskId') taskId: string = null): Promise<void> {
@@ -158,7 +160,7 @@ export class FormController extends BaseHttpController {
             throw new ResourceNotFoundError(`Form with id ${id} does not exist. Check id or access controls`);
         }
 
-        if (this.appConfig.businessKey.enabled) {
+        if (this.appConfig.businessKey.enabled && noBusinessKey === 'false') {
             await this.applyBusinessKey(formVersion);
         }
         const form = this.formResourceAssembler.toResource(formVersion, req);
