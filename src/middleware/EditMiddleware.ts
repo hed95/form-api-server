@@ -31,7 +31,7 @@ export class EditMiddleware extends BaseMiddleware {
 
             const hasAuthorization: boolean = _.intersectionWith(this.editRoles, userRoles).length >= 1;
             if (hasAuthorization) {
-                next()
+                next();
             } else {
                 next(new UnauthorizedError('User not authorized to make edit calls'));
             }
