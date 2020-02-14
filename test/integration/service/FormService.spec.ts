@@ -809,7 +809,7 @@ describe('FormService', () => {
             }).save();
         });
 
-        const query: [] = new QueryParser().parse(['title__eq__Test form X', 'name__eq__Test Form ABC11']);
+        const query: object[] = new QueryParser().parse(['title__eq__Test form X', 'name__eq__Test Form ABC11']);
 
         // tslint:disable-next-line:max-line-length
         const results: { total: number, forms: FormVersion[] } = await formService.getAllForms(new User('id', 'test', [role]), 20, 0,
@@ -857,7 +857,7 @@ describe('FormService', () => {
                 validTo: null,
             }).save();
         });
-        const query: [] = new QueryParser().parse(['title__or__Apple|Carrots']);
+        const query: object[] = new QueryParser().parse(['title__or__Apple|Carrots']);
 
         // tslint:disable-next-line:max-line-length
         const results: { total: number, forms: FormVersion[] } = await formService.getAllForms(new User('id', 'test', [role]), 20, 0, query, []);
@@ -888,7 +888,7 @@ describe('FormService', () => {
                 validTo: null,
             }).save();
         });
-        const query: [] = new QueryParser().parse(['title__startsWith__Apple']);
+        const query: object[] = new QueryParser().parse(['title__startsWith__Apple']);
 
         // tslint:disable-next-line:max-line-length
         const results: { total: number, forms: FormVersion[] } = await formService.getAllForms(new User('id', 'test', [role]), 20, 0, query, []);
@@ -1352,7 +1352,7 @@ describe('FormService', () => {
             "latest": true
         }], user);
 
-        const query: [] = new QueryParser().parse(['name__eq__startShift']);
+        const query: object[] = new QueryParser().parse(['name__eq__startShift']);
 
         const results: { total: number, forms: FormVersion[] } = await formService.getAllForms(user,100, 0, query);
 

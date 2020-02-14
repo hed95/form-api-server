@@ -37,6 +37,7 @@ const {
   DATA_CONTEXT_PLUGIN_EXECUTION_TIMEOUT,
   API_FORM_BUSINESS_KEY_ENABLED,
   API_FORM_BUSINESS_KEY_PREFIX,
+  API_FORM_EDIT_ROLES,
 } = process.env;
 
 const defaultAppConfig: AppConfig = {
@@ -61,9 +62,12 @@ const defaultAppConfig: AppConfig = {
       clientId: API_FORM_KEYCLOAK_ADMIN_CLIENT_ID || 'admin-cli',
     },
   },
+  edit: {
+    roles: API_FORM_EDIT_ROLES ? API_FORM_EDIT_ROLES.split(',') : [],
+  },
   admin: {
     roles: API_FORM_KEYCLOAK_ROLES ?
-            API_FORM_KEYCLOAK_ROLES.split(',') : ['platform'  ],
+            API_FORM_KEYCLOAK_ROLES.split(',') : ['platform'],
   },
   cors: {
     origin: API_FORM_CORS_ORIGIN ? API_FORM_CORS_ORIGIN.split(',') : [],

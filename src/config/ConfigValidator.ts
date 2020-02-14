@@ -27,6 +27,9 @@ export class ConfigValidator {
                     clientId: Joi.string(),
                 }),
             }),
+            edit: Joi.object().keys({
+                roles: Joi.array().items(Joi.string()),
+            }),
             admin: Joi.object().keys({
                 roles: Joi.array().items(Joi.string()),
             }),

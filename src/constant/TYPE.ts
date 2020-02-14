@@ -27,4 +27,5 @@ export default {
     BusinessKeyGenerator: Symbol.for('BusinessKeyGenerator'),
     RedisKeyGeneratorClient: Symbol.for('RedisKeyGeneratorClient'),
     FormRolesRepository: Symbol.for('FormRolesRepository'),
+    EditMiddleware: Symbol.for('EditMiddleware'),
 };

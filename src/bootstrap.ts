@@ -152,12 +152,12 @@ expressApp.use(async (req: GrantedRequest, res: express.Response, next: express.
         const user = await keycloakService.getUser(userEmailFromHeader);
         if (user) {
             userId = user.details.email;
+            httpContext.set('user', user);
         } else {
             next(new UnauthorizedError(`User ${userEmailFromHeader} not authorized`));
         }
     } else {
-        // @ts-ignore
-        userId = req.kauth && req.kauth.grant ? req.kauth.grant.access_token.content.email :
+        userId = req.kauth && req.kauth.grant ? req.kauth.grant.access_token.content['email'] :
             ApplicationConstants.ANONYMOUS;
     }
     httpContext.set(ApplicationConstants.USER_ID, userId);
@@ -203,7 +203,7 @@ const server = new InversifyExpressServer(container,
 
 server.setErrorConfig((app: express.Application) => {
     app.use((err: Error,
-             req: express.Request,
+             req: GrantedRequest,
              res: express.Response,
              next: express.NextFunction) => {
         if (err) {
@@ -212,8 +212,7 @@ server.setErrorConfig((app: express.Application) => {
             });
         }
         const userEmailFromHeader = req.get(ApplicationConstants.USER_ID);
-        // @ts-ignore
-        const user: string = userEmailFromHeader ? userEmailFromHeader : req.kauth.grant.access_token.content.email;
+        const user: string = userEmailFromHeader ? userEmailFromHeader : req.kauth.grant.access_token.content['email'];
 
         const correlationId = httpContext.get(appConfig.correlationIdRequestHeader);
         if (err instanceof ResourceNotFoundError) {

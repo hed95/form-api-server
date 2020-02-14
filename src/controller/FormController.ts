@@ -82,7 +82,7 @@ export class FormController extends BaseHttpController {
                            @queryParam('taskId') taskId: string = null): Promise<void> {
 
         const filter = `name__eq__${name}`;
-        const filterQuery: [] = filter && filter.split(',').length !== 0 ?
+        const filterQuery: object[] = filter && filter.split(',').length !== 0 ?
             this.queryParser.parse(filter.split(',')) : null;
 
         const formVersions = await this.formService.getAllForms(currentUser, 1, 0, filterQuery);
@@ -310,7 +310,7 @@ export class FormController extends BaseHttpController {
         if (title) {
             filter += `,title__iLike__%${title}%`;
         }
-        const filterQuery: [] = filter && filter.split(',').length !== 0 ?
+        const filterQuery: object[] = filter && filter.split(',').length !== 0 ?
             this.queryParser.parse(filter.split(',')) : null;
 
         const fieldAttributes: string[] = attributes ? attributes.split(',') : [];
@@ -419,7 +419,7 @@ export class FormController extends BaseHttpController {
             400: {description: 'Invalid for schema'},
         },
     })
-    @httpPut('/:id', TYPE.ProtectMiddleware)
+    @httpPut('/:id', TYPE.ProtectMiddleware, TYPE.EditMiddleware)
     public async update(@requestParam('id') id: string,
                         @requestBody() form: object, @response() res: express.Response,
                         @principal() currentUser: User): Promise<void> {
@@ -462,7 +462,7 @@ export class FormController extends BaseHttpController {
             400: {description: 'Invalid for schema'},
         },
     })
-    @httpPut('/:id/roles', TYPE.ProtectMiddleware)
+    @httpPut('/:id/roles', TYPE.ProtectMiddleware, TYPE.EditMiddleware)
     public async updateRoles(@requestParam('id') id: string,
                              @requestBody() roles: Role[], @response() res: express.Response,
                              @principal() currentUser: User): Promise<void> {
@@ -525,7 +525,7 @@ export class FormController extends BaseHttpController {
             500: {description: 'Internal execution error'},
         },
     })
-    @httpDelete('/:id', TYPE.ProtectMiddleware)
+    @httpDelete('/:id', TYPE.ProtectMiddleware, TYPE.EditMiddleware)
     public async delete(@requestParam('id') id: string,
                         @response() res: express.Response,
                         @principal() currentUser: User): Promise<void> {
@@ -661,7 +661,7 @@ export class FormController extends BaseHttpController {
             500: {description: 'Internal execution error'},
         },
     })
-    @httpPost('/restore', TYPE.ProtectMiddleware)
+    @httpPost('/restore', TYPE.ProtectMiddleware, TYPE.EditMiddleware)
     public async restore(@requestBody() restoreData: RestoreData,
                          @request() req: express.Request,
                          @response() res: express.Response,

@@ -42,6 +42,7 @@ import {getFormCountGenerator, updateFormCounter} from '../util/metrics';
 import BusinessKeyGenerator from '../plugin/BusinessKeyGenerator';
 import * as Redis from 'redis';
 import {FormRoles} from '../model/FormRoles';
+import {EditMiddleware} from '../middleware/EditMiddleware';
 
 export class ApplicationContext {
     private readonly container: Container;
@@ -56,6 +57,8 @@ export class ApplicationContext {
         this.container.bind<AppConfig>(TYPE.AppConfig).toConstantValue(defaultAppConfig);
         this.container.bind<KeycloakService>(TYPE.KeycloakService).to(KeycloakService);
         this.container.bind<ProtectMiddleware>(TYPE.ProtectMiddleware).to(ProtectMiddleware);
+        this.container.bind<EditMiddleware>(TYPE.EditMiddleware).to(EditMiddleware);
+
         this.container.bind<FormSchemaValidator>(TYPE.FormSchemaValidator).to(FormSchemaValidator);
         this.container.bind<SequelizeProvider>(TYPE.SequelizeProvider).to(SequelizeProvider);
         this.container.bind<FormRepository>(TYPE.FormRepository).toConstantValue(Form);

@@ -225,7 +225,7 @@ export class FormService {
     public async getAllForms(user: User,
                              limit: number = 20,
                              offset: number = 0,
-                             filterQuery: [] = null,
+                             filterQuery: object[] = null,
                              attributes: string[] = [],
                              countOnly: boolean = false,
                              filterOperator: string = 'or'):

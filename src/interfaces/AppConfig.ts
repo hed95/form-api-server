@@ -20,6 +20,9 @@ interface AppConfig {
             clientId: string,
         },
     };
+    edit: {
+        roles: string[],
+    };
     admin: {
         roles: string[],
     };
