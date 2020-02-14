@@ -2,9 +2,6 @@ import 'reflect-metadata';
 import {expect} from "chai";
 import {MockResponse} from "../../MockResponse";
 import {MockRequest} from "../../MockRequest";
-// @ts-ignore
-import httpContext from 'express-http-context';
-
 import {EditMiddleware} from "../../../src/middleware/EditMiddleware";
 import defaultAppConfig from "../../../src/config/defaultAppConfig";
 import {User} from '../../../src/auth/User';
