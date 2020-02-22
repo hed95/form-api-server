@@ -12,7 +12,10 @@ describe('FormResourceAssembler', () => {
     let mockRequest: any;
 
     beforeEach(() => {
-        mockRequest = new MockRequest("/forms", "/api/v1");
+        mockRequest = new MockRequest("/forms", "/api/v1", "GET",{
+            protocol : 'http',
+            host: 'localhost:8000'
+        });
     });
     const underTest: ResourceAssembler<FormVersion, object> = new FormResourceAssembler();
 
@@ -73,37 +76,37 @@ describe('FormResourceAssembler', () => {
                     "rel": "self",
                     "title": "Self",
                     "method": "GET",
-                    "href": "/api/v1/forms/formId"
+                    "href": "http://localhost:8000/forms/formId"
                 },
                 {
                     "rel": "allVersions",
                     "title": "Show all versions",
                     "method": "GET",
-                    "href": "/api/v1/forms/formId/versions"
+                    "href": "http://localhost:8000/forms/formId/versions"
                 },
                 {
                     "rel": "comments",
                     "title": "Show all comments",
                     "method": "GET",
-                    "href": "/api/v1/forms/formId/comments"
+                    "href": "http://localhost:8000/forms/formId/comments"
                 },
                 {
                     "rel": "create-comment",
                     "title": "Add a comment",
                     "method": "POST",
-                    "href": "/api/v1/forms/formId/comments"
+                    "href": "http://localhost:8000/forms/formId/comments"
                 },
                 {
                     "rel": "update",
                     "title": "Update form",
                     "method": "PUT",
-                    "href": "/api/v1/forms/formId"
+                    "href": "http://localhost:8000/forms/formId"
                 },
                 {
                     "rel": "delete",
                     "title": "Delete form",
                     "method": "DELETE",
-                    "href": "/api/v1/forms/formId"
+                    "href": "http://localhost:8000/forms/formId"
                 }
             ]
         };

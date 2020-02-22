@@ -39,43 +39,44 @@ export class FormResourceAssembler implements ResourceAssembler<FormVersion, obj
         resource.latest = entity.latest;
         const formId: string = entity.form.id;
         resource.id = formId;
+        const baseUrl = `${req.protocol}://${req.headers.host}`;
         if (includeLinks) {
             resource.links = [
                 {
                     rel: 'self',
                     title: 'Self',
                     method: 'GET',
-                    href: `${req.baseUrl}/forms/${formId}`,
+                    href: `${baseUrl}/forms/${formId}`,
                 },
                 {
                     rel: 'allVersions',
                     title: 'Show all versions',
                     method: 'GET',
-                    href: `${req.baseUrl}/forms/${formId}/versions`,
+                    href: `${baseUrl}/forms/${formId}/versions`,
                 },
                 {
                     rel: 'comments',
                     title: 'Show all comments',
                     method: 'GET',
-                    href: `${req.baseUrl}/forms/${formId}/comments`,
+                    href: `${baseUrl}/forms/${formId}/comments`,
                 },
                 {
                     rel: 'create-comment',
                     title: 'Add a comment',
                     method: 'POST',
-                    href: `${req.baseUrl}/forms/${formId}/comments`,
+                    href: `${baseUrl}/forms/${formId}/comments`,
                 },
                 {
                     rel: 'update',
                     title: 'Update form',
                     method: 'PUT',
-                    href: `${req.baseUrl}/forms/${formId}`,
+                    href: `${baseUrl}/forms/${formId}`,
                 },
                 {
                     rel: 'delete',
                     title: 'Delete form',
                     method: 'DELETE',
-                    href: `${req.baseUrl}/forms/${formId}`,
+                    href: `${baseUrl}/forms/${formId}`,
                 },
             ];
         }
