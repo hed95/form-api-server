@@ -3,15 +3,18 @@ export class MockRequest {
     private readonly baseUrl: string;
     public readonly method: string;
     private readonly headers: object;
+    private readonly protocol: string;
 
 
     public constructor(path: string, baseUrl: string,
                        method: string = 'GET',
-                       headers: object = {}) {
+                       headers: object = {},
+                       protocol: string = 'http') {
         this.path = path;
         this.baseUrl = baseUrl;
         this.method = method;
         this.headers = headers;
+        this.protocol = protocol;
     }
 
 
