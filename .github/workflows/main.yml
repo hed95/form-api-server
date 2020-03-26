@@ -6,7 +6,7 @@ on:
   schedule:
     - cron: '0 2 * * 0' # Weekly on Sundays at 02:00
 env:
-  image: "digitalpatterns/form-api-server/master"
+  IMAGE: "digitalpatterns/form-api-server/master"
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -14,10 +14,10 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Build the Docker image
-        run: docker build . --file Dockerfile --tag ${{ image }}:latest
+        run: docker build . --file Dockerfile --tag ${{ IMAGE }}:latest
       - uses: anchore/scan-action@master
         with:
-          image-reference: "${{ image }}:latest"
+          image-reference: "${{ IMAGE }}:latest"
           dockerfile-path: "./Dockerfile"
           fail-build: false
           include-app-packages: true
@@ -27,7 +27,7 @@ jobs:
       - name: Publish to Registry
         uses: elgohr/Publish-Docker-Github-Action@master
         with:
-          name: ${{ image }}
+          name: ${{ IMAGE }}
           username: ${{ github.actor }}
           password: ${{ github.token }}
           cache: true
