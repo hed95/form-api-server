@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     env:
-      IMAGE: 'digitalpatterns/form-api-server/master'
+      IMAGE: 'digitalpatterns/form-api-server/form-api-server-master'
     steps:
       - uses: actions/checkout@v1
       - name: Build the Docker image
