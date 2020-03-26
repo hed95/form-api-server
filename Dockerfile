@@ -1,4 +1,4 @@
-FROM digitalpatterns/node:latest AS build
+FROM docker.pkg.github.com/digitalpatterns/node/node-master:latest AS build
 
 COPY . /src
 
@@ -10,7 +10,7 @@ RUN npm run build-ts
 
 RUN npm prune --production
 
-FROM digitalpatterns/node:latest
+FROM docker.pkg.github.com/digitalpatterns/node/node-master:latest
 
 WORKDIR /app
 RUN mkdir -p /app
