@@ -51,7 +51,7 @@ pipeline:
   test:
     image: quay.io/ukhomeofficedigital/cop-node:11
     commands:
-      - npm install
+      - npm ci
       - npm run cover
     when:
       event: push
