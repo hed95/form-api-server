@@ -6,7 +6,7 @@ COPY . /src
 WORKDIR /src
 
 
-RUN npm install
+RUN npm ci
 RUN npm run build-ts
 
 RUN npm prune --production
