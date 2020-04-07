@@ -1,5 +1,5 @@
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: "{{.API_FORM_NAME}}"
@@ -7,20 +7,21 @@ spec:
   selector:
     matchLabels:
       name: "{{.API_FORM_NAME}}"
-  replicas: 1
+  replicas: 3
   revisionHistoryLimit: 3
   template:
     metadata:
       labels:
         name: "{{.API_FORM_NAME}}"
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: "{{.API_FORM_PORT}}"
     spec:
       securityContext:
         runAsUser: 1000
         fsGroup: 1000
-      imagePullSecrets:
-        - name: "{{.DOCKER_CREDENTIALS}}"
       containers:
-      - name: proxy
+      - name: {{.API_FORM_NAME}}-proxy
         image: "{{.NGINX_IMAGE}}:{{.NGINX_TAG}}"
         securityContext:
           runAsNonRoot: true
@@ -39,6 +40,8 @@ spec:
             value: 'FALSE'
           - name: ENABLE_UUID_PARAM
             value: 'FALSE'
+          - name: STATSD_METRICS
+            value: "FALSE"
         ports:
           - name: https
             containerPort: 10443
@@ -54,18 +57,18 @@ spec:
             path: /healthz
             port: {{.API_FORM_PORT}}
             scheme: HTTP
-          periodSeconds: 10
+          periodSeconds: 30
           successThreshold: 1
-          timeoutSeconds: 1
+          timeoutSeconds: 15
         readinessProbe:
           failureThreshold: 3
           httpGet:
             path: /readiness
             port: {{.API_FORM_PORT}}
             scheme: HTTP
-          periodSeconds: 10
+          periodSeconds: 30
           successThreshold: 1
-          timeoutSeconds: 1
+          timeoutSeconds: 15
         env:
           - name: DB_FORM_DEFAULT_USERNAME
             value: "{{.DB_FORM_DEFAULT_USERNAME}}"
@@ -125,6 +128,12 @@ spec:
             value: "{{.API_FORM_CACHE_USER_MAX_AGE}}"
           - name: API_FORM_CACHE_USER_MAX_ENTRIES
             value: "{{.API_FORM_CACHE_USER_MAX_ENTRIES}}"
+          - name: API_FORM_BUSINESS_KEY_PREFIX
+            value: "{{.API_FORM_BUSINESS_KEY_PREFIX}}"
+          - name: API_FORM_BUSINESS_KEY_ENABLED
+            value: "{{.API_FORM_BUSINESS_KEY_ENABLED}}"
+          - name: API_FORM_EDIT_ROLES
+            value: "{{.API_FORM_EDIT_ROLES}}"
           - name: API_FORM_PORT
             value: "{{.API_FORM_PORT}}"
           - name: REDIS_PORT

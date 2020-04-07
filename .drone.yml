@@ -1,120 +1,410 @@
-## Build Image
-kind: pipeline
-name: default
+pipeline:
 
-steps:
-- name: test
-  image: digitalpatterns/node:4
-  commands:
-    - npm install
-    - npm run cover
-  when:
-    event: push
+  synch_dev_secrets:
+    image: quay.io/ukhomeofficedigital/cop-secrets
+    environment:
+      - DRONE_SERVER=https://drone.acp.homeoffice.gov.uk
+      - DEPLOY_ENV=dev
+    secrets:
+      - source: DEV_DRONE_AWS_ACCESS_KEY_ID
+        target: AWS_ACCESS_KEY_ID
+      - source: DEV_DRONE_AWS_SECRET_ACCESS_KEY
+        target: AWS_SECRET_ACCESS_KEY
+      - source: DRONE_PUBLIC_TOKEN
+        target: DRONE_TOKEN
+    when:
+      environment: secrets
+      event: deployment
 
-- name: build_push_to_docker
-  image: plugins/docker
-  settings:
-    username:
-      from_secret: docker_username
-    password:
-      from_secret: docker_password
-    repo: digitalpatterns/form-api-server
+  synch_staging_secrets:
+    image: quay.io/ukhomeofficedigital/cop-secrets
+    environment:
+      - DRONE_SERVER=https://drone.acp.homeoffice.gov.uk
+      - DEPLOY_ENV=staging
+    secrets:
+      - source: STAGING_DRONE_AWS_ACCESS_KEY_ID
+        target: AWS_ACCESS_KEY_ID
+      - source: STAGING_DRONE_AWS_SECRET_ACCESS_KEY
+        target: AWS_SECRET_ACCESS_KEY
+      - source: DRONE_PUBLIC_TOKEN
+        target: DRONE_TOKEN
+    when:
+      environment: secrets
+      event: deployment
+
+  synch_production_secrets:
+    image: quay.io/ukhomeofficedigital/cop-secrets
+    environment:
+      - DRONE_SERVER=https://drone.acp.homeoffice.gov.uk
+      - DEPLOY_ENV=production
+    secrets:
+      - source: PRODUCTION_DRONE_AWS_ACCESS_KEY_ID
+        target: AWS_ACCESS_KEY_ID
+      - source: PRODUCTION_DRONE_AWS_SECRET_ACCESS_KEY
+        target: AWS_SECRET_ACCESS_KEY
+      - source: DRONE_PUBLIC_TOKEN
+        target: DRONE_TOKEN
+    when:
+      environment: secrets
+      event: deployment
+
+  test:
+    image: quay.io/ukhomeofficedigital/cop-node:11
+    commands:
+      - npm install
+      - npm run cover
+    when:
+      event: push
+
+  build:
+    image: quay.io/ukhomeofficedigital/drone-docker
+    commands:
+      - docker build -t form-api-server:$${DRONE_COMMIT_SHA} .
+    when:
+      event: push
+
+  vulnerability-scan:
+    image: quay.io/ukhomeofficedigital/anchore-submission:latest
+    dockerfile: Dockerfile
+    image_name: form-api-server:${DRONE_COMMIT_SHA}
+    local_image: true
+    tolerate: low
+    fail_on_detection: false
+    when:
+      branch: master
+      event: push
+
+  image_to_quay:
+    image: quay.io/ukhomeofficedigital/drone-docker
+    secrets:
+    - source: QUAY_USERNAME
+      target: DOCKER_USERNAME
+    - source: QUAY_PASSWORD
+      target: DOCKER_PASSWORD
+    registry: quay.io
+    repo: quay.io/ukhomeofficedigital/cop-form-api-server
     tags: ${DRONE_COMMIT_SHA}
-  when:
-    branch: master
-    event: push
+    when:
+      branch: master
+      event: push
 
-- name: deploy_to_elf
-  image: quay.io/ukhomeofficedigital/kd
-  secrets:
-    - DEV_KUBE_SERVER
-    - DEV_KUBE_PROTOCOL
-    - DEV_KUBE_TOKEN
-    - DEV_WHITELIST
-    - DEV_KEYCLOAK_URL
-    - DEV_KEYCLOAK_PROTOCOL
-    - DEV_KEYCLOAK_REALM
-    - DEV_NGINX_IMAGE
-    - DEV_NGINX_TAG
-    - DEV_DB_FORM_PORT
-    - DEV_DB_FORM_HOSTNAME
-    - DEV_DB_FORM_SSL
-    - DEV_DB_FORM_DEFAULT_USERNAME
-    - DEV_DB_FORM_DEFAULT_DBNAME
-    - DEV_DB_FORM_DEFAULT_PASSWORD
-    - DEV_API_FORM_NAME
-    - DEV_API_FORM_IMAGE
-    - DEV_API_FORM_KEYCLOAK_CLIENT_ID
-    - DEV_API_FORM_KEYCLOAK_BEARER_ONLY
-    - DEV_API_FORM_KEYCLOAK_ADMIN_USERNAME
-    - DEV_API_FORM_KEYCLOAK_ADMIN_PASSWORD
-    - DEV_API_FORM_KEYCLOAK_ADMIN_CLIENT_ID
-    - DEV_API_FORM_KEYCLOAK_ROLES
-    - DEV_API_FORM_KUBE_NAMESPACE
-    - DEV_API_FORM_LOG_ENABLE_CHANGE
-    - DEV_API_FORM_LOG_CHANGE_TIMEOUT
-    - DEV_API_FORM_LOG_ENABLE_QUERY
-    - DEV_API_FORM_CACHE_ROLE_MAX_AGE
-    - DEV_API_FORM_CACHE_ROLE_MAX_ENTRIES
-    - DEV_API_FORM_CACHE_FORM_MAX_AGE
-    - DEV_API_FORM_CACHE_FORM_MAX_ENTRIES
-    - DEV_API_FORM_CACHE_USER_ROLE_ENTRIES
-    - DEV_API_FORM_CACHE_USER_FORM_ENTRIES
-    - DEV_API_FORM_CACHE_USER_MAX_AGE
-    - DEV_API_FORM_CACHE_USER_MAX_ENTRIES
-    - DEV_REDIS_PORT
-    - DEV_REDIS_URL
-    - DEV_REDIS_SSL
-    - DEV_REDIS_TOKEN
-    - DEV_API_FORM_PORT
-  commands:
-    - export KUBE_SERVER=$${DEV_KUBE_SERVER}
-    - export KUBE_PROTOCOL=$${DEV_KUBE_PROTOCOL}
-    - export KUBE_TOKEN=$${DEV_KUBE_TOKEN}
-    - export WHITELIST=$${DEV_WHITELIST}
-    - export KEYCLOAK_URL=$${DEV_KEYCLOAK_URL}
-    - export KEYCLOAK_PROTOCOL=$${DEV_KEYCLOAK_PROTOCOL}
-    - export KEYCLOAK_REALM=$${DEV_KEYCLOAK_REALM}
-    - export NGINX_IMAGE=$${DEV_NGINX_IMAGE}
-    - export NGINX_TAG=$${DEV_NGINX_TAG}
-    - export DB_FORM_PORT=$${DEV_DB_FORM_PORT}
-    - export DB_FORM_HOSTNAME=$${DEV_DB_FORM_HOSTNAME}
-    - export DB_FORM_SSL=$${DEV_DB_FORM_SSL}
-    - export DB_FORM_DEFAULT_USERNAME=$${DEV_DB_FORM_DEFAULT_USERNAME}
-    - export DB_FORM_DEFAULT_DBNAME=$${DEV_DB_FORM_DEFAULT_DBNAME}
-    - export DB_FORM_DEFAULT_PASSWORD=$${DEV_DB_FORM_DEFAULT_PASSWORD}
-    - export API_FORM_NAME=$${DEV_API_FORM_NAME}
-    - export API_FORM_IMAGE=$${DEV_API_FORM_IMAGE}
-    - export API_FORM_KEYCLOAK_CLIENT_ID=$${DEV_API_FORM_KEYCLOAK_CLIENT_ID}
-    - export API_FORM_KEYCLOAK_BEARER_ONLY=$${DEV_API_FORM_KEYCLOAK_BEARER_ONLY}
-    - export API_FORM_KEYCLOAK_ADMIN_USERNAME=$${DEV_API_FORM_KEYCLOAK_ADMIN_USERNAME}
-    - export API_FORM_KEYCLOAK_ADMIN_PASSWORD=$${DEV_API_FORM_KEYCLOAK_ADMIN_PASSWORD}
-    - export API_FORM_KEYCLOAK_ADMIN_CLIENT_ID=$${DEV_API_FORM_KEYCLOAK_ADMIN_CLIENT_ID}
-    - export API_FORM_KEYCLOAK_ROLES=$${DEV_API_FORM_KEYCLOAK_ROLES}
-    - export API_FORM_KUBE_NAMESPACE=$${DEV_API_FORM_KUBE_NAMESPACE}
-    - export API_FORM_LOG_ENABLE_CHANGE=$${DEV_API_FORM_LOG_ENABLE_CHANGE}
-    - export API_FORM_LOG_CHANGE_TIMEOUT=$${DEV_API_FORM_LOG_CHANGE_TIMEOUT}
-    - export API_FORM_LOG_ENABLE_QUERY=$${DEV_API_FORM_LOG_ENABLE_QUERY}
-    - export API_FORM_CACHE_ROLE_MAX_AGE=$${DEV_API_FORM_CACHE_ROLE_MAX_AGE}
-    - export API_FORM_CACHE_ROLE_MAX_ENTRIES=$${DEV_API_FORM_CACHE_ROLE_MAX_ENTRIES}
-    - export API_FORM_CACHE_FORM_MAX_AGE=$${DEV_API_FORM_CACHE_FORM_MAX_AGE}
-    - export API_FORM_CACHE_FORM_MAX_ENTRIES=$${DEV_API_FORM_CACHE_FORM_MAX_ENTRIES}
-    - export API_FORM_CACHE_USER_ROLE_ENTRIES=$${DEV_API_FORM_CACHE_USER_ROLE_ENTRIES}
-    - export API_FORM_CACHE_USER_FORM_ENTRIES=$${DEV_API_FORM_CACHE_USER_FORM_ENTRIES}
-    - export API_FORM_CACHE_USER_MAX_AGE=$${DEV_API_FORM_CACHE_USER_MAX_AGE}
-    - export API_FORM_CACHE_USER_MAX_ENTRIES=$${DEV_API_FORM_CACHE_USER_MAX_ENTRIES}
-    - export REDIS_PORT=$${DEV_REDIS_PORT}
-    - export REDIS_URL=$${DEV_REDIS_URL}
-    - export REDIS_SSL=$${DEV_REDIS_SSL}
-    - export REDIS_TOKEN=$${DEV_REDIS_TOKEN}
-    - export API_FORM_PORT=$${DEV_API_FORM_PORT}
-    - export API_FORM_TAG=${DRONE_COMMIT_SHA}
-    - kd --insecure-skip-tls-verify -f kube/cert.yml
-    - kd --insecure-skip-tls-verify -f kube/secret.yml
-    - kd --insecure-skip-tls-verify -f kube/network-policy.yml
-    - kd --insecure-skip-tls-verify -f kube/service.yml
-    - kd --insecure-skip-tls-verify -f kube/deployment.yml
-    - kd --insecure-skip-tls-verify -f kube/ingress.yml
-  when:
-    environment: dev
-    event: deployment
+  deploy_to_dev:
+    image: quay.io/ukhomeofficedigital/kd
+    secrets:
+    - source: DEV_API_FORM_EDIT_ROLES
+      target: API_FORM_EDIT_ROLES
+    - source: DEV_API_FORM_BUSINESS_KEY_PREFIX
+      target: API_FORM_BUSINESS_KEY_PREFIX
+    - source: DEV_API_FORM_BUSINESS_KEY_ENABLED
+      target: API_FORM_BUSINESS_KEY_ENABLED
+    - source: DEV_API_FORM_CACHE_FORM_MAX_AGE
+      target: API_FORM_CACHE_FORM_MAX_AGE
+    - source: DEV_API_FORM_CACHE_FORM_MAX_ENTRIES
+      target: API_FORM_CACHE_FORM_MAX_ENTRIES
+    - source: DEV_API_FORM_CACHE_ROLE_MAX_AGE
+      target: API_FORM_CACHE_ROLE_MAX_AGE
+    - source: DEV_API_FORM_CACHE_ROLE_MAX_ENTRIES
+      target: API_FORM_CACHE_ROLE_MAX_ENTRIES
+    - source: DEV_API_FORM_CACHE_USER_FORM_ENTRIES
+      target: API_FORM_CACHE_USER_FORM_ENTRIES
+    - source: DEV_API_FORM_CACHE_USER_ROLE_ENTRIES
+      target: API_FORM_CACHE_USER_ROLE_ENTRIES
+    - source: DEV_API_FORM_CACHE_USER_MAX_AGE
+      target: API_FORM_CACHE_USER_MAX_AGE
+    - source: DEV_API_FORM_CACHE_USER_MAX_ENTRIES
+      target: API_FORM_CACHE_USER_MAX_ENTRIES
+    - source: DEV_API_FORM_IMAGE
+      target: API_FORM_IMAGE
+    - source: DEV_API_FORM_KEYCLOAK_ADMIN_CLIENT_ID
+      target: API_FORM_KEYCLOAK_ADMIN_CLIENT_ID
+    - source: DEV_API_FORM_KEYCLOAK_ADMIN_PASSWORD
+      target: API_FORM_KEYCLOAK_ADMIN_PASSWORD
+    - source: DEV_API_FORM_KEYCLOAK_ADMIN_USERNAME
+      target: API_FORM_KEYCLOAK_ADMIN_USERNAME
+    - source: DEV_API_FORM_KEYCLOAK_BEARER_ONLY
+      target: API_FORM_KEYCLOAK_BEARER_ONLY
+    - source: DEV_API_FORM_KEYCLOAK_CLIENT_ID
+      target: API_FORM_KEYCLOAK_CLIENT_ID
+    - source: DEV_API_FORM_KEYCLOAK_ROLES
+      target: API_FORM_KEYCLOAK_ROLES
+    - source: DEV_API_FORM_LOG_CHANGE_TIMEOUT
+      target: API_FORM_LOG_CHANGE_TIMEOUT
+    - source: DEV_API_FORM_LOG_ENABLE_CHANGE
+      target: API_FORM_LOG_ENABLE_CHANGE
+    - source: DEV_API_FORM_LOG_ENABLE_QUERY
+      target: API_FORM_LOG_ENABLE_QUERY
+    - source: DEV_API_FORM_NAME
+      target: API_FORM_NAME
+    - source: DEV_API_FORM_PORT
+      target: API_FORM_PORT
+    - source: DEV_API_FORM_URL
+      target: API_FORM_URL
+    - source: DEV_DB_FORM_DEFAULT_DBNAME
+      target: DB_FORM_DEFAULT_DBNAME
+    - source: DEV_DB_FORM_DEFAULT_PASSWORD
+      target: DB_FORM_DEFAULT_PASSWORD
+    - source: DEV_DB_FORM_DEFAULT_USERNAME
+      target: DB_FORM_DEFAULT_USERNAME
+    - source: DEV_DB_FORM_HOSTNAME
+      target: DB_FORM_HOSTNAME
+    - source: DEV_DB_FORM_PORT
+      target: DB_FORM_PORT
+    - source: DEV_DB_FORM_SSL
+      target: DB_FORM_SSL
+    - source: DEV_KEYCLOAK_REALM
+      target: KEYCLOAK_REALM
+    - source: DEV_KEYCLOAK_URL
+      target: KEYCLOAK_URL
+    - source: DEV_KUBE_NAMESPACE_PRIVATE_COP
+      target: KUBE_NAMESPACE
+    - source: DEV_KUBE_SERVER
+      target: KUBE_SERVER
+    - source: DEV_KUBE_TOKEN
+      target: KUBE_TOKEN
+    - source: DEV_REDIS_PORT
+      target: REDIS_PORT
+    - source: DEV_REDIS_SSL
+      target: REDIS_SSL
+    - source: DEV_REDIS_TOKEN
+      target: REDIS_TOKEN
+    - source: DEV_REDIS_URL
+      target: REDIS_URL
+    - source: DEV_WHITELIST
+      target: WHITELIST
+    - source: NGINX_IMAGE
+      target: NGINX_IMAGE
+    - source: NGINX_TAG
+      target: NGINX_TAG
+    - source: PROTOCOL_HTTPS
+      target: KEYCLOAK_PROTOCOL
+    commands:
+      - export API_FORM_TAG=$${DRONE_COMMIT_SHA}
+      - kd --insecure-skip-tls-verify -f kube/cert.yml
+      - kd --insecure-skip-tls-verify -f kube/secret.yml
+      - kd --insecure-skip-tls-verify -f kube/network-policy.yml
+      - kd --insecure-skip-tls-verify -f kube/service.yml
+      - kd --insecure-skip-tls-verify -f kube/deployment.yml --timeout=5m
+      - kd --insecure-skip-tls-verify -f kube/ingress.yml
+    when:
+      event: push
+      branch: master
+
+  deploy_to_staging:
+    image: quay.io/ukhomeofficedigital/kd
+    secrets:
+    - source: NGINX_IMAGE
+      target: NGINX_IMAGE
+    - source: NGINX_TAG
+      target: NGINX_TAG
+    - source: PROTOCOL_HTTPS
+      target: KEYCLOAK_PROTOCOL
+    - source: STAGING_API_FORM_EDIT_ROLES
+      target: API_FORM_EDIT_ROLES
+    - source: STAGING_API_FORM_BUSINESS_KEY_PREFIX
+      target: API_FORM_BUSINESS_KEY_PREFIX
+    - source: STAGING_API_FORM_BUSINESS_KEY_ENABLED
+      target: API_FORM_BUSINESS_KEY_ENABLED
+    - source: STAGING_API_FORM_CACHE_FORM_MAX_AGE
+      target: API_FORM_CACHE_FORM_MAX_AGE
+    - source: STAGING_API_FORM_CACHE_FORM_MAX_ENTRIES
+      target: API_FORM_CACHE_FORM_MAX_ENTRIES
+    - source: STAGING_API_FORM_CACHE_ROLE_MAX_AGE
+      target: API_FORM_CACHE_ROLE_MAX_AGE
+    - source: STAGING_API_FORM_CACHE_ROLE_MAX_ENTRIES
+      target: API_FORM_CACHE_ROLE_MAX_ENTRIES
+    - source: STAGING_API_FORM_CACHE_USER_FORM_ENTRIES
+      target: API_FORM_CACHE_USER_FORM_ENTRIES
+    - source: STAGING_API_FORM_CACHE_USER_ROLE_ENTRIES
+      target: API_FORM_CACHE_USER_ROLE_ENTRIES
+    - source: STAGING_API_FORM_CACHE_USER_MAX_AGE
+      target: API_FORM_CACHE_USER_MAX_AGE
+    - source: STAGING_API_FORM_CACHE_USER_MAX_ENTRIES
+      target: API_FORM_CACHE_USER_MAX_ENTRIES
+    - source: STAGING_API_FORM_IMAGE
+      target: API_FORM_IMAGE
+    - source: STAGING_API_FORM_KEYCLOAK_ADMIN_CLIENT_ID
+      target: API_FORM_KEYCLOAK_ADMIN_CLIENT_ID
+    - source: STAGING_API_FORM_KEYCLOAK_ADMIN_PASSWORD
+      target: API_FORM_KEYCLOAK_ADMIN_PASSWORD
+    - source: STAGING_API_FORM_KEYCLOAK_ADMIN_USERNAME
+      target: API_FORM_KEYCLOAK_ADMIN_USERNAME
+    - source: STAGING_API_FORM_KEYCLOAK_BEARER_ONLY
+      target: API_FORM_KEYCLOAK_BEARER_ONLY
+    - source: STAGING_API_FORM_KEYCLOAK_CLIENT_ID
+      target: API_FORM_KEYCLOAK_CLIENT_ID
+    - source: STAGING_API_FORM_KEYCLOAK_ROLES
+      target: API_FORM_KEYCLOAK_ROLES
+    - source: STAGING_API_FORM_LOG_CHANGE_TIMEOUT
+      target: API_FORM_LOG_CHANGE_TIMEOUT
+    - source: STAGING_API_FORM_LOG_ENABLE_CHANGE
+      target: API_FORM_LOG_ENABLE_CHANGE
+    - source: STAGING_API_FORM_LOG_ENABLE_QUERY
+      target: API_FORM_LOG_ENABLE_QUERY
+    - source: STAGING_API_FORM_NAME
+      target: API_FORM_NAME
+    - source: STAGING_API_FORM_PORT
+      target: API_FORM_PORT
+    - source: STAGING_API_FORM_URL
+      target: API_FORM_URL
+    - source: STAGING_DB_FORM_DEFAULT_DBNAME
+      target: DB_FORM_DEFAULT_DBNAME
+    - source: STAGING_DB_FORM_DEFAULT_PASSWORD
+      target: DB_FORM_DEFAULT_PASSWORD
+    - source: STAGING_DB_FORM_DEFAULT_USERNAME
+      target: DB_FORM_DEFAULT_USERNAME
+    - source: STAGING_DB_FORM_HOSTNAME
+      target: DB_FORM_HOSTNAME
+    - source: STAGING_DB_FORM_PORT
+      target: DB_FORM_PORT
+    - source: STAGING_DB_FORM_SSL
+      target: DB_FORM_SSL
+    - source: STAGING_KEYCLOAK_REALM
+      target: KEYCLOAK_REALM
+    - source: STAGING_KEYCLOAK_URL
+      target: KEYCLOAK_URL
+    - source: STAGING_KUBE_NAMESPACE_PRIVATE_COP
+      target: KUBE_NAMESPACE
+    - source: STAGING_KUBE_SERVER
+      target: KUBE_SERVER
+    - source: STAGING_KUBE_TOKEN
+      target: KUBE_TOKEN
+    - source: STAGING_REDIS_PORT
+      target: REDIS_PORT
+    - source: STAGING_REDIS_SSL
+      target: REDIS_SSL
+    - source: STAGING_REDIS_TOKEN
+      target: REDIS_TOKEN
+    - source: STAGING_REDIS_URL
+      target: REDIS_URL
+    - source: STAGING_WHITELIST
+      target: WHITELIST
+    commands:
+      - export API_FORM_TAG=$${DRONE_COMMIT_SHA}
+      - kd --insecure-skip-tls-verify -f kube/cert.yml
+      - kd --insecure-skip-tls-verify -f kube/secret.yml
+      - kd --insecure-skip-tls-verify -f kube/network-policy.yml
+      - kd --insecure-skip-tls-verify -f kube/service.yml
+      - kd --insecure-skip-tls-verify -f kube/deployment.yml --timeout=5m
+      - kd --insecure-skip-tls-verify -f kube/ingress.yml
+    when:
+      event: deployment
+      environment: staging
+
+  deploy_to_production:
+    image: quay.io/ukhomeofficedigital/kd
+    secrets:
+    - source: NGINX_IMAGE
+      target: NGINX_IMAGE
+    - source: NGINX_TAG
+      target: NGINX_TAG
+    - source: PRODUCTION_API_FORM_EDIT_ROLES
+      target: API_FORM_EDIT_ROLES
+    - source: PRODUCTION_API_FORM_BUSINESS_KEY_PREFIX
+      target: API_FORM_BUSINESS_KEY_PREFIX
+    - source: PRODUCTION_API_FORM_BUSINESS_KEY_ENABLED
+      target: API_FORM_BUSINESS_KEY_ENABLED
+    - source: PRODUCTION_API_FORM_CACHE_FORM_MAX_AGE
+      target: API_FORM_CACHE_FORM_MAX_AGE
+    - source: PRODUCTION_API_FORM_CACHE_FORM_MAX_ENTRIES
+      target: API_FORM_CACHE_FORM_MAX_ENTRIES
+    - source: PRODUCTION_API_FORM_CACHE_ROLE_MAX_AGE
+      target: API_FORM_CACHE_ROLE_MAX_AGE
+    - source: PRODUCTION_API_FORM_CACHE_ROLE_MAX_ENTRIES
+      target: API_FORM_CACHE_ROLE_MAX_ENTRIES
+    - source: PRODUCTION_API_FORM_CACHE_USER_FORM_ENTRIES
+      target: API_FORM_CACHE_USER_FORM_ENTRIES
+    - source: PRODUCTION_API_FORM_CACHE_USER_ROLE_ENTRIES
+      target: API_FORM_CACHE_USER_ROLE_ENTRIES
+    - source: PRODUCTION_API_FORM_CACHE_USER_MAX_AGE
+      target: API_FORM_CACHE_USER_MAX_AGE
+    - source: PRODUCTION_API_FORM_CACHE_USER_MAX_ENTRIES
+      target: API_FORM_CACHE_USER_MAX_ENTRIES
+    - source: PRODUCTION_API_FORM_IMAGE
+      target: API_FORM_IMAGE
+    - source: PRODUCTION_API_FORM_KEYCLOAK_ADMIN_CLIENT_ID
+      target: API_FORM_KEYCLOAK_ADMIN_CLIENT_ID
+    - source: PRODUCTION_API_FORM_KEYCLOAK_ADMIN_PASSWORD
+      target: API_FORM_KEYCLOAK_ADMIN_PASSWORD
+    - source: PRODUCTION_API_FORM_KEYCLOAK_ADMIN_USERNAME
+      target: API_FORM_KEYCLOAK_ADMIN_USERNAME
+    - source: PRODUCTION_API_FORM_KEYCLOAK_BEARER_ONLY
+      target: API_FORM_KEYCLOAK_BEARER_ONLY
+    - source: PRODUCTION_API_FORM_KEYCLOAK_CLIENT_ID
+      target: API_FORM_KEYCLOAK_CLIENT_ID
+    - source: PRODUCTION_API_FORM_KEYCLOAK_ROLES
+      target: API_FORM_KEYCLOAK_ROLES
+    - source: PRODUCTION_API_FORM_LOG_CHANGE_TIMEOUT
+      target: API_FORM_LOG_CHANGE_TIMEOUT
+    - source: PRODUCTION_API_FORM_LOG_ENABLE_CHANGE
+      target: API_FORM_LOG_ENABLE_CHANGE
+    - source: PRODUCTION_API_FORM_LOG_ENABLE_QUERY
+      target: API_FORM_LOG_ENABLE_QUERY
+    - source: PRODUCTION_API_FORM_NAME
+      target: API_FORM_NAME
+    - source: PRODUCTION_API_FORM_PORT
+      target: API_FORM_PORT
+    - source: PRODUCTION_API_FORM_URL
+      target: API_FORM_URL
+    - source: PRODUCTION_DB_FORM_DEFAULT_DBNAME
+      target: DB_FORM_DEFAULT_DBNAME
+    - source: PRODUCTION_DB_FORM_DEFAULT_PASSWORD
+      target: DB_FORM_DEFAULT_PASSWORD
+    - source: PRODUCTION_DB_FORM_DEFAULT_USERNAME
+      target: DB_FORM_DEFAULT_USERNAME
+    - source: PRODUCTION_DB_FORM_HOSTNAME
+      target: DB_FORM_HOSTNAME
+    - source: PRODUCTION_DB_FORM_PORT
+      target: DB_FORM_PORT
+    - source: PRODUCTION_DB_FORM_SSL
+      target: DB_FORM_SSL
+    - source: PRODUCTION_KEYCLOAK_REALM
+      target: KEYCLOAK_REALM
+    - source: PRODUCTION_KEYCLOAK_URL
+      target: KEYCLOAK_URL
+    - source: PRODUCTION_KUBE_NAMESPACE_PRIVATE_COP
+      target: KUBE_NAMESPACE
+    - source: PRODUCTION_KUBE_SERVER
+      target: KUBE_SERVER
+    - source: PRODUCTION_KUBE_TOKEN
+      target: KUBE_TOKEN
+    - source: PRODUCTION_REDIS_PORT
+      target: REDIS_PORT
+    - source: PRODUCTION_REDIS_SSL
+      target: REDIS_SSL
+    - source: PRODUCTION_REDIS_TOKEN
+      target: REDIS_TOKEN
+    - source: PRODUCTION_REDIS_URL
+      target: REDIS_URL
+    - source: PRODUCTION_WHITELIST
+      target: WHITELIST
+    - source: PROTOCOL_HTTPS
+      target: KEYCLOAK_PROTOCOL
+    commands:
+      - export API_FORM_TAG=$${DRONE_COMMIT_SHA}
+      - kd --insecure-skip-tls-verify -f kube/cert.yml
+      - kd --insecure-skip-tls-verify -f kube/secret.yml
+      - kd --insecure-skip-tls-verify -f kube/network-policy.yml
+      - kd --insecure-skip-tls-verify -f kube/service.yml
+      - kd --insecure-skip-tls-verify -f kube/deployment.yml --timeout=5m
+      - kd --insecure-skip-tls-verify -f kube/ingress.yml
+    when:
+      event: deployment
+      environment: production
+
+  notify:
+    image: plugins/slack
+    secrets: [ SLACK_WEBHOOK ]
+    channel: cop-deployments
+    username: Drone Build Watcher
+    template: >
+      {{#build.deployTo}}
+        *{{repo.name}} - Build {{build.number}} - {{uppercasefirst build.deployTo}} - {{uppercase build.status}}*
+        {{build.link}}
+      {{else}}
+        *{{repo.name}} - Build {{build.number}} - Development - {{uppercase build.status}}*
+        {{build.link}}
+      {{/build.deployTo}}
+    when:
+      branch: master
+      event: deployment
+      status: [ success, failure ]
