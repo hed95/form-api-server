@@ -491,7 +491,7 @@ export class FormController extends BaseHttpController {
             400: {description: 'Invalid for schema'},
         },
     })
-    @httpPost('/', TYPE.ProtectMiddleware)
+    @httpPost('/', TYPE.ProtectMiddleware, TYPE.EditMiddleware)
     public async create(@requestBody() form: object,
                         @request() req: express.Request,
                         @response() res: express.Response,
