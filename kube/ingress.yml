@@ -24,4 +24,4 @@ spec:
   tls:
   - hosts:
     - {{.API_FORM_URL}}
-    secretName: {{.API_FORM_URL}}-tls
+    secretName: {{.API_FORM_URL}}-cmio
