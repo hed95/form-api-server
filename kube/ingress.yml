@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
   annotations:
-i   cert-manager.io/enabled: "true"
+    cert-manager.io/enabled: "true"
     ingress.kubernetes.io/backend-protocol: HTTPS
     ingress.kubernetes.io/force-ssl-redirect: "true"
     ingress.kubernetes.io/proxy-read-timeout: "3600"
