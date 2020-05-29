@@ -189,6 +189,107 @@ pipeline:
       event: push
       branch: master
 
+  deploy_to_dev_eforms:
+    image: quay.io/ukhomeofficedigital/kd
+    secrets:
+    - source: DEV_API_FORM_EDIT_ROLES
+      target: API_FORM_EDIT_ROLES
+    - source: DEV_API_FORM_BUSINESS_KEY_PREFIX
+      target: API_FORM_BUSINESS_KEY_PREFIX
+    - source: DEV_API_FORM_BUSINESS_KEY_ENABLED
+      target: API_FORM_BUSINESS_KEY_ENABLED
+    - source: DEV_API_FORM_CACHE_FORM_MAX_AGE
+      target: API_FORM_CACHE_FORM_MAX_AGE
+    - source: DEV_API_FORM_CACHE_FORM_MAX_ENTRIES
+      target: API_FORM_CACHE_FORM_MAX_ENTRIES
+    - source: DEV_API_FORM_CACHE_ROLE_MAX_AGE
+      target: API_FORM_CACHE_ROLE_MAX_AGE
+    - source: DEV_API_FORM_CACHE_ROLE_MAX_ENTRIES
+      target: API_FORM_CACHE_ROLE_MAX_ENTRIES
+    - source: DEV_API_FORM_CACHE_USER_FORM_ENTRIES
+      target: API_FORM_CACHE_USER_FORM_ENTRIES
+    - source: DEV_API_FORM_CACHE_USER_ROLE_ENTRIES
+      target: API_FORM_CACHE_USER_ROLE_ENTRIES
+    - source: DEV_API_FORM_CACHE_USER_MAX_AGE
+      target: API_FORM_CACHE_USER_MAX_AGE
+    - source: DEV_API_FORM_CACHE_USER_MAX_ENTRIES
+      target: API_FORM_CACHE_USER_MAX_ENTRIES
+    - source: DEV_API_FORM_IMAGE
+      target: API_FORM_IMAGE
+    - source: DEV_API_FORM_KEYCLOAK_ADMIN_CLIENT_ID
+      target: API_FORM_KEYCLOAK_ADMIN_CLIENT_ID
+    - source: DEV_API_FORM_KEYCLOAK_ADMIN_PASSWORD
+      target: API_FORM_KEYCLOAK_ADMIN_PASSWORD
+    - source: DEV_API_FORM_KEYCLOAK_ADMIN_USERNAME
+      target: API_FORM_KEYCLOAK_ADMIN_USERNAME
+    - source: DEV_API_FORM_KEYCLOAK_BEARER_ONLY
+      target: API_FORM_KEYCLOAK_BEARER_ONLY
+    - source: DEV_API_FORM_KEYCLOAK_CLIENT_ID
+      target: API_FORM_KEYCLOAK_CLIENT_ID
+    - source: DEV_API_FORM_KEYCLOAK_ROLES
+      target: API_FORM_KEYCLOAK_ROLES
+    - source: DEV_API_FORM_LOG_CHANGE_TIMEOUT
+      target: API_FORM_LOG_CHANGE_TIMEOUT
+    - source: DEV_API_FORM_LOG_ENABLE_CHANGE
+      target: API_FORM_LOG_ENABLE_CHANGE
+    - source: DEV_API_FORM_LOG_ENABLE_QUERY
+      target: API_FORM_LOG_ENABLE_QUERY
+    - source: DEV_API_FORM_NAME
+      target: API_FORM_NAME
+    - source: DEV_API_FORM_PORT
+      target: API_FORM_PORT
+    - source: DEV_API_FORM_EFORMS_URL
+      target: API_FORM_URL
+    - source: DEV_DB_EFORMS_DEFAULT_DBNAME
+      target: DB_FORM_DEFAULT_DBNAME
+    - source: DEV_DB_EFORMS_DEFAULT_PASSWORD
+      target: DB_FORM_DEFAULT_PASSWORD
+    - source: DEV_DB_EFORMS_DEFAULT_USERNAME
+      target: DB_FORM_DEFAULT_USERNAME
+    - source: DEV_DB_EFORMS_HOSTNAME
+      target: DB_FORM_HOSTNAME
+    - source: DEV_DB_EFORMS_PORT
+      target: DB_EFORMS_PORT
+    - source: DEV_DB_FORM_SSL
+      target: DB_EFORMS_SSL
+    - source: DEV_KEYCLOAK_REALM
+      target: KEYCLOAK_REALM
+    - source: DEV_KEYCLOAK_URL
+      target: KEYCLOAK_URL
+    - source: DEV_KUBE_NAMESPACE_COP_EFORMS
+      target: KUBE_NAMESPACE
+    - source: DEV_KUBE_SERVER
+      target: KUBE_SERVER
+    - source: DEV_EFORMS_KUBE_TOKEN
+      target: KUBE_TOKEN
+    - source: DEV_REDIS_PORT
+      target: REDIS_PORT
+    - source: DEV_REDIS_SSL
+      target: REDIS_SSL
+    - source: DEV_REDIS_TOKEN
+      target: REDIS_TOKEN
+    - source: DEV_REDIS_URL
+      target: REDIS_URL
+    - source: DEV_WHITELIST
+      target: WHITELIST
+    - source: NGINX_IMAGE
+      target: NGINX_IMAGE
+    - source: NGINX_TAG
+      target: NGINX_TAG
+    - source: PROTOCOL_HTTPS
+      target: KEYCLOAK_PROTOCOL
+    commands:
+      - export API_FORM_TAG=$${DRONE_COMMIT_SHA}
+      - kd --insecure-skip-tls-verify -f kube/cert.yml
+      - kd --insecure-skip-tls-verify -f kube/secret.yml
+      - kd --insecure-skip-tls-verify -f kube/network-policy.yml
+      - kd --insecure-skip-tls-verify -f kube/service.yml
+      - kd --insecure-skip-tls-verify -f kube/deployment.yml --timeout=5m
+      - kd --insecure-skip-tls-verify -f kube/ingress.yml
+    when:
+      event: push
+      branch: master
+
   deploy_to_staging:
     image: quay.io/ukhomeofficedigital/kd
     secrets:
