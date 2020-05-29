@@ -249,9 +249,9 @@ pipeline:
     - source: DEV_DB_EFORMS_HOSTNAME
       target: DB_FORM_HOSTNAME
     - source: DEV_DB_EFORMS_PORT
-      target: DB_EFORMS_PORT
+      target: DB_FORM_PORT
     - source: DEV_DB_FORM_SSL
-      target: DB_EFORMS_SSL
+      target: DB_FORM_SSL
     - source: DEV_KEYCLOAK_REALM
       target: KEYCLOAK_REALM
     - source: DEV_KEYCLOAK_URL
