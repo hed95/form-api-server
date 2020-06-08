@@ -262,11 +262,11 @@ pipeline:
       target: KUBE_SERVER
     - source: DEV_EFORMS_KUBE_TOKEN
       target: KUBE_TOKEN
-    - source: DEV_REDIS_PORT
+    - source: DEV_REDIS_EFORMS_PORT
       target: REDIS_PORT
-    - source: DEV_REDIS_SSL
+    - source: DEV_REDIS_EFORMS_SSL
       target: REDIS_SSL
-    - source: DEV_REDIS_TOKEN
+    - source: DEV_REDIS_EFORMS_TOKEN
       target: REDIS_TOKEN
     - source: DEV_REDIS_URL
       target: REDIS_URL
