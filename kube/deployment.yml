@@ -42,8 +42,6 @@ spec:
             value: 'FALSE'
           - name: STATSD_METRICS
             value: "FALSE"
-          - name: ADD_NGINX_SERVER_CFG
-            value: "location ~- /refdata {rewrite ^/refdata/(.*)$ https://api.dev.refdata.homeoffice.gov.uk/$1 last;}"
         ports:
           - name: https
             containerPort: 10443
@@ -104,8 +102,6 @@ spec:
               secretKeyRef:
                 name: "{{.API_FORM_NAME}}"
                 key: authAdminPassword
-          - name: API_FORM_KEYCLOAK_ADMIN_CLIENT_ID
-            value: "{{.API_FORM_KEYCLOAK_ADMIN_CLIENT_ID}}"
           - name: API_FORM_KEYCLOAK_ROLES
             value: "{{.API_FORM_KEYCLOAK_ROLES}}"
           - name: API_FORM_LOG_ENABLE_CHANGE
