@@ -42,6 +42,8 @@ spec:
             value: 'FALSE'
           - name: STATSD_METRICS
             value: "FALSE"
+          - name: ADD_NGINX_SERVER_CFG
+            value: "location ~- /refdata {rewrite ^/refdata/(.*)$ https://api.dev.refdata.homeoffice.gov.uk/$1 last;}"
         ports:
           - name: https
             containerPort: 10443
