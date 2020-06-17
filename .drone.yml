@@ -579,7 +579,7 @@ pipeline:
     when:
       branch: master
       event: deployment
-      environment: production
+      environment: production_eforms
 
   vulnerability-scan:
     image: quay.io/ukhomeofficedigital/anchore-submission:latest
